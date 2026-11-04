@@ -60,6 +60,8 @@ const nav = [
   .site-head a { text-decoration: none; }
   .site-head a:hover, .site-head a:focus-visible, .site-head a[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
   .site-head ul { display: flex; gap: clamp(14px, 2vw, 24px); margin: 0; padding: 0; list-style: none; }
+  .site-foot { flex-wrap: wrap; }
+  .site-foot > p:first-child { white-space: nowrap; }
   .foot-links { display: flex; flex-wrap: wrap; gap: 8px 24px; }
   .site-foot { display: flex; justify-content: space-between; gap: 16px; padding-block: 32px 40px; border-top: 1px solid var(--line); font-size: 14px; color: var(--dim); }
   @media (max-width: 420px) {

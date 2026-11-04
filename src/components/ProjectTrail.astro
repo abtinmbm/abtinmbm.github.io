@@ -1,52 +1,46 @@
 ---
-// One project's own star trail, for the top of its page. Same rule as the homepage sky:
-// the trail's sweep is sqrt(days worked) * 26 degrees, and a live trail has a glowing head.
-import { arcPath, sweepFor } from '../lib/trails';
+// The homepage sky behind a project page's title: every project's trail, from the same
+// geometry as the homepage, drawn faint, with this page's project drawn bright.
+// With no slug (the 404) only the background exposure shows.
+import { layout, pageSkyMarkup, PAGE_SKY, type TrailProject } from '../lib/trails';
+import { projects } from '../data/projects';
 
-interface Props { start: string; end?: string; }
-const { start, end } = Astro.props;
-const W = 1440, H = 620;
-// The pole sits off the top right, and the radius keeps the bright arc above the title and lead.
-const cx = W * 0.9, cy = -H * 0.18, r = W * 0.3, a1 = 152;
-const days = ((end ? new Date(end) : new Date()).getTime() - new Date(start).getTime()) / 864e5;
-const trail = { r, a0: a1 - sweepFor(days), a1 };
-const head = { x: cx + r * Math.cos((a1 * Math.PI) / 180), y: cy + r * Math.sin((a1 * Math.PI) / 180) };
-
-let s = 7;
-const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
-const bg = Array.from({ length: 110 }, () => {
-  const a0 = rand() * 360;
-  return { d: arcPath(cx, cy, { r: 20 + Math.pow(rand(), 0.8) * W * 1.05, a0, a1: a0 + 34 }), w: (0.5 + rand() * 1.1).toFixed(2), o: (0.08 + Math.pow(rand(), 2) * 0.4).toFixed(2) };
-});
+interface Props { slug?: string; }
+const { slug } = Astro.props;
+const sky: TrailProject[] = projects.map((p) => ({ name: p.name, line: p.line, link: p.href ?? '', start: p.start, end: p.end }));
+const cur = slug ? projects.findIndex((p) => p.slug === slug) : -1;
+const initial = pageSkyMarkup(layout(sky, 1440, 760, new Date(), PAGE_SKY), cur);
 ---
-<svg class="ptrail" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMaxYMin slice" aria-hidden="true"
-  data-start={start} data-end={end} data-geom={JSON.stringify({ cx, cy, r, a1 })}>
-  <defs><radialGradient id="pt-halo"><stop offset="0" stop-color="#fff" stop-opacity=".55" /><stop offset="1" stop-color="#9fb4ff" stop-opacity="0" /></radialGradient></defs>
-  {bg.map((b) => <path class="t-bg" d={b.d} stroke-width={b.w} stroke-opacity={b.o} />)}
-  <path class="t-line pt-line" d={arcPath(cx, cy, trail)} />
-  {!end && <circle class="t-halo pt-halo" cx={head.x} cy={head.y} r="18" />}
-  <circle class:list={['t-head', { live: !end }]} cx={head.x} cy={head.y} r={end ? 2.6 : 4} />
-</svg>
+<svg class="ptrail" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMin slice" aria-hidden="true"
+  data-sky={JSON.stringify(sky)} data-cur={cur} set:html={initial} />
 
-<style>
+<style is:global>
   .ptrail { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .t-bg { fill: none; stroke: #dfe6ff; stroke-linecap: round; }
-  .pt-line { fill: none; stroke: var(--white); stroke-linecap: round; stroke-width: 2.4; }
-  .t-head { fill: var(--white); }
-  .pt-halo { fill: url(#pt-halo); }
+  .ptrail .t-bg { fill: none; stroke: #dfe6ff; stroke-linecap: round; }
+  .ptrail .pt-line { fill: none; stroke: var(--white); stroke-linecap: round; stroke-width: 1.6; stroke-opacity: 0.16; }
+  .ptrail .pt-line.on { stroke-width: 2.6; stroke-opacity: 1; }
+  .ptrail .pt-head { fill: var(--white); }
+  .ptrail .pt-halo { fill: url(#pt-halo-g); }
   @media (prefers-reduced-motion: no-preference) {
-    .t-head.live { animation: pt-breathe 3.2s ease-in-out infinite; }
+    .ptrail .pt-head.live { animation: pt-breathe 3.2s ease-in-out infinite; }
     @keyframes pt-breathe { 50% { opacity: 0.5; } }
   }
 </style>
 
 <script>
-  // Grow the trail to today's length, the same way the homepage sky does.
-  import { arcPath, sweepFor } from '../lib/trails';
-  for (const svg of document.querySelectorAll<SVGSVGElement>('.ptrail')) {
-    if (svg.dataset.end) continue;
-    const g = JSON.parse(svg.dataset.geom!);
-    const days = (Date.now() - new Date(svg.dataset.start!).getTime()) / 864e5;
-    svg.querySelector('.pt-line')?.setAttribute('d', arcPath(g.cx, g.cy, { r: g.r, a0: g.a1 - sweepFor(days), a1: g.a1 }));
+  // Redraw at the real size and today's date, like the homepage sky.
+  import { layout, pageSkyMarkup, PAGE_SKY } from '../lib/trails';
+  const svgs = [...document.querySelectorAll<SVGSVGElement>('.ptrail')];
+  function draw() {
+    for (const svg of svgs) {
+      const box = svg.getBoundingClientRect();
+      const W = Math.round(box.width), H = Math.round(box.height);
+      if (!W || !H) continue;
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      svg.innerHTML = pageSkyMarkup(layout(JSON.parse(svg.dataset.sky!), W, H, new Date(), PAGE_SKY), Number(svg.dataset.cur));
+    }
   }
+  draw();
+  let t = 0;
+  addEventListener('resize', () => { clearTimeout(t); t = window.setTimeout(draw, 150); });
 </script>

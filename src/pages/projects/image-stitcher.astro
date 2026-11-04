@@ -12,7 +12,7 @@ import s80 from '../../assets/stitcher/stages/stage-80.webp';
 import s91 from '../../assets/stitcher/stages/stage-91.webp';
 
 const p = projects.find((x) => x.slug === 'image-stitcher')!;
-const stages = [[20, s20], [40, s40], [60, s60], [80, s80], [91, s91]] as const;
+const stages = [[20, s20], [40, s40], [60, s60], [80, s80]] as const;
 ---
 <Base
   title="Image Stitcher: one map from several drones | Abtin Aryanpour"
@@ -21,7 +21,7 @@ const stages = [[20, s20], [40, s40], [60, s60], [80, s80], [91, s91]] as const;
 >
   <article class="proj">
     <header class="top">
-      <div class="top-sky"><ProjectTrail start={p.start} end={p.end} /></div>
+      <div class="top-sky"><ProjectTrail slug="image-stitcher" /></div>
       <div class="top-text wrap">
         <h1 class="display">Image Stitcher</h1>
         <p class="lead">Merges out-of-order, GPS-tagged photos from several drones into one top-down map that sits in the right place on the Earth.</p>
@@ -31,10 +31,14 @@ const stages = [[20, s20], [40, s40], [60, s60], [80, s80], [91, s91]] as const;
 
     <section class="stages-sec wrap" aria-label="The map as it grows">
       <figure class="stages">
+        <div class="final">
+          <Picture src={s91} fallbackFormat="webp" formats={['avif', 'webp']} widths={[700, 1100, 1664]} sizes="(max-width: 759px) 92vw, 90vw" alt="The finished map after all 91 photos" />
+          <span class="small num">91 photos</span>
+        </div>
         <ol>
           {stages.map(([n, img]) => (
             <li>
-              <Picture src={img} fallbackFormat="webp" formats={['avif', 'webp']} widths={[400, 700, 1100]} sizes="(max-width: 759px) 46vw, 19vw" alt={`The map after ${n} photos`} />
+              <Picture src={img} fallbackFormat="webp" formats={['avif', 'webp']} widths={[400, 700, 1100]} sizes="(max-width: 759px) 46vw, 23vw" alt={`The map after ${n} photos`} />
               <span class="small num">{n} photos</span>
             </li>
           ))}
@@ -123,13 +127,13 @@ const stages = [[20, s20], [40, s40], [60, s60], [80, s80], [91, s91]] as const;
 <style>
   .stages-sec { padding-top: var(--s8); }
   .stages { margin: 0; }
-  .stages ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--gap); }
+  .final { display: grid; gap: var(--s2); max-width: 880px; }
+  .stages ol { list-style: none; margin: var(--s6) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap); }
   .stages li { display: grid; gap: var(--s2); }
-  .stages li span { color: var(--dim); }
+  .stages span { color: var(--dim); }
   .stages :global(img) { width: 100%; height: auto; display: block; }
   .stages figcaption { margin-top: var(--s4); color: var(--dim); max-width: 64ch; }
   @media (max-width: 759px) {
-    .stages ol { grid-template-columns: 1fr 1fr; }
-    .stages li:last-child { grid-column: 1 / -1; }
+    .stages ol { grid-template-columns: 1fr 1fr; margin-top: var(--s5); }
   }
 </style>

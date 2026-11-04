@@ -69,9 +69,9 @@ export const doppel = {
   // README results 2: privacy label (geometry + key kinds) vs real letter pairs, with the improved scorer.
   labelEer: '0.025',
   lettersEer: '0.046',
-  // README limits (public repo, read 2026-11-04): owner records collected vs planned.
-  ownerRecords: '6,534',
-  ownerPlanned: 'about 20,000',
+  // Owner typing collected, from Abtin's own db summary (data/doppel.db, 2026-10-15), given 2026-11-04.
+  ownerRecords: '25,923',
+  ownerDays: 'eight',
   secondRecord: '["right", "space", 76.5, 93.0, 16.5]',
 };
 

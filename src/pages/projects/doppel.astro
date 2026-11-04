@@ -14,7 +14,7 @@ const p = projects.find((x) => x.slug === 'doppel')!;
 >
   <article class="proj">
     <header class="top">
-      <div class="top-sky"><ProjectTrail start={p.start} end={p.end} /></div>
+      <div class="top-sky"><ProjectTrail slug="doppel" /></div>
       <div class="top-text wrap">
         <h1 class="display">Doppel.exe</h1>
         <p class="lead">A Windows agent that keeps checking who’s at the keyboard from their typing rhythm, without ever storing what they type.</p>
@@ -22,24 +22,23 @@ const p = projects.find((x) => x.slug === 'doppel')!;
       </div>
     </header>
 
-    <section class="rec-sec wrap" aria-labelledby="rec-h">
-      <h2 id="rec-h" class="visually-hidden">What it stores</h2>
-      <figure class="rec">
-        <p class="rec-line num" aria-hidden="true"><span>[false, 2,</span> <span>122.0, 35.0, −87.0]</span></p>
-        <dl class="rec-key small">
-          <div><dt class="num">false, 2</dt><dd>A rough label for the pair of keys: they’re on opposite halves of the keyboard, 1.5 to 3.5 key widths apart. Not which keys.</dd></div>
-          <div><dt class="num">122.0</dt><dd>How long the first key was held, in milliseconds.</dd></div>
-          <div><dt class="num">35.0</dt><dd>From pressing the first key to pressing the second.</dd></div>
-          <div><dt class="num">−87.0</dt><dd>From releasing the first key to pressing the second. It’s negative because the keys overlapped.</dd></div>
-        </dl>
-        <figcaption class="small">A record as Doppel stores it. That’s everything it keeps about a pair of keys. Space, Shift and other keys get a label by kind instead, like <span class="num">{doppel.secondRecord}</span>.</figcaption>
-      </figure>
-    </section>
-
     <section class="why wrap" aria-labelledby="why-h">
       <h2 id="why-h" class="visually-hidden">Why it exists</h2>
       <p class="statement">I leave my PC on at home. My brother doesn’t hack anything. He just waits until I walk away and uses the session I left logged in.</p>
       <p class="why-more">Locking after a few idle minutes doesn’t help, because he sits down sooner. A password checks you once. Doppel keeps checking, and when the person typing stops typing like me, it calls Windows’ own lock.</p>
+    </section>
+
+    <section class="rec-sec wrap" aria-labelledby="rec-h">
+      <h2 id="rec-h" class="visually-hidden">What it stores</h2>
+      <figure class="rec">
+        <dl class="rec-key">
+          <div><dt class="num">[false, 2,</dt><dd>A rough label for the pair of keys: they’re on opposite halves of the keyboard, 1.5 to 3.5 key widths apart. Not which keys.</dd></div>
+          <div><dt class="num">122.0,</dt><dd>How long the first key was held, in milliseconds.</dd></div>
+          <div><dt class="num">35.0,</dt><dd>From pressing the first key to pressing the second.</dd></div>
+          <div><dt class="num">−87.0]</dt><dd>From releasing the first key to pressing the second. It’s negative because the keys overlapped.</dd></div>
+        </dl>
+        <figcaption class="small">A record as Doppel stores it. That’s everything it keeps about a pair of keys. Space, Shift and other keys get a label by kind instead, like <span class="num">{doppel.secondRecord}</span>.</figcaption>
+      </figure>
     </section>
 
     <section class="how wrap grid" aria-labelledby="how-h">
@@ -75,16 +74,13 @@ const p = projects.find((x) => x.slug === 'doppel')!;
     <section class="story wrap" aria-labelledby="short-h">
       <div class="problem">
         <h2 id="short-h">Where it stopped</h2>
-        <p>The typing pipeline works end to end, as a dry run that says when it would lock. The lock limits were never tuned on enough of my own typing: I collected {doppel.ownerRecords} records of the {doppel.ownerPlanned} I planned. So I make no accuracy claim for the live app. Writing style, attack tests and a mouse signal were planned, then dropped.</p>
+        <p>The typing pipeline works end to end, as a dry run that says when it would lock. I collected {doppel.ownerRecords} records of my own typing over {doppel.ownerDays} days and started tuning the lock limits on them, but never tested real locking. So I make no accuracy claim for the live app. Writing style, attack tests and a mouse signal were planned, then dropped.</p>
       </div>
       <div class="problem">
         <h3>Known gaps</h3>
         <p>Someone at the session can end the process. Reading or scrolling without typing is invisible to it. Anything done before the lock gets through.</p>
       </div>
-    </section>
-
-    <section class="next wrap" aria-label="Stack">
-      <p class="small dim">Built with Python, NumPy, pandas, SQLite, AES-GCM, Windows DPAPI and Windows APIs.</p>
+      <p class="stack small dim">Built with Python, NumPy, pandas, SQLite, AES-GCM, Windows DPAPI and Windows APIs.</p>
     </section>
 
     <nav class="onward wrap" aria-label="Next project">
@@ -94,18 +90,20 @@ const p = projects.find((x) => x.slug === 'doppel')!;
 </Base>
 
 <style>
-  .rec-sec { padding-top: var(--s8); }
+  .rec-sec { padding-block: 0 var(--s9); }
   .rec { margin: 0; }
-  .rec-line { font-size: clamp(30px, 6vw, 88px); line-height: 1.05; font-weight: 500; letter-spacing: -0.02em; }
-  .rec-line span { white-space: nowrap; }
-  .rec-key { margin: var(--s6) 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap); }
-  .rec-key div { border-top: 1px solid var(--line); padding-top: var(--s3); display: grid; gap: var(--s2); align-content: start; }
-  .rec-key dt { font-weight: 500; }
-  .rec-key dd { margin: 0; color: var(--dim); }
+  /* The record reads as one line; each note sits under its own value. */
+  .rec-key { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(max-content, auto)); justify-content: start; column-gap: clamp(20px, 2.4vw, 40px); }
+  .rec-key div { display: grid; grid-template-rows: subgrid; grid-row: span 2; row-gap: var(--s4); }
+  .rec-key dt { font-size: clamp(30px, 4.6vw, 72px); line-height: 1.05; font-weight: 500; letter-spacing: -0.02em; white-space: nowrap; }
+  .rec-key dd { margin: 0; color: var(--dim); font-size: 15px; line-height: 1.45; width: 0; min-width: 100%; max-width: 22em; border-top: 1px solid var(--line); padding-top: var(--s3); }
+  .stack { margin-top: var(--s7); }
   .rec figcaption { margin-top: var(--s5); color: var(--dim); max-width: 64ch; }
   .story h2 { margin-bottom: var(--s3); }
   @media (max-width: 899px) {
-    .rec-key { grid-template-columns: 1fr 1fr; row-gap: var(--s5); }
+    .rec-key { grid-template-columns: 1fr 1fr; row-gap: var(--s6); }
+    .rec-key div { grid-template-rows: none; grid-row: auto; align-content: start; row-gap: var(--s3); }
+    .rec-key dd { width: auto; max-width: none; }
   }
   @media (max-width: 599px) {
     .rec-key { grid-template-columns: 1fr; }

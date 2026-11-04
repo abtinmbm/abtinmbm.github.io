@@ -10,7 +10,7 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
   <article class="cv wrap">
     <header class="cv-head">
       <h1 class="display">Resume</h1>
-      <p class="get"><a href={pdf} download>Download the PDF</a> <span class="small dim">(one page, 111 KB)</span></p>
+      <p class="get"><a href={pdf} download>Download the PDF</a> <span class="small dim">(one page, 111&nbsp;KB)</span></p>
     </header>
 
     <section aria-labelledby="edu">
@@ -39,8 +39,8 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
         <ul>
           <li>Built a machine-sound anomaly detector trained only on healthy audio: a 98k-weight CNN reached 92.13% mean AUC on the held-out DCASE 2020 evaluation set, against 79.70% for the reference autoencoder (3 seeds).</li>
           <li>Reproduced the published DCASE baseline in PyTorch within 0.88 AUC points on all 6 machine types, and released checkpoints so two commands re-check the held-out CNN results from a fresh clone.</li>
-          <li>Turned scores into an andon light with SPC control limits, hysteresis and a Streamlit dashboard. On the held-out evaluation clips it caught 65.57% of 30 s faults, on average 10.57 s after onset, at 5.53 false alarms per hour.</li>
-          <li>Quantized the CNN to int8 for a Cortex-M33 with a custom fixed-point reference: 98.7 KB (from 383.0 KB) at 92.08% held-out AUC, exporting C headers and test vectors in CI. Now porting to a Raspberry Pi Pico 2.</li>
+          <li>Turned scores into an andon light with SPC control limits, hysteresis and a Streamlit dashboard. On the held-out evaluation clips it caught 65.57% of 30&nbsp;s faults, on average 10.57&nbsp;s after onset, at 5.53 false alarms per hour.</li>
+          <li>Quantized the CNN to int8 for a Cortex-M33 with a custom fixed-point reference: 98.7&nbsp;KB (from 383.0&nbsp;KB) at 92.08% held-out AUC, exporting C headers and test vectors in CI. Now porting to a Raspberry Pi Pico 2.</li>
         </ul>
       </div>
       <div class="entry">
@@ -48,8 +48,8 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
         <p class="meta">Python, PyTorch, OpenCV. Pull request #215. October 2026 to now.</p>
         <ul>
           <li>Developed a groundside orthomosaic stitcher on the autonomy subteam, merging out-of-order, GPS-tagged photos from 3 drones into one georeferenced map using XFeat learned features and RANSAC.</li>
-          <li>Fused images with noisy GPS to recover heading, aligning photos within 6.9 cm at 3 m of simulated GPS error.</li>
-          <li>Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13–41 cm to 4–7 cm.</li>
+          <li>Fused images with noisy GPS to recover heading, aligning photos within 6.9&nbsp;cm at 3&nbsp;m of simulated GPS error.</li>
+          <li>Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13–41&nbsp;cm to 4–7&nbsp;cm.</li>
           <li>Handled 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated 91-photo missions.</li>
           <li>Added lens undistortion and blur, exposure and tilt checks, and built a ground-truth mission simulator and 80 tests.</li>
         </ul>
@@ -104,12 +104,12 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
   .get { font-size: var(--t-lead); }
   section { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); padding-block: var(--s6); border-top: 1px solid var(--line); }
   h2 { grid-column: 1 / 5; font-size: var(--t-h3); font-weight: 500; line-height: 1.25; }
-  section > :not(h2) { grid-column: 5 / 12; }
+  section > :not(h2) { grid-column: 5 / 12; max-width: 62ch; }
   .entry { display: grid; gap: var(--s2); }
   .entry + .entry { margin-top: var(--s6); }
   h3 { font-size: 18px; font-weight: 500; }
   .meta { color: var(--dim); font-size: 15px; }
-  ul { margin: var(--s2) 0 0; padding-left: 1.1em; display: grid; gap: var(--s2); }
+  ul { margin: var(--s2) 0 0 -1.1em; padding-left: 1.1em; display: grid; gap: var(--s2); }
   ul.plain { margin: 0; }
   .skills { margin: 0; display: grid; gap: var(--s3); }
   .skills dt { font-weight: 500; }
@@ -118,5 +118,6 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
     .cv { padding-top: var(--s7); }
     h2, section > :not(h2) { grid-column: 1 / 13; }
     h2 { margin-bottom: var(--s4); }
+    ul { margin-left: 0; }
   }
 </style>
