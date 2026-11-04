@@ -10,6 +10,7 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
   <article class="cv wrap">
     <header class="cv-head">
       <h1 class="display">Resume</h1>
+      <p class="contact"><a href="mailto:aaryanpo@uwaterloo.ca">aaryanpo@uwaterloo.ca</a> <a href="https://www.linkedin.com/in/abtin-aryanpour">linkedin.com/in/abtin-aryanpour</a> <a href="https://github.com/abtinmbm">github.com/abtinmbm</a></p>
       <p class="get"><a href={pdf} download>Download the PDF</a> <span class="small dim">(one page, 119&nbsp;KB)</span></p>
     </header>
 
@@ -17,7 +18,7 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
       <h2 id="edu">Education</h2>
       <div class="entry">
         <h3>University of Waterloo</h3>
-        <p class="meta">Candidate for BASc in Computer Engineering, Co-op Program. Expected April 2031.</p>
+        <p class="meta">Waterloo, ON. Candidate for BASc in Computer Engineering, Co-op Program. Expected April 2031.</p>
         <p>Coursework: Fundamentals of Programming (C++), Linear Algebra, Calculus, Mechanics, Engineering Design</p>
       </div>
     </section>
@@ -68,16 +69,16 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
     <section aria-labelledby="exp">
       <h2 id="exp">Experience</h2>
       <div class="entry">
-        <h3>Treasurer, Bayview Secondary School</h3>
-        <p class="meta">September 2025 to June 2026.</p>
+        <h3>Treasurer</h3>
+        <p class="meta">Bayview Secondary School, Richmond Hill, ON. September 2025 to June 2026.</p>
         <ul>
           <li>Managed a $21,000 student budget across 42 clubs serving 2,000 students.</li>
           <li>Reviewed and approved each club’s budget, calculating allocations and negotiating changes in meetings with club presidents and school administrators.</li>
         </ul>
       </div>
       <div class="entry">
-        <h3>Homework Helper and Assistant Teacher, Spirit of Math Schools</h3>
-        <p class="meta">September 2022 to July 2025.</p>
+        <h3>Homework Helper and Assistant Teacher</h3>
+        <p class="meta">Spirit of Math Schools Inc., Richmond Hill, ON. September 2022 to July 2025.</p>
         <ul>
           <li>Homework Helper (2024–2025): ran a drop-in homework help classroom as one of two staff, triaging questions from students ranging from kindergarten to Grade 11 and diagnosing where each one was stuck.</li>
           <li>Assistant Teacher (2022–2024): supported classes of 16 students, teaching lessons and contest-style algebra.</li>
@@ -101,6 +102,7 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
   .cv-head { display: grid; gap: var(--s4); margin-bottom: var(--s9); }
   h1 { font-size: var(--t-title); line-height: 0.95; letter-spacing: -0.01em; }
   .get { font-size: var(--t-lead); }
+  .contact { display: flex; flex-wrap: wrap; gap: 4px 24px; }
   section { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); padding-block: var(--s6); border-top: 1px solid var(--line); }
   h2 { grid-column: 1 / 5; font-size: var(--t-h3); font-weight: 500; line-height: 1.25; }
   section > :not(h2) { grid-column: 5 / 12; max-width: 62ch; }

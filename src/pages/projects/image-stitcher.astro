@@ -84,7 +84,7 @@ const last = stages.length - 1;
     <section class="how wrap grid" aria-labelledby="how-h">
       <h2 id="how-h">From shuffled photos to one map</h2>
       <ol>
-        <li><p><b>Check.</b> Each photo is undistorted for the lens, then checked for blur, exposure and tilt before it’s used.</p></li>
+        <li><p><b>Check.</b> Each photo is checked for blur, exposure and tilt. The ones that pass are undistorted for the lens.</p></li>
         <li><p><b>Find neighbours.</b> GPS says which photos should overlap, even when they arrive out of order from different drones.</p></li>
         <li><p><b>Match.</b> XFeat learned features and RANSAC line each pair up and throw out wrong matches.</p></li>
         <li><p><b>Recover heading.</b> There’s no compass, so the matches and the noisy GPS together work out which way each photo faces.</p></li>
@@ -109,7 +109,7 @@ const last = stages.length - 1;
       </div>
       <div class="problem">
         <h3>The blur check rejected good photos</h3>
-        <p>Sharp and blurred scores overlapped, so no limit could work. The new score compares a photo with itself at half resolution, in each direction. Code review then showed sensor noise could fool it, so a 3×3 median filter runs first.</p>
+        <p>Sharp and blurred scores overlapped, so no limit could work. The new score compares a photo with itself at half resolution, in each direction. Code review then showed sensor noise could fool it, so a 3×3 median filter runs first. Heavy noise can still get a blurry photo through, and the limits are tuned on synthetic photos.</p>
       </div>
       <div class="problem">
         <h3>Where it still falls short</h3>
