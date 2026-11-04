@@ -39,7 +39,7 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
         <ul>
           <li>Built a machine-sound anomaly detector trained only on healthy audio: a 98k-weight CNN reached 92.13% mean AUC on the held-out DCASE 2020 evaluation set, against 79.70% for the reference autoencoder (3 seeds).</li>
           <li>Reproduced the published DCASE baseline in PyTorch within 0.88 AUC points on all 6 machine types, and released checkpoints so two commands re-check the held-out CNN results from a fresh clone.</li>
-          <li>Turned scores into a live andon light with SPC control limits, hysteresis and a Streamlit dashboard. On the held-out evaluation clips it caught 65.57% of 30 s faults, on average 10.57 s after onset, at 5.53 false alarms per hour.</li>
+          <li>Turned scores into an andon light with SPC control limits, hysteresis and a Streamlit dashboard. On the held-out evaluation clips it caught 65.57% of 30 s faults, on average 10.57 s after onset, at 5.53 false alarms per hour.</li>
           <li>Quantized the CNN to int8 for a Cortex-M33 with a custom fixed-point reference: 98.7 KB (from 383.0 KB) at 92.08% held-out AUC, exporting C headers and test vectors in CI. Now porting to a Raspberry Pi Pico 2.</li>
         </ul>
       </div>
@@ -69,7 +69,7 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
         <ul>
           <li>Sole developer of a responsive forum where users post, comment and vote, with sorting, topic filtering and fuzzy search (Fuse.js), built on Django, Django REST Framework and SQLite.</li>
           <li>Secured accounts with Django authentication, CSRF protection and reCAPTCHA on login and signup, and added rich-text posts (CKEditor) and profile picture uploads.</li>
-          <li>Deployed behind AWS CloudFront with a seeded demo dataset. Won 1st place in Coding &amp; Programming at the Canadian National Leadership Conference 2025 (32 teams).</li>
+          <li>Deployed live behind AWS CloudFront with a seeded demo dataset. Won 1st place in Coding &amp; Programming at the Canadian National Leadership Conference 2025 (32 teams).</li>
         </ul>
       </div>
     </section>
