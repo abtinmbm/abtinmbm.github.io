@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.astro/
+.env*
+CLAUDE.md
+START_HERE.md
+.claude/
+docs/
+references/
+assets/
+directions/
+DESIGN.md
+npm-debug.log*
+.DS_Store
+.idea/
+.vscode/
