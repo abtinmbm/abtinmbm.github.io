@@ -1,0 +1,69 @@
+---
+import { andon } from '../data/metrics';
+const rows = andon.byType;
+const min = 50; // AUC of 50% is guessing, so the axis starts there
+const pct = (v: number) => ((v - min) / (100 - min)) * 100;
+---
+<figure class="auc">
+  <figcaption id="auc-cap">
+    <span class="key"><i class="sw cnn"></i>Andon’s CNN</span>
+    <span class="key"><i class="sw ae"></i>Reference autoencoder</span>
+    <span class="dim">Evaluation AUC by machine type, mean of 3 seeds. 50% is guessing.</span>
+  </figcaption>
+  <div class="rows" aria-hidden="true">
+    {rows.map((r) => (
+      <div class="row">
+        <span class="type">{r.type}</span>
+        <span class="bars">
+          <span class="bar cnn" style={`width:${pct(r.cnn)}%`}><b class="num">{r.cnn.toFixed(2)}</b></span>
+          <span class="bar ae" style={`width:${pct(r.ae)}%`}><b class="num">{r.ae.toFixed(2)}</b></span>
+        </span>
+      </div>
+    ))}
+    <div class="row"><span></span><span class="axis"><span style="left:0">50%</span><span style="left:50%">75%</span><span style="left:100%">100%</span></span></div>
+  </div>
+  <details class="as-table">
+  <summary class="small">Show as a table</summary>
+  <table class="small">
+    <caption>Evaluation AUC (%) by machine type</caption>
+    <thead><tr><th scope="col">Machine type</th><th scope="col">Andon’s CNN</th><th scope="col">Reference autoencoder</th></tr></thead>
+    <tbody>
+      {rows.map((r) => (<tr><th scope="row">{r.type}</th><td class="num">{r.cnn.toFixed(2)}</td><td class="num">{r.ae.toFixed(2)}</td></tr>))}
+      <tr class="mean"><th scope="row">Mean of six</th><td class="num">{andon.meanAuc.replace('%', '')}</td><td class="num">{andon.baselineAuc.replace('%', '')}</td></tr>
+    </tbody>
+  </table>
+  </details>
+</figure>
+
+<style>
+  .auc { margin: 0; }
+  figcaption { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; margin-bottom: 20px; }
+  .key { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 14px; height: 8px; display: inline-block; }
+  .sw.cnn, .bar.cnn { background: var(--white); }
+  .sw.ae, .bar.ae { background: #3b4f8f; }
+  .rows { display: grid; gap: 14px; }
+  .row { display: grid; grid-template-columns: 7.5em 1fr; gap: 12px; align-items: center; }
+  .type { font-size: 14px; color: var(--dim); }
+  .bars { display: grid; gap: 3px; }
+  .bar { height: 14px; position: relative; min-width: 2px; }
+  .bar b { position: absolute; left: calc(100% + 8px); top: 50%; transform: translateY(-50%); font-weight: 400; font-size: 12.5px; color: var(--dim); }
+  .bar.cnn b { color: var(--white); }
+  .bars { margin-right: 56px;
+    background: linear-gradient(to right, transparent calc(50% - 0.5px), var(--line) calc(50% - 0.5px), var(--line) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      linear-gradient(to left, var(--line) 1px, transparent 1px); }
+  .axis { position: relative; display: block; height: 1.6em; margin-right: 56px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--dim); }
+  .axis span { position: absolute; top: 6px; transform: translateX(-50%); }
+  .axis span:first-child { transform: none; }
+  .axis span:last-child { transform: translateX(-100%); }
+  .as-table { margin-top: 28px; }
+  summary { cursor: pointer; width: fit-content; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
+  summary:hover, summary:focus-visible { text-decoration-thickness: 2px; }
+  table { width: 100%; margin-top: 16px; border-collapse: collapse; }
+  caption { text-align: left; color: var(--dim); padding-bottom: 8px; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-top: 1px solid var(--line); font-weight: 400; }
+  thead th { color: var(--dim); }
+  td { text-align: right; }
+  thead th:not(:first-child) { text-align: right; }
+  tr.mean th, tr.mean td { font-weight: 500; }
+</style>

@@ -1,43 +1,204 @@
 ---
----
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import StarTrails from '../components/StarTrails.astro';
+import AndonReplay from '../components/AndonReplay.astro';
+import { projects } from '../data/projects';
+import { andon, stitcher, doppel, awards } from '../data/metrics';
+import portrait from '../assets/photos/abtin-portrait.jpg';
+import map91 from '../assets/stitcher/map-91-shape.webp';
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<title>Abtin Aryanpour</title>
-		<meta name="description" content="Portfolio of Abtin Aryanpour. Coming soon." />
-		<meta name="robots" content="noindex" />
-		<style>
-			body {
-				margin: 0;
-				min-height: 100vh;
-				display: grid;
-				place-items: center;
-				background: #111;
-				color: #eee;
-				font-family: system-ui, sans-serif;
-			}
-			main {
-				padding: 1rem;
-				text-align: center;
-			}
-			h1 {
-				font-weight: 500;
-				font-size: 1.5rem;
-				margin: 0 0 0.5rem;
-			}
-			p {
-				margin: 0;
-				color: #aaa;
-			}
-		</style>
-	</head>
-	<body>
-		<main>
-			<h1>Abtin Aryanpour</h1>
-			<p>Site coming soon.</p>
-		</main>
-	</body>
-</html>
+const trailProjects = projects.map((p) => ({
+  name: p.name,
+  line: p.line,
+  link: p.href ?? `#${p.slug}`,
+  start: p.start,
+  end: p.end,
+}));
+---
+<Base
+  title="Abtin Aryanpour, Computer Engineering at Waterloo"
+  description="First-year Computer Engineering student at the University of Waterloo, building across software and firmware. Looking for a co-op, May to August 2027."
+  overlay
+  current="home"
+>
+  <section class="hero" aria-labelledby="hero-name">
+    <div class="sky">
+      <StarTrails projects={trailProjects} />
+    </div>
+    <div class="who">
+      <h1 id="hero-name" class="display">Abtin Aryanpour</h1>
+      <div class="who-text">
+        <p>First-year Computer Engineering student at the University of Waterloo. I build across software and firmware, and I’ve started three projects since September.</p>
+        <p class="avail">Looking for a software or firmware co-op, May to August 2027.</p>
+      </div>
+      <p class="key small">Each bright trail above is one of my projects, as long as I worked on it. Trails with a glowing head are still growing. Click a name to open it.</p>
+    </div>
+  </section>
+
+  <section class="intro wrap grid" aria-label="About me">
+    <Picture pictureAttributes={{ class: "portrait" }} src={portrait} alt="Abtin at a formal event in a suit and bow tie, pointing at the camera" widths={[360, 560, 820]} sizes="(max-width: 759px) 60vw, 26vw" formats={['avif', 'webp']} />
+    <div class="intro-text">
+      <p class="lead">I’m Abtin. I’m on the autonomy software team at the Waterloo Aerial Robotics Group, and before Waterloo I won first place in Coding &amp; Programming at the FBLC Canada national conference.</p>
+      <p>I like projects with a real, slightly funny reason to exist, and I check my work against the published baseline before I claim to beat it.</p>
+      <p><a href="/about/">More about me</a></p>
+    </div>
+  </section>
+
+  <section id="work" class="work" aria-labelledby="work-h">
+    <h2 id="work-h" class="visually-hidden">Projects</h2>
+
+    <article id="andon" class="p-andon wrap grid" aria-labelledby="andon-h">
+      <div class="p-text">
+        <h3 id="andon-h" class="display">Andon</h3>
+        <p class="lead">Hears when a machine starts to sound wrong, after learning only from healthy recordings.</p>
+        <p class="status"><b>In progress.</b> The software works. Now it’s moving onto a Raspberry Pi Pico 2.</p>
+        <p>On the held-out evaluation set, it tells faulty sound from normal with {andon.meanAuc} AUC, against {andon.baselineAuc} for the reference autoencoder. As int8 it fits in {andon.int8Size}.</p>
+        <p><a href="/projects/andon/">Read about Andon</a></p>
+      </div>
+      <div class="p-media">
+        <AndonReplay captionId="andon-cap">
+          <figcaption id="andon-cap" class="small">A replay of one fan’s real scores: two minutes of normal running, then a fault. This machine was picked to show how the light works.</figcaption>
+        </AndonReplay>
+      </div>
+    </article>
+
+    <article id="image-stitcher" class="p-stitch" aria-labelledby="stitch-h">
+      <figure class="p-map wrap">
+        <Picture pictureAttributes={{ class: "p-bleed" }} src={map91} fallbackFormat="webp" alt="A map stitched from 91 simulated drone photos. Its stepped outline shows where the photos landed, and only its painted ground markers are drawn inside." widths={[800, 1400, 2400]} sizes="(max-width: 759px) 100vw, 95vw" formats={['avif', 'webp']} />
+        <figcaption class="cap small">One simulated mission of {stitcher.photos} photos. The stepped outline is the edge of the stitched photos, and only the painted ground markers are kept inside it.</figcaption>
+      </figure>
+      <div class="p-text wrap">
+        <h3 id="stitch-h" class="display">Image Stitcher</h3>
+        <p class="lead">Merges out-of-order, GPS-tagged photos from three drones into one top-down map, for the Waterloo Aerial Robotics Group.</p>
+        <p class="status"><b>In review.</b> Pull request #215 is open.</p>
+        <p>In {stitcher.missions} simulated missions it built one connected map, with neighbouring photos lined up to within {stitcher.alignment}.</p>
+        <p><a href="/projects/image-stitcher/">Read about the stitcher</a></p>
+      </div>
+    </article>
+
+    <article id="doppel" class="p-doppel wrap" aria-labelledby="doppel-h">
+      <p class="record num" aria-hidden="true">{doppel.exampleRecord}</p>
+      <p class="record-cap small">That record is everything Doppel keeps about one pair of keys: a rough label and three timings. Letters are never stored.</p>
+      <div class="grid">
+        <div class="p-text">
+          <h3 id="doppel-h" class="display">Doppel.exe</h3>
+          <p class="lead">My brother waits until I walk away from my PC, then uses my logged-in session. A password checks you once. Doppel keeps checking, from typing rhythm alone.</p>
+          <p class="status"><b>Finished</b> in October 2026.</p>
+        </div>
+        <div class="p-side">
+          <p>On public datasets, my method cut the mean equal error rate from {doppel.eerBefore} to {doppel.eerAfter}, confirmed on {doppel.heldOutUsers} held-out users.</p>
+          <p><a href="/projects/doppel/">Read about Doppel</a></p>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="earlier wrap" aria-labelledby="earlier-h">
+    <h2 id="earlier-h" class="display">Before Waterloo</h2>
+    <ul>
+      <li id="cybershield">
+        <h3>CyberShield</h3>
+        <p>A Django cybersecurity forum. I was the only developer on a team of three.</p>
+        <p class="dim">{awards.fblc2025}</p>
+        <a href="https://github.com/abtinmbm/cybershield">Code on GitHub<span class="visually-hidden"> for CyberShield</span></a>
+      </li>
+      <li id="school-partner-directory">
+        <h3>School Partner Directory</h3>
+        <p>A Django directory linking a school with more than 25 local partners. I handled hosting and production debugging.</p>
+        <p class="dim">{awards.fbla2024}</p>
+        <a href="https://github.com/abtinmbm/FBLA2024">Code on GitHub<span class="visually-hidden"> for School Partner Directory</span></a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="contact" class="contact wrap" aria-labelledby="contact-h">
+    <h2 id="contact-h" class="visually-hidden">Contact</h2>
+    <p class="mail display"><a href="mailto:aaryanpo@uwaterloo.ca">aaryanpo@uwaterloo.ca</a></p>
+    <p class="links"><a href="https://github.com/abtinmbm">GitHub</a><a href="https://linkedin.com/in/abtin-aryanpour">LinkedIn</a><a href="/resume/">Resume</a></p>
+  </section>
+</Base>
+
+<style>
+  /* first screen */
+  .hero { position: relative; height: 100svh; min-height: 660px; overflow: hidden;
+    background: radial-gradient(120% 90% at 30% 120%, var(--glow), var(--deep) 45%, var(--black) 85%); }
+  .sky { position: absolute; inset: 0; }
+  .hero::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(to top, rgb(1 3 10 / 0.94) 0%, rgb(1 3 10 / 0.86) 30%, rgb(1 3 10 / 0.5) 44%, transparent 58%); }
+  .who { position: absolute; z-index: 3; left: var(--edge); right: var(--edge); bottom: var(--edge);
+    text-shadow: 0 0 6px var(--black), 0 0 18px var(--black); }
+  .who h1 { font-size: var(--t-name); line-height: 1; letter-spacing: -0.01em; white-space: nowrap; margin-bottom: var(--s5); }
+  .who-text p { max-width: 46ch; }
+  .who .avail { margin-top: var(--s3); font-weight: 500; }
+  .key { margin-top: var(--s5); max-width: 52ch; color: var(--dim); }
+
+  /* intro */
+  .intro { padding-block: var(--s10) var(--s9); align-items: start; }
+  :global(.portrait) { grid-column: 1 / 5; display: block; }
+  :global(.portrait img) { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+  .intro-text { grid-column: 7 / 13; display: grid; gap: var(--s4); max-width: 34rem; }
+  .lead { font-size: var(--t-lead); line-height: 1.4; }
+
+  /* projects */
+  .work { display: grid; gap: var(--s10); padding-bottom: var(--s10); }
+  .p-text { display: grid; gap: var(--s4); align-content: start; }
+  .p-text h3 { font-size: var(--t-h2); line-height: 1.05; }
+  .status b { font-weight: 500; }
+  .status { color: var(--dim); }
+  .status b { color: var(--white); }
+
+  .p-andon { align-items: center; }
+  .p-andon .p-text { grid-column: 1 / 6; }
+  .p-media { grid-column: 7 / 13; }
+
+  .p-stitch { position: relative; }
+  :global(.p-bleed) { display: block; }
+  .p-map { margin: 0; }
+  :global(.p-bleed img) { width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; object-position: 50% 0; }
+  .p-map .cap { margin-top: var(--s3); color: var(--dim); max-width: 64ch; }
+  .p-stitch .p-text { margin-top: var(--s8); max-width: calc(36em + 2 * var(--edge)); }
+
+  .record { font-size: clamp(30px, 5vw, 72px); line-height: 1; font-weight: 500; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+  .record-cap { margin: var(--s3) 0 var(--s8); color: var(--dim); max-width: 60ch; }
+  .p-doppel .p-text { grid-column: 1 / 7; }
+  .p-doppel .p-side { grid-column: 7 / 13; max-width: 34em; display: grid; gap: var(--s4); align-content: start; padding-top: var(--s2); }
+
+  /* earlier work */
+  .earlier { padding-block: var(--s9); border-top: 1px solid var(--line); }
+  .earlier h2 { font-size: var(--t-h3); margin-bottom: var(--s7); }
+  .earlier ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7) var(--gap); }
+  .earlier li { display: grid; gap: var(--s2); align-content: start; max-width: 34em; }
+  .earlier h3 { font-size: 18px; }
+
+  /* contact */
+  .contact { padding-block: var(--s9) var(--s10); }
+  .mail { font-size: clamp(17px, 4vw, 56px); line-height: 1.1; overflow-wrap: anywhere; }
+  .mail a { text-decoration-thickness: 2px; text-underline-offset: 0.16em; }
+  .links { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s6); margin-top: var(--s6); }
+
+  @media (max-width: 759px) {
+    .hero { height: auto; min-height: 0; background: none; overflow: visible; }
+    .hero::after { display: none; }
+    .sky { position: relative; height: min(70svh, 520px); overflow: hidden;
+      background: radial-gradient(140% 90% at 30% 120%, var(--glow), var(--deep) 45%, var(--black) 85%); }
+    .who { position: relative; left: auto; right: auto; bottom: auto; margin-top: -56px; padding: 0 var(--edge); }
+    .who h1 { font-size: clamp(24px, 8vw, 44px); margin-bottom: var(--s4); }
+    .intro { padding-block: var(--s9) var(--s8); row-gap: var(--s6); }
+    :global(.portrait) { grid-column: 1 / 9; }
+    .intro-text { grid-column: 1 / 13; }
+    .work { gap: var(--s9); }
+    .p-andon .p-text, .p-media { grid-column: 1 / 13; }
+    .p-media { margin-top: var(--s7); }
+    .p-map { padding-inline: 0; }
+    .p-map .cap { padding-inline: var(--edge); }
+    /* phones: show a third of the mission larger, so the markers read as shapes */
+    :global(.p-bleed) { overflow: hidden; aspect-ratio: 1 / 1; }
+    :global(.p-bleed img) { width: 230%; max-width: none; aspect-ratio: auto; }
+    .p-stitch .p-text { margin-top: var(--s7); }
+    .record { white-space: normal; font-size: 30px; }
+    .p-doppel .p-text, .p-doppel .p-side { grid-column: 1 / 13; }
+    .p-doppel .p-side { margin-top: var(--s6); }
+    .earlier ul { grid-template-columns: 1fr; }
+  }
+</style>

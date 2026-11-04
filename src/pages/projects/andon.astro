@@ -1,0 +1,151 @@
+---
+import Base from '../../layouts/Base.astro';
+import AucChart from '../../components/AucChart.astro';
+import AndonReplay from '../../components/AndonReplay.astro';
+import ProjectTrail from '../../components/ProjectTrail.astro';
+import { andon } from '../../data/metrics';
+import { projects } from '../../data/projects';
+
+const p = projects.find((x) => x.slug === 'andon')!;
+---
+<Base
+  title="Andon: hearing when a machine sounds wrong | Abtin Aryanpour"
+  description="A machine-sound anomaly detector that learns only from healthy recordings and turns a green, yellow or red light when a machine starts to sound wrong. Now moving onto a Raspberry Pi Pico 2."
+  current="work"
+>
+  <article class="proj">
+    <header class="top">
+      <div class="top-sky"><ProjectTrail start={p.start} end={p.end} /></div>
+      <div class="top-text wrap">
+        <h1 class="display">Andon</h1>
+        <p class="lead">A machine-sound anomaly detector that learns only from healthy recordings, and turns a green, yellow or red light when a machine starts to sound wrong.</p>
+        <p class="status">Started in October 2026 and still in progress. The software stage is done and the hardware stage has started. <a href="https://github.com/abtinmbm/andon">Code on GitHub</a></p>
+      </div>
+    </header>
+
+    <section class="replay-sec wrap" aria-label="Replay">
+      <AndonReplay captionId="replay-cap">
+        <figcaption id="replay-cap" class="small">The real scores from one fan (machine id_06, model seed 0), replayed at 8× speed: about two minutes of normal running, then a fault. The yellow light partway through is a real warning that clears by itself without stopping the line. This machine was picked to show how the light works. Typical rates are below.</figcaption>
+      </AndonReplay>
+    </section>
+
+    <section class="why wrap" aria-labelledby="why-h">
+      <h2 id="why-h" class="visually-hidden">Why it exists</h2>
+      <p class="statement">Factories use andon lights to flag a problem on the line. But a fault is rare and expensive to record, so the system has to learn from normal sound alone.</p>
+      <p class="why-more">A small CNN learns to recognise each individual machine by its sound. When it can no longer tell which machine it’s hearing, something has changed.</p>
+    </section>
+
+    <section class="results wrap grid" aria-labelledby="results-h">
+      <h2 id="results-h">Better than the reference on five of six machine types</h2>
+      <div class="chart"><AucChart /></div>
+      <div class="notes">
+        <p><b class="num">{andon.meanAuc}</b> mean AUC on the held-out DCASE 2020 evaluation set, against {andon.baselineAuc} for the reference autoencoder. AUC is the chance a random faulty clip scores as more abnormal than a random normal one.</p>
+        <p>Before changing anything I reproduced that reference, to within <b class="num">{andon.reproductionGap}</b> AUC points of the published result on all six machine types.</p>
+        <p>Streamed as a live light, it caught <b class="num">{andon.faultsCaught}</b> of 30-second faults, on average {andon.secondsToRed} after they started, with {andon.falseAlarmsPerHour} false alarms per hour.</p>
+        <p>It has {andon.weights} weights. As int8 it’s <b class="num">{andon.int8Size}</b>, down from {andon.floatSize}, and still scores {andon.int8Auc} AUC.</p>
+        <p>The checkpoints are public, and one command re-checks every held-out result from a fresh clone.</p>
+      </div>
+    </section>
+
+    <section class="how wrap grid" aria-labelledby="how-h">
+      <h2 id="how-h">From a sound to a light</h2>
+      <ol>
+        <li><p><b>Listen.</b> Each 10-second clip becomes a log-mel spectrogram: how loud each of 128 frequency bands is, every 32 ms.</p></li>
+        <li><p><b>Recognise.</b> One small CNN per machine type learns to tell that type’s machines apart, from normal recordings only.</p></li>
+        <li><p><b>Score.</b> If the CNN can’t recognise the machine it’s hearing, the score rises. Each 2-second window gets a score, every second.</p></li>
+        <li><p><b>Set limits.</b> Normal audio sets a warning limit and a control limit for each machine, like a factory control chart. They’re the two dashed lines in the replay.</p></li>
+        <li><p><b>Light.</b> Two windows in a row over the warning limit turn it yellow. Three in a row over the control limit turn it red, and it stays red until someone resets it.</p></li>
+      </ol>
+    </section>
+
+    <section class="story wrap" aria-labelledby="hard-h">
+      <h2 id="hard-h" class="visually-hidden">What was hard</h2>
+      <div class="problem">
+        <h3>There were no faults to train on</h3>
+        <p>Instead of learning what a fault sounds like, the CNN learns to name which machine it hears. Low confidence in the right name becomes the anomaly score. Valve went from {andon.valveAe} AUC with the reference to {andon.valveCnn}.</p>
+      </div>
+      <div class="problem">
+        <h3>Overconfidence hurt the score</h3>
+        <p>Without mixup, the ToyConveyor classifier hit 100% training accuracy, leaving no room for a fault to lower its confidence. Blending pairs of training examples (mixup) raised mean development AUC from {andon.devAucNoMixup} to {andon.devAucMixup}.</p>
+      </div>
+      <div class="problem">
+        <h3>PyTorch doesn’t say how it rounds</h3>
+        <p>Its quantized kernels don’t specify their rounding, and a C port has to match them exactly. So I wrote a NumPy fixed-point reference of {andon.quantRefLines} lines that defines every integer step, and exports test vectors the C version must match.</p>
+      </div>
+
+      <div class="problem">
+        <h3>Where it still falls short</h3>
+        <p>AUC isn’t real-world performance. {andon.meanAuc} AUC still caught only {andon.faultsCaught} of faults on a live stream, and {andon.valveCaught} for valve. {andon.falseAlarmsPerHour} false alarms per hour is too many for a real line. A much simpler Gaussian mixture beats the CNN on {andon.gmmWins} machine types. And the compute figure for the Pico ({andon.estComputeMs} per 32 ms of audio) is an estimate until it runs on the device.</p>
+      </div>
+    </section>
+
+    <section class="next wrap grid" aria-labelledby="next-h">
+      <h2 id="next-h">Next, a Raspberry Pi Pico 2 that cuts power to a real fan the moment it hears a fault</h2>
+      <div class="next-text">
+        <p>The first firmware exists: the light’s state machine in C, tested on a host and cross-compiled in CI. The model doesn’t run on the device yet. Next come the fan switch, a microphone, a dataset of the real fan, and the model in C.</p>
+        <p class="small dim">Built with Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.</p>
+      </div>
+    </section>
+
+    <nav class="onward wrap" aria-label="Next project">
+      <a class="display" href="/projects/image-stitcher/">Next project: Image Stitcher</a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .proj { padding-bottom: var(--s9); }
+
+  .top { position: relative; min-height: min(78svh, 760px); display: flex; align-items: flex-end; overflow: hidden;
+    background: radial-gradient(110% 80% at 20% 130%, var(--glow), var(--deep) 45%, var(--black) 85%); }
+  .top-sky { position: absolute; inset: 0; }
+  .top::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to top, rgb(1 3 10 / 0.94) 0%, rgb(1 3 10 / 0.85) 34%, transparent 62%); }
+  .top-text { position: relative; z-index: 1; width: 100%; padding-block: var(--s10) var(--s8); display: grid; gap: var(--s5); }
+  .top h1 { font-size: var(--t-title); line-height: 0.95; letter-spacing: -0.01em; }
+  .top .lead { max-width: 34em; }
+  .top .status { max-width: 46em; color: var(--dim); }
+  .top .status a { color: var(--white); margin-left: 0.3em; }
+  .lead { font-size: var(--t-lead); line-height: 1.4; }
+
+  .replay-sec { padding-top: var(--s8); }
+
+  .why { padding-block: var(--s10) var(--s9); }
+  .statement { font-size: clamp(26px, 3.3vw, 48px); line-height: 1.15; letter-spacing: -0.01em; max-width: 26em; text-wrap: balance; }
+  .why-more { margin-top: var(--s6); max-width: 36em; color: var(--dim); font-size: var(--t-lead); line-height: 1.4; }
+
+  .proj h2 { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; text-wrap: balance; }
+  .results { padding-block: var(--s8) var(--s9); border-top: 1px solid var(--line); row-gap: var(--s7); }
+  .results h2 { grid-column: 1 / 13; max-width: 18em; padding-top: var(--s5); }
+  .chart { grid-column: 1 / 7; }
+  .notes { grid-column: 7 / 13; display: grid; gap: var(--s5); align-content: start; max-width: 34em; }
+  .notes b { font-weight: 500; }
+
+  .how { padding-block: var(--s10) var(--s9); row-gap: var(--s6); }
+  .how h2 { grid-column: 1 / 7; }
+  .how ol { grid-column: 7 / 13; list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s5); counter-reset: step; max-width: 36em; }
+  .how li { counter-increment: step; display: grid; grid-template-columns: 2.2em 1fr; }
+  .how li::before { content: counter(step); color: var(--dim); font-variant-numeric: tabular-nums; }
+  .how b { font-weight: 500; }
+
+  .story { padding-block: var(--s9) var(--s10); }
+  .problem { max-width: 36em; }
+  .problem + .problem { margin-top: var(--s7); }
+  .problem h3 { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; margin-bottom: var(--s3); }
+
+  .next { padding-block: var(--s9); row-gap: var(--s6); }
+  .next h2 { grid-column: 1 / 7; max-width: 20em; }
+  .next-text { grid-column: 7 / 13; display: grid; gap: var(--s4); max-width: 36em; }
+
+  .onward { padding-block: var(--s9) var(--s4); }
+  .onward a { font-size: var(--t-h3); line-height: 1.2; text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
+
+  @media (max-width: 899px) {
+    .chart, .notes, .how h2, .how ol, .next h2, .next-text { grid-column: 1 / 13; }
+  }
+  @media (max-width: 599px) {
+    .top { min-height: 0; }
+    .top-sky { bottom: auto; height: 300px; }
+    .top-text { padding-block: 220px var(--s7); }
+  }
+</style>
