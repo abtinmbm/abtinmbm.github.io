@@ -22,7 +22,7 @@ const initial = pageSkyMarkup(layout(sky, 1440, 760, new Date(), PAGE_SKY), cur)
   .ptrail .pt-head { fill: var(--white); }
   .ptrail .pt-halo { fill: url(#pt-halo-g); }
   @media (prefers-reduced-motion: no-preference) {
-    .ptrail .pt-head.live { animation: pt-breathe 3.2s ease-in-out infinite; }
+    .ptrail .pt-head.live { animation: pt-breathe 3.2s ease-in-out 3; }
     @keyframes pt-breathe { 50% { opacity: 0.5; } }
   }
 </style>
