@@ -10,6 +10,7 @@ interface Props {
 }
 const { title, description, overlay = false, current } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const is404 = Astro.url.pathname.startsWith('/404');
 // One sharing image per page, made by scripts/og-images.mjs. Pages without one use the homepage's.
 const ogNames: Record<string, string> = {
   '/': 'home', '/projects/andon/': 'andon', '/projects/image-stitcher/': 'image-stitcher',
@@ -30,14 +31,14 @@ const nav = [
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
-  <link rel="canonical" href={canonical} />
+  {!is404 && <link rel="canonical" href={canonical} />}
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="theme-color" content="#01030a" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Abtin Aryanpour" />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:url" content={canonical} />
+  {!is404 && <meta property="og:url" content={canonical} />}
   <meta property="og:image" content={ogImage} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />

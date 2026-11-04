@@ -11,7 +11,7 @@ import { awards } from '../data/metrics';
 >
   <article class="about wrap grid">
     <div class="side">
-      <Picture pictureAttributes={{ class: 'about-photo' }} src={portrait} alt="Abtin at a formal event in a suit and bow tie, pointing at the camera" widths={[400, 640, 900]} sizes="(max-width: 759px) 70vw, 34vw" formats={['avif', 'webp']} />
+      <Picture pictureAttributes={{ class: 'about-photo' }} src={portrait} alt="Abtin at a formal event in a suit and bow tie, pointing at the camera" widths={[400, 640, 900]} sizes="(max-width: 759px) 70vw, 34vw" formats={['avif', 'webp']} loading="eager" fetchpriority="high" />
     </div>
 
     <div class="main">

@@ -9,7 +9,7 @@ const initial = svgMarkup(layout(projects, 1440, 900, new Date()));
 ---
 <div class="sky-field" data-trails={JSON.stringify(projects)}>
   <svg class="sky-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" set:html={initial} />
-  <ul class="sky-labels" aria-label="Projects on the sky"></ul>
+  <ul class="sky-labels" aria-label="Projects on the sky" hidden></ul>
 </div>
 
 <style is:global>
@@ -49,6 +49,7 @@ const initial = svgMarkup(layout(projects, 1440, 900, new Date()));
     const projects: TrailProject[] = JSON.parse(field.dataset.trails!);
     const svg = field.querySelector('svg')!;
     const list = field.querySelector('ul')!;
+    list.hidden = false;
 
     const draw = () => {
       const W = field.clientWidth, H = field.clientHeight;

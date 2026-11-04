@@ -40,10 +40,10 @@ const sizes = { pano: '100vw', pair: '(max-width: 759px) 92vw, 46vw', wide: '(ma
   <div class="book">
     {rows.map((r, k) => (
       <div class:list={['row', r.kind, { wrap: r.kind !== 'pano', 'pair-tall': r.tall, break: r.brk }]}>
-        {r.items.map((p) => (
+        {r.items.map((p, j) => (
           <Picture src={p.src} alt={p.alt} formats={['avif', 'webp']} fallbackFormat="webp"
-            widths={r.kind === 'pano' ? [900, 1600, 2800] : [600, 1000, 1600]} sizes={sizes[r.kind]}
-            loading={k < 2 ? 'eager' : 'lazy'} />
+            widths={r.kind === 'pano' ? [900, 1600, 2800] : [480, 800, 1200, 1600]} sizes={sizes[r.kind]}
+            loading={k < 2 && j === 0 ? 'eager' : 'lazy'} fetchpriority={k < 2 && j === 0 ? 'high' : undefined} />
         ))}
       </div>
     ))}
