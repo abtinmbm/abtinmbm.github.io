@@ -1,0 +1,83 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import portrait from '../assets/photos/abtin-portrait.jpg';
+import { awards } from '../data/metrics';
+---
+<Base
+  title="About | Abtin Aryanpour"
+  description="Abtin Aryanpour is a first-year Computer Engineering student at the University of Waterloo, on the Waterloo Aerial Robotics Group's autonomy software team, looking for a co-op from May to August 2027."
+  current="about"
+>
+  <article class="about wrap grid">
+    <div class="side">
+      <Picture pictureAttributes={{ class: 'about-photo' }} src={portrait} alt="Abtin at a formal event in a suit and bow tie, pointing at the camera" widths={[400, 640, 900]} sizes="(max-width: 759px) 70vw, 34vw" formats={['avif', 'webp']} loading="eager" fetchpriority="high" />
+    </div>
+
+    <div class="main">
+      <h1 class="display">About</h1>
+      <p class="lead">I’m in my first term of Computer Engineering at the University of Waterloo, in the co&#8209;op program, and I’m looking for a co&#8209;op from May to August 2027.</p>
+
+      <div class="body">
+        <p>At Waterloo I’m on the autonomy software team at the Waterloo Aerial Robotics Group, where I built the <a href="/projects/image-stitcher/">image stitcher</a> that turns drone photos into one map. On my own I’ve been building <a href="/projects/andon/">Andon</a> since October.</p>
+        <p>Before Waterloo I spent almost three years at Spirit of Math: first as an assistant teacher for classes of 16, teaching lessons and contest-style algebra, then running a drop-in homework room as one of two staff, for students from kindergarten to Grade 11.</p>
+        <p>In my last year of high school I was school treasurer, managing a $21,000 budget across 42 clubs.</p>
+        <p>I take photos on a Canon EOS 90D. In high school I was a photographer for the yearbook, the athletic council and Bayview TV, and I still shoot for fun. <a href="/photography/">See my photography</a></p>
+        <p>Outside engineering, I play sports like basketball and pickleball, watch TV shows, movies and anime, read comics and manga, and play video and board games. Someday I want to travel and get to know more of the world and its cultures.</p>
+      </div>
+
+      <section aria-labelledby="edu-h">
+        <h2 id="edu-h">Education</h2>
+        <dl class="list">
+          <div><dt>University of Waterloo</dt><dd>BASc in Computer Engineering, Co-op. September 2026 to April 2031, expected.</dd></div>
+          <div><dt>Bayview Secondary School</dt><dd>2022 to 2026</dd></div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="awards-h">
+        <h2 id="awards-h">Awards</h2>
+        <ul class="list">
+          <li>{awards.fblc2025}</li>
+          <li>{awards.fbla2024}</li>
+          <li>Euclid (86) and Hypatia (33) Honour Roll, and Fermat and CSMC Distinction, University of Waterloo math contests, 2025 to 2026</li>
+          <li>Excellence in Mathematics, Bayview Secondary School Mathematics Department, 2025 and 2026</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="else-h">
+        <h2 id="else-h">A few other things</h2>
+        <ul class="list">
+          <li>My best Rubik’s cube solve is <span class="num">14.21</span> seconds.</li>
+          <li>I have a horizontal slit in one eyebrow, from an injury when I was a kid.</li>
+          <li>I’ve had a turtle, a cat and parakeets. I have a dog now, and I’d like guinea pigs next.</li>
+        </ul>
+      </section>
+
+      <p class="more"><a href="/resume/">Read my resume</a> <span class="dim">or email</span> <a href="mailto:aaryanpo@uwaterloo.ca">aaryanpo@uwaterloo.ca</a></p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .about { padding-block: calc(var(--s9) + 40px) var(--s10); align-items: start; }
+  .side { grid-column: 1 / 6; position: sticky; top: var(--s6); }
+  :global(.about-photo) { display: block; }
+  :global(.about-photo img) { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
+  .main { grid-column: 7 / 13; display: grid; gap: var(--s6); max-width: 36em; }
+  h1 { font-size: var(--t-title); line-height: 0.95; letter-spacing: -0.01em; }
+  .lead { font-size: var(--t-lead); line-height: 1.4; }
+  .body { display: grid; gap: var(--s4); }
+  section { margin-top: var(--s5); }
+  h2 { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; margin-bottom: var(--s4); }
+  .list { margin: 0; padding: 0; list-style: none; display: grid; }
+  .list > div, .list > li { padding-block: var(--s3); border-top: 1px solid var(--line); }
+  .list dt { font-weight: 500; }
+  .list dd { margin: 0; color: var(--dim); }
+  .more { margin-top: var(--s5); }
+  .more .dim { margin-inline: 0.3em; }
+  @media (max-width: 759px) {
+    .about { padding-top: var(--s7); row-gap: var(--s7); }
+    .side { grid-column: 1 / 13; position: static; }
+    .main { grid-column: 1 / 13; }
+  }
+</style>

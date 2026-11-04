@@ -58,17 +58,8 @@ export const stitcher = {
   rowMatches: '6 to 13 of 600',
 };
 
-export const doppel = {
-  // Public datasets, comparing methods. Not the accuracy of the live app.
-  eerBefore: '0.164',
-  eerAfter: '0.023',
-  heldOutUsers: '500',
-  cmuGap: '0.0002',
-  exampleRecord: '[false, 2, 122.0, 35.0, −87.0]',
-  batch: '200',
-};
-
 export const awards = {
-  fblc2025: '1st of 32 teams, Coding & Programming, FBLC Canada 2025',
+  // CNLC is the competition; FBLC Canada (2025) and FBLA Canada (2024) ran it. Abtin, 2026-11-04.
+  fblc2025: '1st of 32 teams, Coding & Programming, CNLC 2025 (FBLC Canada)',
   fbla2024: '4th of 32 teams, Coding & Programming, FBLA Canada 2024',
 };

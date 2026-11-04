@@ -1,0 +1,44 @@
+---
+// A small horizontal bar or range chart for one comparison beside a paragraph.
+// Each row is a bar from `from` to `to` on a shared axis; a plain bar starts at the axis minimum.
+// The values are also in the text next to it, so the chart is aria-hidden apart from its caption.
+interface Row { label: string; from?: number; to: number; text: string; strong?: boolean }
+interface Props { rows: Row[]; min: number; max: number; ticks: number[]; unit: string; caption: string }
+const { rows, min, max, ticks, unit, caption } = Astro.props;
+const pct = (v: number) => `${(((v - min) / (max - min)) * 100).toFixed(2)}%`;
+---
+<figure class="bars-fig">
+  <div class="b-rows" aria-hidden="true">
+    {rows.map((r) => (
+      <div class="b-row">
+        <span class="b-label small">{r.label}</span>
+        <span class="b-track">
+          <span class:list={['b-bar', { strong: r.strong }]} style={`left:${pct(r.from ?? min)};width:calc(${pct(r.to)} - ${pct(r.from ?? min)})`}>
+            <b class="num">{r.text}</b>
+          </span>
+        </span>
+      </div>
+    ))}
+    <div class="b-row">
+      <span></span>
+      <span class="b-axis small num">{ticks.map((t) => <span style={`left:${pct(t)}`}>{t}{t === ticks[ticks.length - 1] ? ` ${unit}` : ''}</span>)}</span>
+    </div>
+  </div>
+  <figcaption class="small">{caption}</figcaption>
+</figure>
+
+<style>
+  .bars-fig { margin: 0; }
+  .b-rows { display: grid; gap: 12px; }
+  .b-row { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: 12px; align-items: center; }
+  .b-label { color: var(--dim); }
+  .b-track { position: relative; height: 14px; margin-right: 4.5em; }
+  .b-bar { position: absolute; top: 0; bottom: 0; min-width: 2px; background: #3b4f8f; }
+  .b-bar.strong { background: var(--white); }
+  .b-bar b { position: absolute; left: calc(100% + 8px); top: 50%; transform: translateY(-50%); white-space: nowrap; font-weight: 400; font-size: 12.5px; color: var(--dim); }
+  .b-bar.strong b { color: var(--white); }
+  .b-axis { position: relative; display: block; height: 1.6em; margin-right: 4.5em; border-top: 1px solid var(--line); color: var(--dim); font-size: 12.5px; }
+  .b-axis span { position: absolute; top: 6px; transform: translateX(-50%); white-space: nowrap; }
+  .b-axis span:first-child { transform: none; }
+  figcaption { margin-top: var(--s4); color: var(--dim); }
+</style>

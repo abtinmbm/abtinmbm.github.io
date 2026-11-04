@@ -3,7 +3,6 @@
 //
 // Dates: first and last commit on GitHub, in UTC.
 // - School Partner Directory and CyberShield end dates skip a later README tidy-up (2026-10-16).
-// - Doppel ends at its last code commit (2026-10-04), not the "mark as finished" commit.
 // - Image Stitcher starts at the first commit of UWARG/autonomy-monorepo PR #215.
 // Checked with `gh` on 2026-11-04.
 
@@ -38,22 +37,12 @@ export const projects: Project[] = [
   {
     slug: 'cybershield',
     name: 'CyberShield',
-    line: 'A forum that placed 1st in coding at FBLC Canada',
+    line: 'A forum that placed 1st in coding at CNLC 2025',
     status: 'finished',
     start: '2025-02-28T23:08:57Z',
     end: '2025-03-02T23:59:00Z',
     repo: 'https://github.com/abtinmbm/cybershield',
     earlier: true,
-  },
-  {
-    slug: 'doppel',
-    name: 'Doppel.exe',
-    line: 'Checks who’s typing on my PC',
-    status: 'finished',
-    start: '2026-09-30T02:04:23Z',
-    end: '2026-10-04T02:40:31Z',
-    href: '/projects/doppel/',
-    repo: 'https://github.com/abtinmbm/doppel',
   },
   {
     slug: 'image-stitcher',

@@ -1,0 +1,79 @@
+---
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Base from '../layouts/Base.astro';
+import list from '../data/photos.json';
+
+const files = import.meta.glob<{ default: ImageMetadata }>('../assets/photography/*.webp', { eager: true });
+const photos = list.map((p) => ({ ...p, src: files[`../assets/photography/${p.file}`].default, kind: p.w / p.h > 2 ? 'pano' : p.w <= p.h ? 'tall' : 'wide' }));
+
+// The page reads like a photo book: panoramas run edge to edge, photos of the same shape
+// sit in pairs, and single photos take turns between the full measure and an offset.
+// Numbers are positions in photos.json, counting from 1. A group in breaks starts a new
+// subject or place, and gets more space above it.
+const groups = [[1], [2, 4], [3, 5], [6], [7, 8], [9], [10, 30], [11, 12], [13], [14, 47], [15], [16], [38, 40], [39, 41], [42, 45], [43, 44], [17, 22], [18], [19, 46], [20], [21, 25], [23, 24], [48, 49], [26, 27], [28, 29], [31], [32, 33], [34, 35], [36], [37]];
+const breaks = new Set([6, 38, 17, 31, 32, 37]);
+type Row = { kind: 'pano' | 'pair' | 'wide' | 'offset' | 'single-tall'; items: typeof photos; tall?: boolean; brk?: boolean };
+let flip = false;
+const rows: Row[] = groups.map((g) => {
+  const items = g.map((n) => photos[n - 1]);
+  const brk = breaks.has(g[0]);
+  if (items.length === 2) return { kind: 'pair', items, tall: items.every((p) => p.kind === 'tall'), brk };
+  const k = items[0].kind;
+  if (k === 'pano') return { kind: 'pano', items, brk };
+  if (k === 'tall') return { kind: 'single-tall', items, brk };
+  flip = !flip;
+  return { kind: flip ? 'wide' : 'offset', items, brk };
+});
+if (new Set(groups.flat()).size !== photos.length) throw new Error('photography: every photo must appear exactly once');
+const sizes = { pano: '100vw', pair: '(max-width: 759px) 92vw, 46vw', wide: '(max-width: 759px) 92vw, 80vw', offset: '(max-width: 759px) 92vw, 56vw', 'single-tall': '(max-width: 759px) 92vw, 34vw' };
+---
+<Base
+  title="Photography | Abtin Aryanpour"
+  description="Photos by Abtin Aryanpour, taken on a Canon EOS 90D: cities at night, school sports, fire performers, mountains and a few cats."
+>
+  <header class="ph-head wrap">
+    <h1 class="display">Photography</h1>
+    <p class="lead">I take photos on a Canon EOS 90D, for school and for fun.</p>
+  </header>
+
+  <div class="book">
+    {rows.map((r, k) => (
+      <div class:list={['row', r.kind, { wrap: r.kind !== 'pano', 'pair-tall': r.tall, break: r.brk }]}>
+        {r.items.map((p, j) => (
+          <Picture src={p.src} alt={p.alt} formats={['avif', 'webp']} fallbackFormat="webp"
+            widths={r.kind === 'pano' ? [900, 1600, 2800] : [480, 800, 1200, 1600]} sizes={sizes[r.kind]}
+            loading={k < 2 && j === 0 ? 'eager' : 'lazy'} fetchpriority={k < 2 && j === 0 ? 'high' : undefined} />
+        ))}
+      </div>
+    ))}
+  </div>
+
+</Base>
+
+<style>
+  .ph-head { padding-block: calc(var(--s9) + 40px) var(--s8); display: grid; gap: var(--s4); }
+  h1 { font-size: min(var(--t-title), 9.2vw); line-height: 0.95; letter-spacing: -0.01em; }
+  .lead { font-size: var(--t-lead); line-height: 1.4; max-width: 34em; }
+  .book { display: grid; gap: var(--s5); padding-bottom: var(--s10); }
+  .row.break { margin-top: var(--s10); }
+  .row :global(img) { display: block; width: 100%; height: auto; }
+  .row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); }
+  .row > :global(picture) { grid-column: 1 / 13; }
+  .pair > :global(picture:first-child) { grid-column: 1 / 7; }
+  .pair { align-items: start; }
+  .pair > :global(picture:last-child) { grid-column: 7 / 13; }
+  .pair-tall > :global(picture:first-child) { grid-column: 2 / 7; }
+  .pair-tall > :global(picture:last-child) { grid-column: 7 / 12; }
+  .wide > :global(picture) { grid-column: 1 / 11; }
+  .offset > :global(picture) { grid-column: 4 / 13; }
+  .single-tall > :global(picture) { grid-column: 4 / 8; }
+  .pano { display: block; }
+  @media (max-width: 759px) {
+    .ph-head { padding-top: var(--s7); }
+    .book { gap: var(--s4); }
+    .row.break { margin-top: var(--s8); }
+    .row { row-gap: var(--s5); }
+    .row > :global(picture), .pair > :global(picture:first-child), .pair > :global(picture:last-child), .pair-tall > :global(picture), .offset > :global(picture), .single-tall > :global(picture) { grid-column: 1 / 13; margin-top: 0; }
+  }
+</style>

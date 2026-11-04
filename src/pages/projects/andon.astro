@@ -1,12 +1,18 @@
 ---
+import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import Bars from '../../components/Bars.astro';
+import specNormal from '../../assets/andon/spec-normal.webp';
+import specFault from '../../assets/andon/spec-fault.webp';
 import AucChart from '../../components/AucChart.astro';
 import AndonReplay from '../../components/AndonReplay.astro';
 import ProjectTrail from '../../components/ProjectTrail.astro';
 import { andon } from '../../data/metrics';
 import { projects } from '../../data/projects';
+import '../../styles/project.css';
 
 const p = projects.find((x) => x.slug === 'andon')!;
+const num = (s: string) => Number(s.replace('%', ''));
 ---
 <Base
   title="Andon: hearing when a machine sounds wrong | Abtin Aryanpour"
@@ -15,7 +21,7 @@ const p = projects.find((x) => x.slug === 'andon')!;
 >
   <article class="proj">
     <header class="top">
-      <div class="top-sky"><ProjectTrail start={p.start} end={p.end} /></div>
+      <div class="top-sky"><ProjectTrail slug="andon" /></div>
       <div class="top-text wrap">
         <h1 class="display">Andon</h1>
         <p class="lead">A machine-sound anomaly detector that learns only from healthy recordings, and turns a green, yellow or red light when a machine starts to sound wrong.</p>
@@ -25,7 +31,7 @@ const p = projects.find((x) => x.slug === 'andon')!;
 
     <section class="replay-sec wrap" aria-label="Replay">
       <AndonReplay captionId="replay-cap">
-        <figcaption id="replay-cap" class="small">The real scores from one fan (machine id_06, model seed 0), replayed at 8× speed: about two minutes of normal running, then a fault. The yellow light partway through is a real warning that clears by itself without stopping the line. This machine was picked to show how the light works. Typical rates are below.</figcaption>
+        <figcaption id="replay-cap" class="small">The real scores from one fan (machine id_06, development test clips, model seed 0), replayed at 8× speed: about two minutes of normal running, then a fault. The yellow light partway through is a real warning that clears by itself without stopping the line. This machine was picked to show how the light works. Typical rates are below.</figcaption>
       </AndonReplay>
     </section>
 
@@ -40,10 +46,10 @@ const p = projects.find((x) => x.slug === 'andon')!;
       <div class="chart"><AucChart /></div>
       <div class="notes">
         <p><b class="num">{andon.meanAuc}</b> mean AUC on the held-out DCASE 2020 evaluation set, against {andon.baselineAuc} for the reference autoencoder. AUC is the chance a random faulty clip scores as more abnormal than a random normal one.</p>
-        <p>Before changing anything I reproduced that reference, to within <b class="num">{andon.reproductionGap}</b> AUC points of the published result on all six machine types.</p>
-        <p>Streamed as a live light, it caught <b class="num">{andon.faultsCaught}</b> of 30-second faults, on average {andon.secondsToRed} after they started, with {andon.falseAlarmsPerHour} false alarms per hour.</p>
+        <p>Before changing anything I reproduced the published reference on the development set, to within <b class="num">{andon.reproductionGap}</b> AUC points on all six machine types.</p>
+        <p>Played back as a continuous stream of test audio, the light caught <b class="num">{andon.faultsCaught}</b> of 30-second faults, on average {andon.secondsToRed} after they started, with {andon.falseAlarmsPerHour} false alarms per hour.</p>
         <p>It has {andon.weights} weights. As int8 it’s <b class="num">{andon.int8Size}</b>, down from {andon.floatSize}, and still scores {andon.int8Auc} AUC.</p>
-        <p>The checkpoints are public, and one command re-checks every held-out result from a fresh clone.</p>
+        <p>The checkpoints are public, and two commands re-check the held-out CNN AUC results from a fresh clone.</p>
       </div>
     </section>
 
@@ -63,10 +69,19 @@ const p = projects.find((x) => x.slug === 'andon')!;
       <div class="problem">
         <h3>There were no faults to train on</h3>
         <p>Instead of learning what a fault sounds like, the CNN learns to name which machine it hears. Low confidence in the right name becomes the anomaly score. Valve went from {andon.valveAe} AUC with the reference to {andon.valveCnn}.</p>
+        <figure class="ev specs">
+          <div class="spec"><Picture src={specNormal} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a normal clip: steady bright bands in the low frequencies." /><span class="small">Normal</span></div>
+          <div class="spec"><Picture src={specFault} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a faulty clip from the same fan: the bands look almost the same." /><span class="small">Faulty</span></div>
+          <figcaption class="small">Two 10&nbsp;s clips from the replay fan (id_06), as the model hears them: 128 frequency bands, low pitches at the bottom. The fault is hard to see, and training only ever hears the first kind.</figcaption>
+        </figure>
       </div>
       <div class="problem">
         <h3>Overconfidence hurt the score</h3>
-        <p>Without mixup, the ToyConveyor classifier hit 100% training accuracy, leaving no room for a fault to lower its confidence. Blending pairs of training examples (mixup) raised mean development AUC from {andon.devAucNoMixup} to {andon.devAucMixup}.</p>
+        <p>Without mixup, the ToyConveyor classifier hit 100% training accuracy, which likely left little room for a fault to lower its confidence. Blending pairs of training examples (mixup) raised mean development AUC from {andon.devAucNoMixup} to {andon.devAucMixup}.</p>
+        <div class="ev">
+          <Bars min={50} max={100} ticks={[50, 75, 100]} unit="%" caption="Mean AUC on the development set. 50% is guessing."
+            rows={[{ label: 'No mixup', to: num(andon.devAucNoMixup), text: andon.devAucNoMixup }, { label: 'Mixup', to: num(andon.devAucMixup), text: andon.devAucMixup, strong: true }]} />
+        </div>
       </div>
       <div class="problem">
         <h3>PyTorch doesn’t say how it rounds</h3>
@@ -75,7 +90,7 @@ const p = projects.find((x) => x.slug === 'andon')!;
 
       <div class="problem">
         <h3>Where it still falls short</h3>
-        <p>AUC isn’t real-world performance. {andon.meanAuc} AUC still caught only {andon.faultsCaught} of faults on a live stream, and {andon.valveCaught} for valve. {andon.falseAlarmsPerHour} false alarms per hour is too many for a real line. A much simpler Gaussian mixture beats the CNN on {andon.gmmWins} machine types. And the compute figure for the Pico ({andon.estComputeMs} per 32 ms of audio) is an estimate until it runs on the device.</p>
+        <p>AUC isn’t real-world performance. {andon.meanAuc} AUC still caught only {andon.faultsCaught} of faults on a continuous stream of test audio, and {andon.valveCaught} for valve. {andon.falseAlarmsPerHour} false alarms per hour is too many for a real line. A much simpler Gaussian mixture beats the CNN on {andon.gmmWins} machine types. And the compute figure for the Pico ({andon.estComputeMs} per 32 ms of audio) is an estimate until it runs on the device.</p>
       </div>
     </section>
 
@@ -93,59 +108,3 @@ const p = projects.find((x) => x.slug === 'andon')!;
   </article>
 </Base>
 
-<style>
-  .proj { padding-bottom: var(--s9); }
-
-  .top { position: relative; min-height: min(78svh, 760px); display: flex; align-items: flex-end; overflow: hidden;
-    background: radial-gradient(110% 80% at 20% 130%, var(--glow), var(--deep) 45%, var(--black) 85%); }
-  .top-sky { position: absolute; inset: 0; }
-  .top::after { content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(to top, rgb(1 3 10 / 0.94) 0%, rgb(1 3 10 / 0.85) 34%, transparent 62%); }
-  .top-text { position: relative; z-index: 1; width: 100%; padding-block: var(--s10) var(--s8); display: grid; gap: var(--s5); }
-  .top h1 { font-size: var(--t-title); line-height: 0.95; letter-spacing: -0.01em; }
-  .top .lead { max-width: 34em; }
-  .top .status { max-width: 46em; color: var(--dim); }
-  .top .status a { color: var(--white); margin-left: 0.3em; }
-  .lead { font-size: var(--t-lead); line-height: 1.4; }
-
-  .replay-sec { padding-top: var(--s8); }
-
-  .why { padding-block: var(--s10) var(--s9); }
-  .statement { font-size: clamp(26px, 3.3vw, 48px); line-height: 1.15; letter-spacing: -0.01em; max-width: 26em; text-wrap: balance; }
-  .why-more { margin-top: var(--s6); max-width: 36em; color: var(--dim); font-size: var(--t-lead); line-height: 1.4; }
-
-  .proj h2 { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; text-wrap: balance; }
-  .results { padding-block: var(--s8) var(--s9); border-top: 1px solid var(--line); row-gap: var(--s7); }
-  .results h2 { grid-column: 1 / 13; max-width: 18em; padding-top: var(--s5); }
-  .chart { grid-column: 1 / 7; }
-  .notes { grid-column: 7 / 13; display: grid; gap: var(--s5); align-content: start; max-width: 34em; }
-  .notes b { font-weight: 500; }
-
-  .how { padding-block: var(--s10) var(--s9); row-gap: var(--s6); }
-  .how h2 { grid-column: 1 / 7; }
-  .how ol { grid-column: 7 / 13; list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s5); counter-reset: step; max-width: 36em; }
-  .how li { counter-increment: step; display: grid; grid-template-columns: 2.2em 1fr; }
-  .how li::before { content: counter(step); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .how b { font-weight: 500; }
-
-  .story { padding-block: var(--s9) var(--s10); }
-  .problem { max-width: 36em; }
-  .problem + .problem { margin-top: var(--s7); }
-  .problem h3 { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; margin-bottom: var(--s3); }
-
-  .next { padding-block: var(--s9); row-gap: var(--s6); }
-  .next h2 { grid-column: 1 / 7; max-width: 20em; }
-  .next-text { grid-column: 7 / 13; display: grid; gap: var(--s4); max-width: 36em; }
-
-  .onward { padding-block: var(--s9) var(--s4); }
-  .onward a { font-size: var(--t-h3); line-height: 1.2; text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
-
-  @media (max-width: 899px) {
-    .chart, .notes, .how h2, .how ol, .next h2, .next-text { grid-column: 1 / 13; }
-  }
-  @media (max-width: 599px) {
-    .top { min-height: 0; }
-    .top-sky { bottom: auto; height: 300px; }
-    .top-text { padding-block: 220px var(--s7); }
-  }
-</style>

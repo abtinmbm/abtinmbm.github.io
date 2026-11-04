@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const pages = ['/', '/projects/andon/'];
+const pages = ['/', '/projects/andon/', '/projects/image-stitcher/', '/about/', '/resume/', '/photography/', '/404'];
 const widths = [320, 390, 768, 1280, 1920];
 
 for (const path of pages) {
@@ -46,16 +46,16 @@ for (const path of pages) {
 test('star trails draw one labelled trail per recent project', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  await expect(page.locator('.sky-labels a')).toHaveCount(5);
+  await expect(page.locator('.sky-labels a')).toHaveCount(4);
   await expect(page.locator('.sky-labels a', { hasText: 'Andon' })).toHaveAttribute('href', '/projects/andon/');
-  await expect(page.locator('.t-proj')).toHaveCount(5);
+  await expect(page.locator('.t-proj')).toHaveCount(4);
 });
 
 test('star trails still show a sky without JavaScript', async ({ browser }) => {
   const ctx = await browser.newContext({ javaScriptEnabled: false });
   const page = await ctx.newPage();
   await page.goto('/');
-  await expect(page.locator('.t-proj')).toHaveCount(5);
+  await expect(page.locator('.t-proj')).toHaveCount(4);
   await expect(page.locator('#work a[href="/projects/andon/"]')).toBeVisible();
   await ctx.close();
 });
@@ -73,4 +73,46 @@ test('the Andon replay plays when motion is allowed and can be paused', async ({
   const paused = await now.textContent();
   await page.waitForTimeout(500);
   expect(await now.textContent()).toBe(paused);
+});
+
+test('the stitcher map grows with the slider and the keyboard', async ({ page }) => {
+  await page.goto('/projects/image-stitcher/');
+  const range = page.locator('#grow-range');
+  const on = page.locator('.grow-frame.on');
+  await expect(on).toHaveAttribute('data-n', '20');
+  await range.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(on).toHaveAttribute('data-n', '40');
+  await expect(range).toHaveAttribute('aria-valuetext', '40 photos');
+  await page.keyboard.press('End');
+  await expect(on).toHaveAttribute('data-n', '91');
+  await expect(page.locator('.grow-frame[aria-hidden="true"]')).toHaveCount(4);
+  await page.locator('.grow-ticks button', { hasText: '60' }).click();
+  await expect(on).toHaveAttribute('data-n', '60');
+});
+
+test('the stitcher page shows the finished map without JavaScript', async ({ browser }) => {
+  const ctx = await browser.newContext({ javaScriptEnabled: false });
+  const page = await ctx.newPage();
+  await page.goto('/projects/image-stitcher/');
+  await expect(page.locator('.grow-frame.on')).toHaveAttribute('data-n', '91');
+  await expect(page.locator('.grow-ctl')).toBeHidden();
+  await ctx.close();
+});
+
+test('every page has its own sharing image, and the sitemap lists the pages', async ({ page, request }) => {
+  const seen = new Set<string>();
+  for (const path of pages.filter((p) => p !== '/404')) {
+    await page.goto(path);
+    const img = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect(img).toBeTruthy();
+    const res = await request.get(new URL(img!).pathname);
+    expect(res.status(), img!).toBe(200);
+    seen.add(img!);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://abtinmbm.github.io${path}`);
+  }
+  expect(seen.size).toBe(pages.length - 1);
+  const map = await (await request.get('/sitemap.xml')).text();
+  for (const path of pages.filter((p) => p !== '/404')) expect(map).toContain(`https://abtinmbm.github.io${path}<`);
+  expect((await request.get('/robots.txt')).status()).toBe(200);
 });

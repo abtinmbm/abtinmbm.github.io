@@ -9,7 +9,7 @@ const initial = svgMarkup(layout(projects, 1440, 900, new Date()));
 ---
 <div class="sky-field" data-trails={JSON.stringify(projects)}>
   <svg class="sky-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" set:html={initial} />
-  <ul class="sky-labels" aria-label="Projects on the sky"></ul>
+  <ul class="sky-labels" aria-label="Projects on the sky" hidden></ul>
 </div>
 
 <style is:global>
@@ -25,7 +25,7 @@ const initial = svgMarkup(layout(projects, 1440, 900, new Date()));
   .sky-labels li { position: absolute; z-index: 2; transform: translate(16px, -50%); white-space: nowrap;
     text-shadow: 0 0 2px var(--black), 0 0 8px var(--black), 0 0 18px var(--black); }
   /* a soft dark patch behind each label, so trails never strike through its text */
-  .sky-labels li::before { content: ""; position: absolute; inset: -4px -12px; z-index: -1; background: var(--black); opacity: 0.72; filter: blur(9px); border-radius: 12px; }
+  .sky-labels li::before { content: ""; position: absolute; inset: -4px -12px; z-index: -1; background: var(--black); opacity: 0.9; filter: blur(9px); border-radius: 12px; }
   .sky-labels li.left { transform: translate(calc(-100% - 16px), -50%); text-align: right; }
   .sky-labels a { display: block; text-decoration: none; padding: 4px 0; }
   .sky-labels .n { font-family: var(--display); font-weight: 500; font-size: 15px; letter-spacing: 0.005em;
@@ -49,6 +49,7 @@ const initial = svgMarkup(layout(projects, 1440, 900, new Date()));
     const projects: TrailProject[] = JSON.parse(field.dataset.trails!);
     const svg = field.querySelector('svg')!;
     const list = field.querySelector('ul')!;
+    list.hidden = false;
 
     const draw = () => {
       const W = field.clientWidth, H = field.clientHeight;

@@ -1,0 +1,213 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import ProjectTrail from '../../components/ProjectTrail.astro';
+import Bars from '../../components/Bars.astro';
+import { stitcher } from '../../data/metrics';
+import { projects } from '../../data/projects';
+import '../../styles/project.css';
+import s20 from '../../assets/stitcher/stages/stage-20.webp';
+import s40 from '../../assets/stitcher/stages/stage-40.webp';
+import s60 from '../../assets/stitcher/stages/stage-60.webp';
+import s80 from '../../assets/stitcher/stages/stage-80.webp';
+import s91 from '../../assets/stitcher/stages/stage-91.webp';
+
+const p = projects.find((x) => x.slug === 'image-stitcher')!;
+const stages = [[20, s20], [40, s40], [60, s60], [80, s80], [91, s91]] as const;
+const last = stages.length - 1;
+// 600 candidate matches between rows, 30 by 20; the best simulated run kept 13.
+const kept = 13;
+// Which dots are bright is arbitrary (a fixed seed), so they scatter instead of forming a pattern.
+let seed = 11;
+const lit = new Set<number>();
+while (lit.size < kept) lit.add((seed = (seed * 16807) % 2147483647) % 600);
+const dots = Array.from({ length: 600 }, (_, i) => ({ x: (i % 30) * 10 + 5, y: Math.floor(i / 30) * 10 + 5, on: lit.has(i) }));
+// Without JavaScript the finished map shows. With it, the slider opens on the first stage
+// (the section is below the first screen, so the switch is never seen), and visitors grow it.
+const first = 0;
+---
+<Base
+  title="Image Stitcher: one map from several drones | Abtin Aryanpour"
+  description="A groundside stitcher for the Waterloo Aerial Robotics Group that merges out-of-order, GPS-tagged photos from several drones into one georeferenced map. Tested in simulation; the pull request is in review."
+  current="work"
+>
+  <article class="proj">
+    <header class="top">
+      <div class="top-sky"><ProjectTrail slug="image-stitcher" /></div>
+      <div class="top-text wrap">
+        <h1 class="display">Image Stitcher</h1>
+        <p class="lead">Merges out-of-order, GPS-tagged photos from several drones into one top-down map that sits in the right place on the Earth.</p>
+        <p class="status">In review. Built on the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026. The pull request is open, with changes requested. <a href="https://github.com/UWARG/autonomy-monorepo/pull/215">Pull request #215 on GitHub</a></p>
+      </div>
+    </header>
+
+    <section class="stages-sec wrap" aria-label="The map as it grows">
+      <figure class="stages grow" data-grow>
+        <div class="grow-stack">
+          {stages.map(([n, img], k) => (
+            <div class:list={['grow-frame', { on: k === last }]} data-n={n} aria-hidden={k === last ? undefined : 'true'}>
+              <Picture src={img} fallbackFormat="webp" formats={['avif', 'webp']} widths={[700, 1100, 1664]} sizes="(max-width: 759px) 92vw, 880px"
+                loading={k === last ? 'eager' : 'lazy'} alt={k === last ? 'The finished map after all 91 photos' : `The map after ${n} photos`} />
+            </div>
+          ))}
+        </div>
+        <div class="grow-ctl" hidden>
+          <output class="grow-out num" for="grow-range" aria-hidden="true"><b>20</b> photos</output>
+          <div class="grow-track">
+            <input id="grow-range" type="range" min="0" max={last} step="1" value={first}
+              aria-label="Photos stitched so far" aria-valuetext="20 photos" />
+            <ol class="grow-ticks small num" aria-hidden="true">
+              {stages.map(([n], k) => <li style={`--k:${k}`}><button type="button" tabindex="-1" data-k={k}>{n}</button></li>)}
+            </ol>
+          </div>
+        </div>
+        <figcaption class="small">One simulated mission, saved after 20, 40, 60, 80 and all 91 photos, each drawn in the same GPS frame. The stepped outline is the edge of the stitched photos, and only the painted ground markers are kept inside it.</figcaption>
+      </figure>
+    </section>
+
+    <section class="why wrap" aria-labelledby="why-h">
+      <h2 id="why-h" class="visually-hidden">Why it exists</h2>
+      <p class="statement">Drones fly back and forth over a field taking photos. The photos reach the ground laptop out of order, from several drones, with GPS that’s metres off and no compass heading.</p>
+      <p class="why-more">GPS finds which photos should overlap, image matching lines them up, and all the GPS readings together place the finished map on the Earth.</p>
+    </section>
+
+    <section class="results wrap grid" aria-labelledby="results-h">
+      <h2 id="results-h">One connected map in {stitcher.missions} simulated missions</h2>
+      <div class="chart">
+        <table class="facts-table">
+          <caption class="small">All simulated: 10 missions of 91 photos from 3 drones, arriving shuffled, with the heading unknown.</caption>
+          <tbody>
+            <tr><th scope="row">One connected map</th><td>{stitcher.missions} missions, at 1 m and 3 m of GPS error</td></tr>
+            <tr><th scope="row">Photo-to-photo alignment</th><td><span class="num">{stitcher.alignment}</span>, at most about 1.5 pixels</td></tr>
+            <tr><th scope="row">Least-squares refinement</th><td>Misalignment of <span class="num">{stitcher.refineBefore}</span> without it, <span class="num">{stitcher.refineAfter}</span> with it</td></tr>
+            <tr><th scope="row">Map position against the truth</th><td><span class="num">{stitcher.mapError}</span></td></tr>
+            <tr><th scope="row">Speed</th><td><span class="num">{stitcher.speed}</span> per photo on a laptop CPU</td></tr>
+            <tr><th scope="row">Tests</th><td>{stitcher.tests} stitcher tests, plus a ground-truth mission simulator</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="notes">
+        <p>The simulator knows where every photo really was, so each run can be scored against the truth instead of by eye.</p>
+        <p>Alignment is how far apart the same ground point lands in two neighbouring photos. Map position is how far the whole map sits from where it should be on the Earth.</p>
+      </div>
+    </section>
+
+    <section class="how wrap grid" aria-labelledby="how-h">
+      <h2 id="how-h">From shuffled photos to one map</h2>
+      <ol>
+        <li><p><b>Check.</b> Each photo is checked for blur, exposure and tilt. The ones that pass are undistorted for the lens.</p></li>
+        <li><p><b>Find neighbours.</b> GPS says which photos should overlap, even when they arrive out of order from different drones.</p></li>
+        <li><p><b>Match.</b> XFeat learned features and RANSAC line each pair up and throw out wrong matches.</p></li>
+        <li><p><b>Recover heading.</b> There’s no compass, so the matches and the noisy GPS together work out which way each photo faces.</p></li>
+        <li><p><b>Refine.</b> A least-squares solver, in the style of bundle adjustment, adjusts every photo at once so the whole map agrees.</p></li>
+        <li><p><b>Place.</b> All the GPS readings together put the finished map in the right place on the Earth.</p></li>
+      </ol>
+    </section>
+
+    <section class="story wrap" aria-labelledby="hard-h">
+      <h2 id="hard-h" class="visually-hidden">What was hard</h2>
+      <div class="problem">
+        <h3>Rows wouldn’t connect</h3>
+        <p>The drones turn 180 degrees at the end of each row, and XFeat isn’t rotation invariant. In simulated missions, of 600 candidate matches between rows, only {stitcher.rowMatches.replace(' of 600', '')} survived RANSAC. Extracting features at four quarter turns fixed it.</p>
+        <figure class="ev">
+          <svg class="dots" viewBox="0 0 300 200" role="img" aria-label={`600 dots for the candidate matches, ${kept} of them bright`}>
+            {dots.map((d) => <circle cx={d.x} cy={d.y} r={d.on ? 3.2 : 1.6} class:list={{ on: d.on }} />)}
+          </svg>
+          <figcaption class="small">Before the fix: at best 13 of 600 candidate matches between rows survived, in simulated missions.</figcaption>
+        </figure>
+      </div>
+      <div class="problem">
+        <h3>Refinement made the map worse</h3>
+        <p>The first version gave simulated errors of 20 to 30 m, because a huge penalty weight on the pinned photo made the solver unstable. Removing that photo’s unknowns from the system fixed it.</p>
+        <div class="ev">
+          <Bars min={0} max={45} ticks={[0, 15, 30, 45]} unit="cm" caption="After the fix: misalignment between neighbouring photos, across simulated missions."
+            rows={[{ label: 'Without it', from: 13, to: 41, text: stitcher.refineBefore }, { label: 'With it', from: 4, to: 7, text: stitcher.refineAfter, strong: true }]} />
+        </div>
+      </div>
+      <div class="problem">
+        <h3>One simulated run in 10 split the map</h3>
+        <p>Small clusters with noisy GPS rejected good matches. Now a cluster’s GPS check only counts once the cluster spans four times the GPS error, and a repeating-ground test proves wrong matches stay blocked.</p>
+      </div>
+      <div class="problem">
+        <h3>The blur check rejected good photos</h3>
+        <p>Sharp and blurred scores overlapped, so no limit could work. The new score compares a photo with itself at half resolution, in each direction. Code review then showed sensor noise could fool it, so a 3×3 median filter runs first. Heavy noise can still get a blurry photo through, and the limits are tuned on synthetic photos.</p>
+      </div>
+      <div class="problem">
+        <h3>Where it still falls short</h3>
+        <p>Every result is from simulation. There are no real flight photos yet. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms. The pull request hasn’t merged.</p>
+      </div>
+    </section>
+
+    <section class="next wrap grid" aria-labelledby="next-h">
+      <h2 id="next-h">Where it stands</h2>
+      <div class="next-text">
+        <p>The stitcher is a pull request to the team’s autonomy code, reviewed by the autonomy subteam. The second round of review changes was pushed on November 3, 2026.</p>
+        <p class="small dim">Built with Python, PyTorch, OpenCV, NumPy and pytest.</p>
+      </div>
+    </section>
+
+    <nav class="onward wrap" aria-label="Next project">
+      <a class="display" href="/projects/andon/">Next project: Andon</a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .stages-sec { padding-top: var(--s8); }
+  .dots { display: block; width: 100%; height: auto; }
+  .dots circle { fill: var(--dim); opacity: 0.35; }
+  .dots circle.on { fill: var(--white); opacity: 1; }
+  .stages { margin: 0; max-width: 880px; }
+  .grow-stack { display: grid; }
+  .grow-frame { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0s 0.25s; }
+  .grow-frame.on { opacity: 1; visibility: visible; transition: opacity 0.25s ease; }
+  .stages :global(img) { width: 100%; height: auto; display: block; }
+  .grow-ctl { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); align-items: start; gap: var(--s5); margin-top: var(--s5); }
+  .grow-ctl[hidden] { display: none; }
+  .grow-out { font-size: var(--t-h3); line-height: 1; color: var(--dim); }
+  .grow-out b { font-weight: 500; color: var(--white); }
+  .grow-track { display: grid; gap: var(--s2); padding-top: 4px; }
+  #grow-range { width: 100%; margin: 0; height: 24px; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
+  #grow-range::-webkit-slider-runnable-track { height: 2px; background: var(--line); }
+  #grow-range::-moz-range-track { height: 2px; background: var(--line); }
+  #grow-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px; border-radius: 50%; background: var(--white); border: 0; box-shadow: 0 0 0 6px rgb(159 180 255 / 0.18); }
+  #grow-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--white); border: 0; box-shadow: 0 0 0 6px rgb(159 180 255 / 0.18); }
+  #grow-range:focus-visible { outline: none; }
+  #grow-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--black), 0 0 0 5px var(--white); }
+  #grow-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--black), 0 0 0 5px var(--white); }
+  /* Each label sits under the thumb position for its step (the thumb is 18px wide). */
+  .grow-ticks { list-style: none; margin: 0; padding: 0; position: relative; height: 1.8em; }
+  .grow-ticks li { position: absolute; left: calc(9px + var(--k) * (100% - 18px) / 4); transform: translateX(-50%); }
+  .grow-ticks button { background: none; border: 0; padding: 4px 0; color: var(--dim); font: inherit; cursor: pointer; }
+  .grow-ticks button[aria-current="true"] { color: var(--white); }
+  .stages figcaption { margin-top: var(--s5); color: var(--dim); max-width: 64ch; }
+  @media (max-width: 599px) {
+    .grow-ctl { grid-template-columns: 1fr; gap: var(--s3); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .grow-frame, .grow-frame.on { transition: none; }
+  }
+</style>
+
+<script>
+  // The map growth slider. Without JavaScript the finished map shows on its own.
+  for (const fig of document.querySelectorAll<HTMLElement>('[data-grow]')) {
+    const frames = [...fig.querySelectorAll<HTMLElement>('.grow-frame')];
+    const range = fig.querySelector<HTMLInputElement>('input[type=range]')!;
+    const out = fig.querySelector('.grow-out b')!;
+    const ticks = [...fig.querySelectorAll<HTMLButtonElement>('.grow-ticks button')];
+    // Load the earlier maps now, so moving the slider never shows a blank frame.
+    for (const img of fig.querySelectorAll('img')) img.loading = 'eager';
+    const show = (k: number) => {
+      frames.forEach((f, i) => { f.classList.toggle('on', i === k); if (i === k) f.removeAttribute('aria-hidden'); else f.setAttribute('aria-hidden', 'true'); });
+      ticks.forEach((t, i) => t.setAttribute('aria-current', String(i === k)));
+      const n = frames[k].dataset.n!;
+      out.textContent = n;
+      range.setAttribute('aria-valuetext', `${n} photos`);
+    };
+    range.addEventListener('input', () => show(Number(range.value)));
+    ticks.forEach((t) => t.addEventListener('click', () => { range.value = t.dataset.k!; show(Number(t.dataset.k)); range.focus(); }));
+    fig.querySelector<HTMLElement>('.grow-ctl')!.hidden = false;
+    show(Number(range.value));
+  }
+</script>

@@ -39,7 +39,10 @@ function rng(seed: number) {
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 }
 
-export function layout(projects: TrailProject[], W: number, H: number, now: Date): Layout {
+/** Where trail heads may sit, as fractions of the height. The homepage uses the defaults. */
+export interface LayoutOptions { yTop?: number; yBottom?: number; }
+
+export function layout(projects: TrailProject[], W: number, H: number, now: Date, opts: LayoutOptions = {}): Layout {
   const mobile = W < 760;
   const cx = W * (mobile ? 0.82 : 0.74);
   const cy = H * (mobile ? 0.08 : 0.16);
@@ -58,9 +61,9 @@ export function layout(projects: TrailProject[], W: number, H: number, now: Date
   const n = projects.length;
   const rMin = S * (mobile ? 0.3 : 0.3);
   const rMax = S * (mobile ? 0.95 : 1.0);
-  const yTop = H * (mobile ? 0.2 : 0.2);
-  const yBottom = H * (mobile ? 0.7 : 0.48);
-  const labelled = mobile ? 4 : 6;
+  const yTop = H * (opts.yTop ?? 0.2);
+  const yBottom = H * (opts.yBottom ?? (mobile ? 0.7 : 0.48));
+  const labelled = mobile ? 3 : 6;
 
   const trails: ProjectTrail[] = projects.map((p, i) => {
     const t = n === 1 ? 0.5 : i / (n - 1);
@@ -105,4 +108,27 @@ export function svgMarkup(L: Layout): string {
     })
     .join('');
   return `<defs><radialGradient id="t-halo"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#9fb4ff" stop-opacity="0"/></radialGradient></defs>${bg}${fg}`;
+}
+
+/** Heads on project pages sit higher than on the homepage, clear of the title. */
+export const PAGE_SKY: LayoutOptions = { yTop: 0.1, yBottom: 0.28 };
+
+/** The sky behind a project page: every trail faint, the page's own trail bright.
+ *  With cur = -1 (the 404) only the background exposure is drawn. */
+export function pageSkyMarkup(L: Layout, cur: number): string {
+  const f = (v: number) => v.toFixed(1);
+  const bg = L.background
+    .map((b) => `<path class="t-bg" d="${arcPath(L.cx, L.cy, b)}" stroke-width="${b.w.toFixed(2)}" stroke-opacity="${(b.o * 0.8).toFixed(2)}"/>`)
+    .join('');
+  if (cur < 0) return bg;
+  const fg = L.trails
+    .map((t) => {
+      const on = t.i === cur;
+      const head = !on ? ''
+        : (t.live ? `<circle class="pt-halo" cx="${f(t.head.x)}" cy="${f(t.head.y)}" r="18"/>` : '')
+          + `<circle class="pt-head${t.live ? ' live' : ''}" cx="${f(t.head.x)}" cy="${f(t.head.y)}" r="${t.live ? 4 : 2.8}"/>`;
+      return `<path class="pt-line${on ? ' on' : ''}" d="${arcPath(L.cx, L.cy, t)}"/>${head}`;
+    })
+    .join('');
+  return `<defs><radialGradient id="pt-halo-g"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#9fb4ff" stop-opacity="0"/></radialGradient></defs>${bg}${fg}`;
 }

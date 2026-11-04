@@ -1,0 +1,124 @@
+---
+import Base from '../layouts/Base.astro';
+const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
+---
+<Base
+  title="Resume | Abtin Aryanpour"
+  description="The resume of Abtin Aryanpour, first-year Computer Engineering at the University of Waterloo: projects, experience, skills and awards, with a PDF to download."
+  current="resume"
+>
+  <article class="cv wrap">
+    <header class="cv-head">
+      <h1 class="display">Resume</h1>
+      <p class="contact"><a href="mailto:aaryanpo@uwaterloo.ca">aaryanpo@uwaterloo.ca</a> <a href="https://www.linkedin.com/in/abtin-aryanpour">linkedin.com/in/abtin-aryanpour</a> <a href="https://github.com/abtinmbm">github.com/abtinmbm</a></p>
+      <p class="get"><a href={pdf} download>Download the PDF</a> <span class="small dim">(one page, 119&nbsp;KB)</span></p>
+    </header>
+
+    <section aria-labelledby="edu">
+      <h2 id="edu">Education</h2>
+      <div class="entry">
+        <h3>University of Waterloo</h3>
+        <p class="meta">Waterloo, ON. Candidate for BASc in Computer Engineering, Co-op Program. Expected April 2031.</p>
+        <p>Coursework: Fundamentals of Programming (C++), Linear Algebra, Calculus, Mechanics, Engineering Design</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="skills">
+      <h2 id="skills">Technical skills</h2>
+      <dl class="skills">
+        <div><dt>Languages</dt><dd>Python, C/C++, Java, JavaScript, SQL, HTML/CSS</dd></div>
+        <div><dt>Frameworks and libraries</dt><dd>PyTorch, NumPy, OpenCV, scikit-learn, Django, Streamlit, jQuery</dd></div>
+        <div><dt>Tools and platforms</dt><dd>Git, GitHub Actions (CI), pytest, uv, CMake, SQLite, AWS (EC2, CloudFront)</dd></div>
+      </dl>
+    </section>
+
+    <section aria-labelledby="projects">
+      <h2 id="projects">Projects</h2>
+      <div class="entry">
+        <h3><a href="/projects/andon/">Andon: machine-sound anomaly detection</a></h3>
+        <p class="meta">Python, PyTorch, C, Pico 2. October 2026 to now.</p>
+        <ul>
+          <li>Built a machine-sound anomaly detector trained only on healthy audio: a 98k-weight CNN reached 92.13% mean AUC on the held-out DCASE 2020 evaluation set, against 79.70% for the reference autoencoder (3 seeds).</li>
+          <li>Reproduced the published DCASE baseline in PyTorch within 0.88 AUC points on all 6 machine types, and released checkpoints so two commands re-check the held-out CNN results from a fresh clone.</li>
+          <li>Turned scores into an andon light with SPC control limits, hysteresis and a Streamlit dashboard. On the held-out evaluation clips it caught 65.57% of 30&nbsp;s faults, on average 10.57&nbsp;s after onset, at 5.53 false alarms per hour.</li>
+          <li>Quantized the CNN to int8 for a Cortex-M33 with a custom fixed-point reference: 98.7&nbsp;KB (from 383.0&nbsp;KB) at 92.08% held-out AUC, exporting C headers and test vectors in CI. Now porting to a Raspberry Pi Pico 2.</li>
+        </ul>
+      </div>
+      <div class="entry">
+        <h3><a href="/projects/image-stitcher/">Image Stitcher, Waterloo Aerial Robotics Group</a></h3>
+        <p class="meta">Python, PyTorch, OpenCV. Pull request #215. October 2026 to now.</p>
+        <ul>
+          <li>Developed a groundside orthomosaic stitcher on the autonomy subteam, merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map using XFeat learned features and RANSAC.</li>
+          <li>Fused images with noisy GPS to recover heading, aligning photos within 6.9&nbsp;cm at 3&nbsp;m of simulated GPS error.</li>
+          <li>Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13–41&nbsp;cm to 4–7&nbsp;cm.</li>
+          <li>Handled 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated 91-photo missions.</li>
+          <li>Added lens undistortion and blur, exposure and tilt checks, and built a ground-truth mission simulator and 80 tests.</li>
+        </ul>
+      </div>
+      <div class="entry">
+        <h3><a href="https://github.com/abtinmbm/cybershield">CyberShield: full-stack discussion forum</a></h3>
+        <p class="meta">Python, Django, JavaScript, Tailwind CSS. March 2025.</p>
+        <ul>
+          <li>Sole developer of a responsive forum where users post, comment and vote, with sorting, topic filtering and fuzzy search (Fuse.js), built on Django, jQuery (AJAX) and SQLite.</li>
+          <li>Secured accounts with Django authentication, CSRF protection and reCAPTCHA on login and signup, and added rich-text posts (CKEditor) and profile picture uploads.</li>
+          <li>Deployed live behind AWS CloudFront with a seeded demo dataset. Won 1st place in Coding &amp; Programming at the Canadian National Leadership Conference 2025 (32 teams).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section aria-labelledby="exp">
+      <h2 id="exp">Experience</h2>
+      <div class="entry">
+        <h3>Treasurer</h3>
+        <p class="meta">Bayview Secondary School, Richmond Hill, ON. September 2025 to June 2026.</p>
+        <ul>
+          <li>Managed a $21,000 student budget across 42 clubs serving 2,000 students.</li>
+          <li>Reviewed and approved each club’s budget, calculating allocations and negotiating changes in meetings with club presidents and school administrators.</li>
+        </ul>
+      </div>
+      <div class="entry">
+        <h3>Homework Helper and Assistant Teacher</h3>
+        <p class="meta">Spirit of Math Schools Inc., Richmond Hill, ON. September 2022 to July 2025.</p>
+        <ul>
+          <li>Homework Helper (2024–2025): ran a drop-in homework help classroom as one of two staff, triaging questions from students ranging from kindergarten to Grade 11 and diagnosing where each one was stuck.</li>
+          <li>Assistant Teacher (2022–2024): supported classes of 16 students, teaching lessons and contest-style algebra.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section aria-labelledby="awards">
+      <h2 id="awards">Awards</h2>
+      <ul class="plain">
+        <li>1st place (2025, CNLC) and 4th place (2024, FBLA), Coding &amp; Programming, national competitions</li>
+        <li>Euclid (86) and Hypatia (33) Honour Roll, and Fermat and CSMC Distinction, University of Waterloo, 2025–2026</li>
+        <li>Excellence in Mathematics, Bayview Secondary School Mathematics Department, 2025 and 2026</li>
+      </ul>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .cv { padding-block: calc(var(--s9) + 40px) var(--s10); }
+  .cv-head { display: grid; gap: var(--s4); margin-bottom: var(--s9); }
+  h1 { font-size: var(--t-title); line-height: 0.95; letter-spacing: -0.01em; }
+  .get { font-size: var(--t-lead); }
+  .contact { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+  section { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); padding-block: var(--s6); border-top: 1px solid var(--line); }
+  h2 { grid-column: 1 / 5; font-size: var(--t-h3); font-weight: 500; line-height: 1.25; }
+  section > :not(h2) { grid-column: 5 / 12; max-width: 62ch; }
+  .entry { display: grid; gap: var(--s2); }
+  .entry + .entry { margin-top: var(--s6); }
+  h3 { font-size: 18px; font-weight: 500; }
+  .meta { color: var(--dim); font-size: 15px; }
+  ul { margin: var(--s2) 0 0 -1.1em; padding-left: 1.1em; display: grid; gap: var(--s2); }
+  ul.plain { margin: 0 0 0 -1.1em; }
+  .skills { margin: 0; display: grid; gap: var(--s3); }
+  .skills dt { font-weight: 500; }
+  .skills dd { margin: 0; color: var(--dim); }
+  @media (max-width: 759px) {
+    .cv { padding-top: var(--s7); }
+    h2, section > :not(h2) { grid-column: 1 / 13; }
+    h2 { margin-bottom: var(--s4); }
+    ul, ul.plain { margin-left: 0; }
+  }
+</style>
