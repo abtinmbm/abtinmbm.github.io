@@ -1,0 +1,74 @@
+---
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Base from '../layouts/Base.astro';
+import list from '../data/photos.json';
+
+const files = import.meta.glob<{ default: ImageMetadata }>('../assets/photography/*.webp', { eager: true });
+const photos = list.map((p) => ({ ...p, src: files[`../assets/photography/${p.file}`].default, kind: p.w / p.h > 2 ? 'pano' : p.w < p.h ? 'tall' : 'wide' }));
+
+// The page reads like a photo book: panoramas run edge to edge, photos of the same shape
+// sit in pairs, and single photos take turns between the full measure and an offset.
+// Numbers are positions in photos.json, counting from 1.
+const groups = [[1], [2, 4], [3, 5], [6], [7, 8], [9], [10, 30], [11, 12], [13], [14, 15], [16], [17, 19], [18], [21, 22], [20], [25, 26], [23, 24], [27], [28, 29], [31], [32, 33], [34, 35], [36], [37]];
+type Row = { kind: 'pano' | 'pair' | 'wide' | 'offset' | 'single-tall'; items: typeof photos };
+let flip = false;
+const rows: Row[] = groups.map((g) => {
+  const items = g.map((n) => photos[n - 1]);
+  if (items.length === 2) return { kind: 'pair', items };
+  const k = items[0].kind;
+  if (k === 'pano') return { kind: 'pano', items };
+  if (k === 'tall') return { kind: 'single-tall', items };
+  flip = !flip;
+  return { kind: flip ? 'wide' : 'offset', items };
+});
+if (new Set(groups.flat()).size !== photos.length) throw new Error('photography: every photo must appear exactly once');
+const sizes = { pano: '100vw', pair: '(max-width: 759px) 92vw, 46vw', wide: '(max-width: 759px) 92vw, 80vw', offset: '(max-width: 759px) 92vw, 56vw', 'single-tall': '(max-width: 759px) 92vw, 34vw' };
+---
+<Base
+  title="Photography | Abtin Aryanpour"
+  description="Photos by Abtin Aryanpour, taken on a Canon EOS 90D: cities at night, mountains, a summer trip to China, and a few cats."
+>
+  <header class="ph-head wrap">
+    <h1 class="display">Photography</h1>
+    <p class="lead">I take photos on a Canon EOS 90D. A lot of these are from a summer trip to China.</p>
+  </header>
+
+  <div class="book">
+    {rows.map((r, k) => (
+      <div class:list={['row', r.kind, { wrap: r.kind !== 'pano' }]}>
+        {r.items.map((p) => (
+          <Picture src={p.src} alt={p.alt} formats={['avif', 'webp']} fallbackFormat="webp"
+            widths={r.kind === 'pano' ? [900, 1600, 2800] : [600, 1000, 1600]} sizes={sizes[r.kind]}
+            loading={k < 2 ? 'eager' : 'lazy'} />
+        ))}
+      </div>
+    ))}
+  </div>
+
+  <p class="end wrap small dim">All photos are mine. Please ask before using one.</p>
+</Base>
+
+<style>
+  .ph-head { padding-block: calc(var(--s9) + 40px) var(--s8); display: grid; gap: var(--s4); }
+  h1 { font-size: min(var(--t-title), 9.2vw); line-height: 0.95; letter-spacing: -0.01em; }
+  .lead { font-size: var(--t-lead); line-height: 1.4; max-width: 34em; }
+  .book { display: grid; gap: var(--s8); padding-bottom: var(--s9); }
+  .row :global(img) { display: block; width: 100%; height: auto; }
+  .row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); }
+  .row > :global(picture) { grid-column: 1 / 13; }
+  .pair > :global(picture:first-child) { grid-column: 1 / 7; }
+  .pair { align-items: start; }
+  .pair > :global(picture:last-child) { grid-column: 7 / 13; }
+  .wide > :global(picture) { grid-column: 1 / 11; }
+  .offset > :global(picture) { grid-column: 6 / 13; }
+  .single-tall > :global(picture) { grid-column: 4 / 8; }
+  .pano { display: block; }
+  .end { padding-bottom: var(--s8); }
+  @media (max-width: 759px) {
+    .ph-head { padding-top: var(--s7); }
+    .book { gap: var(--s5); }
+    .row { row-gap: var(--s5); }
+    .row > :global(picture), .pair > :global(picture:first-child), .pair > :global(picture:last-child), .offset > :global(picture), .single-tall > :global(picture) { grid-column: 1 / 13; margin-top: 0; }
+  }
+</style>

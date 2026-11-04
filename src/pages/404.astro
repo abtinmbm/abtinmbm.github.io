@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Page not found | Abtin Aryanpour" description="This page doesn't exist.">
+  <section class="lost wrap">
+    <h1 class="display">Nothing here yet</h1>
+    <p class="lead">No trail starts at this address. The page may have moved, or the link has a typo.</p>
+    <ul>
+      <li><a href="/">Go to the homepage</a></li>
+      <li><a href="/#work">See the projects</a></li>
+      <li><a href="mailto:aaryanpo@uwaterloo.ca">Email me about a broken link</a></li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .lost { min-height: 70svh; display: grid; align-content: center; gap: var(--s5); padding-block: var(--s10); }
+  h1 { font-size: var(--t-h2); line-height: 1.05; }
+  .lead { font-size: var(--t-lead); line-height: 1.4; max-width: 30em; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); }
+</style>

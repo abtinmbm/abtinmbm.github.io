@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const pages = ['/', '/projects/andon/'];
+const pages = ['/', '/projects/andon/', '/projects/image-stitcher/', '/projects/doppel/', '/about/', '/resume/', '/photography/', '/404'];
 const widths = [320, 390, 768, 1280, 1920];
 
 for (const path of pages) {

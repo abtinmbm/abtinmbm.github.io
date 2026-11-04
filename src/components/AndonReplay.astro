@@ -7,7 +7,7 @@ const { captionId } = Astro.props;
 const n = trace.t.length;
 // First paint and the no-JS view show the finished replay.
 const initial = chartSvg(trace, n, 880, 340);
-const label = `Anomaly score over two and a half minutes of one fan's sound. During normal running it stays under both limits, apart from one short crossing of the warning limit. After the fault starts it jumps above the control limit, and the light turns red ${redDelay(trace).toFixed(1)} seconds later.`;
+const label = `Anomaly score over two and a half minutes of one fan's sound. During normal running it stays mostly under both limits. A few windows go over, which turns the light yellow briefly, but never three in a row over the control limit. After the fault starts it jumps above the control limit, and the light turns red ${redDelay(trace).toFixed(1)} seconds later.`;
 ---
 <figure class="replay" data-replay aria-describedby={captionId}>
   <div class="rp-stage">

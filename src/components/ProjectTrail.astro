@@ -7,7 +7,7 @@ interface Props { start: string; end?: string; }
 const { start, end } = Astro.props;
 const W = 1440, H = 620;
 // The pole sits off the top right, and the radius keeps the bright arc above the title and lead.
-const cx = W * 0.9, cy = -H * 0.18, r = W * 0.36, a1 = 152;
+const cx = W * 0.9, cy = -H * 0.18, r = W * 0.3, a1 = 152;
 const days = ((end ? new Date(end) : new Date()).getTime() - new Date(start).getTime()) / 864e5;
 const trail = { r, a0: a1 - sweepFor(days), a1 };
 const head = { x: cx + r * Math.cos((a1 * Math.PI) / 180), y: cy + r * Math.sin((a1 * Math.PI) / 180) };
