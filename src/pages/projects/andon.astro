@@ -1,5 +1,9 @@
 ---
+import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import Bars from '../../components/Bars.astro';
+import specNormal from '../../assets/andon/spec-normal.webp';
+import specFault from '../../assets/andon/spec-fault.webp';
 import AucChart from '../../components/AucChart.astro';
 import AndonReplay from '../../components/AndonReplay.astro';
 import ProjectTrail from '../../components/ProjectTrail.astro';
@@ -8,6 +12,7 @@ import { projects } from '../../data/projects';
 import '../../styles/project.css';
 
 const p = projects.find((x) => x.slug === 'andon')!;
+const num = (s: string) => Number(s.replace('%', ''));
 ---
 <Base
   title="Andon: hearing when a machine sounds wrong | Abtin Aryanpour"
@@ -64,10 +69,19 @@ const p = projects.find((x) => x.slug === 'andon')!;
       <div class="problem">
         <h3>There were no faults to train on</h3>
         <p>Instead of learning what a fault sounds like, the CNN learns to name which machine it hears. Low confidence in the right name becomes the anomaly score. Valve went from {andon.valveAe} AUC with the reference to {andon.valveCnn}.</p>
+        <figure class="ev specs">
+          <div class="spec"><Picture src={specNormal} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a normal clip: steady bright bands in the low frequencies." /><span class="small">Normal</span></div>
+          <div class="spec"><Picture src={specFault} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a faulty clip from the same fan: the bands look almost the same." /><span class="small">Faulty</span></div>
+          <figcaption class="small">Two 10&nbsp;s clips from the replay fan (id_06), as the model hears them: 128 frequency bands, low pitches at the bottom. The fault is hard to see, and training only ever hears the first kind.</figcaption>
+        </figure>
       </div>
       <div class="problem">
         <h3>Overconfidence hurt the score</h3>
         <p>Without mixup, the ToyConveyor classifier hit 100% training accuracy, which likely left little room for a fault to lower its confidence. Blending pairs of training examples (mixup) raised mean development AUC from {andon.devAucNoMixup} to {andon.devAucMixup}.</p>
+        <div class="ev">
+          <Bars min={50} max={100} ticks={[50, 75, 100]} unit="%" caption="Mean AUC on the development set. 50% is guessing."
+            rows={[{ label: 'No mixup', to: num(andon.devAucNoMixup), text: andon.devAucNoMixup }, { label: 'Mixup', to: num(andon.devAucMixup), text: andon.devAucMixup, strong: true }]} />
+        </div>
       </div>
       <div class="problem">
         <h3>PyTorch doesn’t say how it rounds</h3>

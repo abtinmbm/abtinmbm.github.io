@@ -36,9 +36,24 @@
   .how b { font-weight: 500; }
 
   .story { padding-block: var(--s9) var(--s10); }
-  .problem { max-width: 36em; }
-  .problem + .problem { margin-top: var(--s7); }
-  .problem h3 { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; margin-bottom: var(--s3); }
+  /* Each hard problem is a row: the heading hangs on the left, evidence sits on the right. */
+  .problem { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: start; }
+  .problem + .problem { margin-top: var(--s9); }
+  .problem h3 { grid-column: 1 / 5; font-size: var(--t-h3); font-weight: 500; line-height: 1.25; padding-right: var(--s5); }
+  .problem > p { grid-column: 5 / 10; max-width: 36em; }
+  .problem:has(.ev) > p { grid-column: 5 / 9; }
+  .problem .ev { grid-column: 9 / 13; margin: 0; padding-top: 6px; }
+  .ev figcaption { margin-top: var(--s4); color: var(--dim); }
+  .specs { display: grid; gap: var(--s3); }
+  .spec { display: grid; gap: 4px; }
+  .spec img { display: block; width: 100%; height: auto; }
+  .spec span { color: var(--dim); }
+  @media (max-width: 899px) {
+    .problem h3, .problem > p, .problem:has(.ev) > p, .problem .ev { grid-column: 1 / -1; }
+    .problem h3 { margin-bottom: var(--s3); padding-right: 0; }
+    .problem .ev { margin-top: var(--s5); }
+    .problem + .problem { margin-top: var(--s8); }
+  }
 
   .next { padding-block: var(--s9); row-gap: var(--s6); }
   .next h2 { grid-column: 1 / 7; max-width: 20em; }

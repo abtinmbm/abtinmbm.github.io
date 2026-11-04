@@ -37,7 +37,7 @@ export const projects: Project[] = [
   {
     slug: 'cybershield',
     name: 'CyberShield',
-    line: 'A forum that placed 1st in coding at FBLC Canada',
+    line: 'A forum that placed 1st in coding at CNLC 2025',
     status: 'finished',
     start: '2025-02-28T23:08:57Z',
     end: '2025-03-02T23:59:00Z',
