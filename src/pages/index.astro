@@ -47,14 +47,13 @@ const person = {
         <p>First-year Computer Engineering student at the University of Waterloo. I build across software and firmware, and I’ve started two projects since October.</p>
         <p class="avail">Looking for a co&#8209;op, May to August 2027.</p>
       </div>
-      <p class="key small">Each bright trail above is one of my projects, as long as I worked on it. Trails with a glowing head are still growing. Click a name to open it.</p>
     </div>
   </section>
 
   <section class="intro wrap grid" aria-labelledby="intro-h">
     <Picture pictureAttributes={{ class: "portrait" }} src={portrait} alt="Abtin at a formal event in a suit and bow tie, pointing at the camera" widths={[360, 560, 820]} sizes="(max-width: 759px) 60vw, 40vw" formats={['avif', 'webp']} />
     <div class="intro-text">
-      <h2 id="intro-h" class="display">About me</h2>
+      <h2 id="intro-h" class="head">About me</h2>
       <p class="lead">I’m Abtin. I’m in first-year Computer Engineering at the University of Waterloo, on the autonomy software team at the Waterloo Aerial Robotics Group.</p>
       <p>I like projects with a real reason to exist, and I check my work against the published baseline before I claim to beat it.</p>
       <p><a href="/about/">More about me</a></p>
@@ -66,7 +65,7 @@ const person = {
 
     <article id="andon" class="p-andon wrap grid" aria-labelledby="andon-h">
       <div class="p-text">
-        <h3 id="andon-h" class="display">Andon</h3>
+        <h3 id="andon-h" class="head">Andon</h3>
         <p class="lead">Hears when a machine starts to sound wrong, after learning only from healthy recordings.</p>
         <p class="status"><b>In progress.</b> The software works. Now it’s moving onto a Raspberry Pi Pico 2.</p>
         <p>On the held-out evaluation set, it tells faulty sound from normal with {andon.meanAuc} AUC, against {andon.baselineAuc} for the reference autoencoder. As int8 it fits in {andon.int8Size}.</p>
@@ -85,7 +84,7 @@ const person = {
         <figcaption class="cap small">One simulated mission, after 20 of its {stitcher.photos} photos. The stepped outline is the edge of the stitched photos, the gaps are ground no photo has covered yet, and only the painted ground markers are kept inside.</figcaption>
       </figure>
       <div class="p-text wrap">
-        <h3 id="stitch-h" class="display">Image Stitcher</h3>
+        <h3 id="stitch-h" class="head">Image Stitcher</h3>
         <p class="lead">Merges out-of-order, GPS-tagged photos from several drones into one top-down map, for the Waterloo Aerial Robotics Group.</p>
         <p class="status"><b>In review.</b> Pull request #215 is open.</p>
         <p>In {stitcher.missions} simulated missions it built one connected map, with neighbouring photos lined up to within 6.9 cm.</p>
@@ -96,7 +95,7 @@ const person = {
   </section>
 
   <section class="earlier wrap" aria-labelledby="earlier-h">
-    <h2 id="earlier-h" class="display">Before Waterloo</h2>
+    <h2 id="earlier-h" class="head">Before Waterloo</h2>
     <ul>
       <li id="cybershield">
         <h3>CyberShield</h3>
@@ -116,12 +115,12 @@ const person = {
   <section id="contact" class="contact" aria-labelledby="contact-h">
     <div class="c-inner wrap grid">
       <div class="c-side">
-        <h2 id="contact-h" class="display">Contact</h2>
+        <h2 id="contact-h" class="head">Contact</h2>
         <p>Looking for a co&#8209;op, May to August 2027.</p>
       </div>
       <div class="c-main">
         <a class="c-mail" href="mailto:aaryanpo@uwaterloo.ca" data-copy="aaryanpo@uwaterloo.ca">
-          <span class="c-addr display">aaryanpo@uwaterloo.ca</span>
+          <span class="c-addr">aaryanpo@uwaterloo.ca</span>
           <span class="c-hint small"><span class="c-hint-copy"><Icon name="copy" /> Click to copy</span><span class="c-hint-done"><Icon name="check" /> Copied to clipboard</span></span>
         </a>
         <p class="c-alt small"><a href="mailto:aaryanpo@uwaterloo.ca">Open in your mail app</a></p>
@@ -166,10 +165,9 @@ const person = {
     background: linear-gradient(to top, rgb(1 3 10 / 0.94) 0%, rgb(1 3 10 / 0.86) 30%, rgb(1 3 10 / 0.5) 44%, transparent 58%); }
   .who { position: absolute; z-index: 3; left: var(--edge); right: var(--edge); bottom: var(--edge);
     text-shadow: 0 0 6px var(--black), 0 0 18px var(--black); }
-  .who h1 { font-size: var(--t-name); line-height: 1; letter-spacing: -0.01em; white-space: nowrap; margin-bottom: var(--s5); }
+  .who h1 { font-size: var(--t-name); line-height: 1; letter-spacing: 0; white-space: nowrap; margin-bottom: var(--s5); }
   .who-text p { max-width: 46ch; }
   .who .avail { margin-top: var(--s3); font-weight: 500; }
-  .key { margin-top: var(--s5); max-width: 52ch; color: var(--dim); }
 
   /* intro */
   .intro { padding-block: var(--s9) var(--s8); align-items: center; }
@@ -178,6 +176,8 @@ const person = {
   .intro-text { grid-column: 7 / 13; display: grid; gap: var(--s4); max-width: 36em; }
   .intro-text h2 { font-size: var(--t-h2); line-height: 1.05; }
   .lead { font-size: var(--t-lead); line-height: 1.4; }
+  /* Section headings use the body face; the wide display face is kept for page titles. */
+  .head { font-weight: 500; letter-spacing: -0.015em; }
 
   /* projects */
   .work { display: grid; gap: var(--s9); padding-bottom: var(--s9); }
@@ -217,7 +217,7 @@ const person = {
   .c-side h2 { font-size: var(--t-h2); line-height: 1.05; }
   .c-main { grid-column: 5 / 13; display: grid; gap: var(--s3); min-width: 0; }
   .c-mail { display: grid; gap: var(--s3); justify-items: start; text-decoration: none; width: fit-content; max-width: 100%; }
-  .c-addr { font-size: clamp(18px, 2.6vw, 40px); line-height: 1.15; white-space: nowrap;
+  .c-addr { font-weight: 500; letter-spacing: -0.01em; font-size: clamp(20px, 2.8vw, 42px); line-height: 1.15; white-space: nowrap;
     text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.16em; text-decoration-color: rgb(243 245 255 / 0.4); transition: text-decoration-color 160ms ease; }
   .c-mail:hover .c-addr, .c-mail:focus-visible .c-addr { text-decoration-color: var(--white); }
   .c-mail:focus-visible { outline: 2px solid var(--white); outline-offset: 6px; }
@@ -244,7 +244,7 @@ const person = {
     .sky { position: relative; height: min(70svh, 520px); overflow: hidden;
       background: radial-gradient(140% 90% at 30% 120%, var(--glow), var(--deep) 45%, var(--black) 85%); }
     .who { position: relative; left: auto; right: auto; bottom: auto; margin-top: -56px; padding: 0 var(--edge); }
-    .who h1 { font-size: clamp(24px, 8vw, 44px); margin-bottom: var(--s4); }
+    .who h1 { font-size: clamp(22px, 7.6vw, 44px); margin-bottom: var(--s4); }
     .intro { padding-block: var(--s7); row-gap: var(--s5); }
     :global(.portrait) { grid-column: 1 / 9; }
     .intro { align-items: start; }
@@ -260,7 +260,7 @@ const person = {
     .earlier ul { grid-template-columns: 1fr; }
     .c-inner { padding-block: var(--s8); row-gap: var(--s5); }
     .c-side, .c-main { grid-column: 1 / -1; }
-    .c-addr { font-size: clamp(15px, 4.3vw, 28px); white-space: normal; overflow-wrap: anywhere; }
+    .c-addr { font-size: clamp(17px, 5.2vw, 28px); white-space: normal; overflow-wrap: anywhere; }
     .c-links { grid-template-columns: 1fr; margin-top: var(--s5); }
   }
 </style>

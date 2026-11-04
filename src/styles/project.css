@@ -9,7 +9,7 @@
   .top-text { position: relative; z-index: 1; width: 100%; padding-block: var(--s10) var(--s8); display: grid; gap: var(--s5); }
   .top-text > * { min-width: 0; }
   /* 11vw keeps long titles inside a 390px phone */
-  .top h1 { font-size: min(var(--t-title), 11vw); line-height: 0.95; letter-spacing: -0.01em; }
+  .top h1 { font-size: min(var(--t-title), 11vw); line-height: 0.95; letter-spacing: 0.01em; }
   .top .lead { max-width: 34em; }
   .top .status { max-width: 46em; color: var(--dim); }
   .top .status a { color: var(--white); margin-left: 0.3em; }
@@ -31,7 +31,7 @@
   /* the steps read across in two columns */
   .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6) var(--s7); counter-reset: step; }
   .steps li { counter-increment: step; display: grid; gap: var(--s2); align-content: start; }
-  .steps li::before { content: counter(step); font-family: var(--display); font-size: 20px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .steps li::before { content: counter(step); font-size: 18px; font-weight: 500; color: var(--dim); font-variant-numeric: tabular-nums; }
 
   /* a paragraph with its evidence beside it */
   .pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s7); align-items: start; }
@@ -47,7 +47,7 @@
   .built { color: var(--dim); }
 
   .onward { padding-block: var(--s8) var(--s4); border-top: 1px solid var(--line); }
-  .onward a { font-size: var(--t-h3); line-height: 1.2; text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
+  .onward a { font-weight: 500; font-size: var(--t-h3); line-height: 1.2; text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
 
   @media (max-width: 899px) {
     .sec { padding-block: var(--s7); row-gap: var(--s4); }

@@ -22,17 +22,6 @@ const projectEntries: Entry[] = [
     ],
   },
   {
-    title: 'Image Stitcher, Waterloo Aerial Robotics Group', href: '/projects/image-stitcher/',
-    meta: 'Python, PyTorch, OpenCV. Pull request #215', when: 'October 2026 to now',
-    points: [
-      'Developed a groundside orthomosaic stitcher on the autonomy subteam, merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map using XFeat learned features and RANSAC.',
-      'Fused images with noisy GPS to recover heading, aligning photos within 6.9 cm at 3 m of simulated GPS error.',
-      'Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13–41 cm to 4–7 cm.',
-      'Handled 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated 91-photo missions.',
-      'Added lens undistortion and blur, exposure and tilt checks, and built a ground-truth mission simulator and 80 tests.',
-    ],
-  },
-  {
     title: 'CyberShield: full-stack discussion forum', href: 'https://github.com/abtinmbm/cybershield',
     meta: 'Python, Django, JavaScript, Tailwind CSS', when: 'March 2025',
     points: [
@@ -43,6 +32,17 @@ const projectEntries: Entry[] = [
   },
 ];
 const experience: Entry[] = [
+  {
+    title: 'Autonomy Software Member',
+    meta: 'Waterloo Aerial Robotics Group, Waterloo, ON. Python, PyTorch, OpenCV', when: 'September 2026 to now',
+    points: [
+      'Developed a groundside orthomosaic stitcher (pull request #215), merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map using XFeat learned features and RANSAC.',
+      'Fused images with noisy GPS to recover heading, aligning photos within 6.9 cm at 3 m of simulated GPS error.',
+      'Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13–41 cm to 4–7 cm.',
+      'Handled 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated 91-photo missions.',
+      'Added lens undistortion and blur, exposure and tilt checks, and built a ground-truth mission simulator and 80 tests.',
+    ],
+  },
   {
     title: 'Treasurer', meta: 'Bayview Secondary School, Richmond Hill, ON', when: 'September 2025 to June 2026',
     points: [
@@ -63,15 +63,10 @@ const skills = [
   ['Frameworks and libraries', 'PyTorch, NumPy, OpenCV, scikit-learn, Django, Streamlit, jQuery'],
   ['Tools and platforms', 'Git, GitHub Actions (CI), pytest, uv, CMake, SQLite, AWS (EC2, CloudFront)'],
 ];
-const awards = [
-  '1st place (2025, CNLC) and 4th place (2024, FBLA), Coding & Programming, national competitions',
-  'Euclid (86) and Hypatia (33) Honour Roll, and Fermat and CSMC Distinction, University of Waterloo, 2025–2026',
-  'Excellence in Mathematics, Bayview Secondary School Mathematics Department, 2025 and 2026',
-];
 ---
 <Base
   title="Resume | Abtin Aryanpour"
-  description="The resume of Abtin Aryanpour, first-year Computer Engineering at the University of Waterloo: projects, experience, skills and awards, with a PDF to download."
+  description="The resume of Abtin Aryanpour, first-year Computer Engineering at the University of Waterloo: experience, projects and skills, with a PDF to download."
   current="resume"
 >
   <div class="cv wrap grid">
@@ -105,16 +100,6 @@ const awards = [
         </dl>
       </section>
 
-      <section aria-labelledby="projects">
-        <h2 id="projects">Projects</h2>
-        {projectEntries.map((e) => (
-          <div class="entry">
-            <div class="e-head"><h3><a href={e.href}>{e.title}</a></h3><p class="when">{e.when}</p></div>
-            <p class="meta">{e.meta}</p>
-            <ul>{e.points!.map((pt) => <li>{pt}</li>)}</ul>
-          </div>
-        ))}
-      </section>
 
       <section aria-labelledby="exp">
         <h2 id="exp">Experience</h2>
@@ -127,10 +112,17 @@ const awards = [
         ))}
       </section>
 
-      <section aria-labelledby="awards">
-        <h2 id="awards">Awards</h2>
-        <ul>{awards.map((a) => <li>{a}</li>)}</ul>
+      <section aria-labelledby="projects">
+        <h2 id="projects">Projects</h2>
+        {projectEntries.map((e) => (
+          <div class="entry">
+            <div class="e-head"><h3><a href={e.href}>{e.title}</a></h3><p class="when">{e.when}</p></div>
+            <p class="meta">{e.meta}</p>
+            <ul>{e.points!.map((pt) => <li>{pt}</li>)}</ul>
+          </div>
+        ))}
       </section>
+
     </div>
   </div>
 </Base>
@@ -139,7 +131,7 @@ const awards = [
   .cv { padding-block: var(--s8) var(--s9); align-items: start; }
   /* The left column stays in view while the resume scrolls past it. */
   .cv-side { grid-column: 1 / 4; position: sticky; top: var(--s6); display: grid; gap: var(--s5); }
-  h1 { font-size: var(--t-h2); line-height: 1; letter-spacing: -0.01em; }
+  h1 { font-size: var(--t-h2); line-height: 1; letter-spacing: 0.01em; }
   .who { line-height: 1.5; }
   .get { display: flex; align-items: center; gap: var(--s4); padding: var(--s4) var(--s5); border: 1px solid rgb(243 245 255 / 0.4); border-radius: 10px;
     text-decoration: none; font-weight: 500; transition: border-color 160ms ease, background-color 160ms ease; }
@@ -154,7 +146,7 @@ const awards = [
 
   .cv-main { grid-column: 5 / 13; display: grid; gap: var(--s7); max-width: 54rem; }
   section { display: grid; gap: var(--s5); }
-  h2 { font-family: var(--display); font-size: 15px; font-weight: 500; letter-spacing: 0.02em; color: var(--dim); padding-bottom: var(--s3); border-bottom: 1px solid var(--line); }
+  h2 { font-size: 15px; font-weight: 500; color: var(--dim); padding-bottom: var(--s3); border-bottom: 1px solid var(--line); }
   .entry { display: grid; gap: 4px; }
   .entry + .entry { margin-top: var(--s4); }
   .e-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px var(--s5); }

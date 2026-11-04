@@ -21,7 +21,7 @@ const projectHero = `
 `;
 
 const pages = {
-  home: { path: '/', css: '.key { display: none !important; } #main > :not(.hero) { display: none !important; }' },
+  home: { path: '/', css: '#main > :not(.hero) { display: none !important; }' },
   andon: { path: '/projects/andon/', css: projectHero },
   'image-stitcher': {
     path: '/projects/image-stitcher/',
