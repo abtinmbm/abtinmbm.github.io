@@ -15,18 +15,18 @@ const projectEntries: Entry[] = [
     title: 'Andon: machine-sound anomaly detection', href: '/projects/andon/',
     meta: 'Python, PyTorch, C, Pico 2', when: 'October 2026 to now',
     points: [
-      'Built a machine-sound anomaly detector trained only on healthy audio: a 98k-weight CNN reached 92.13% mean AUC on the held-out DCASE 2020 evaluation set, against 79.70% for the reference autoencoder (3 seeds).',
+      'Built an anomaly detector trained only on healthy machine audio: a 98k-weight CNN reached 92.13% mean AUC on held-out DCASE 2020 data, against 79.70% for the reference autoencoder, winning 5 of 6 machine types (3 seeds).',
       'Reproduced the published DCASE baseline in PyTorch within 0.88 AUC points on all 6 machine types, and released checkpoints so two commands re-check the held-out CNN results from a fresh clone.',
-      'Turned scores into an andon light with SPC control limits, hysteresis and a Streamlit dashboard. On the held-out evaluation clips it caught 65.57% of 30 s faults, on average 10.57 s after onset, at 5.53 false alarms per hour.',
-      'Quantized the CNN to int8 for a Cortex-M33 with a custom fixed-point reference: 98.7 KB (from 383.0 KB) at 92.08% held-out AUC, with a C header and test-vector export path verified in CI. Now porting to a Raspberry Pi Pico 2.',
+      'Turned scores into an andon light with SPC limits (mean + 2σ and 3σ), hysteresis, a latching stop and a dashboard. On held-out evaluation clips it caught 65.57% of 30 s faults, a mean 10.57 s after onset, at 5.53 false alarms per hour.',
+      'Quantized the CNN to int8 for a Cortex-M33 with a custom fixed-point reference: 98.7 KB (from 383.0 KB) at 92.08% held-out AUC, with C headers and bit-exact test vectors (export verified in CI). Now porting to a Pico 2.',
     ],
   },
   {
-    title: 'Image Stitcher, Waterloo Aerial Robotics Group', href: '/projects/image-stitcher/',
-    meta: 'Python, PyTorch, OpenCV. Pull request #215', when: 'October 2026 to now',
+    title: 'Image Stitcher, Waterloo Aerial Robotics', href: '/projects/image-stitcher/',
+    meta: 'PyTorch, OpenCV. Pull request #215 (in review)', when: 'October 2026 to now',
     points: [
       'Developed a groundside orthomosaic stitcher on the autonomy subteam, merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map using XFeat learned features and RANSAC.',
-      'Fused images with noisy GPS to recover heading, aligning photos to 4.3–6.9 cm on average at 3 m of simulated GPS error.',
+      'Fused images with GPS to recover heading, aligning photos to 4.3–6.9 cm on average at 3 m of simulated GPS error.',
       'Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13–41 cm to 4–7 cm.',
       'Handled 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated 91-photo missions.',
       'Added lens undistortion and blur, exposure and tilt checks, and built a ground-truth mission simulator and 80 tests.',
@@ -47,7 +47,7 @@ const experience: Entry[] = [
     title: 'Autonomy Software Member', meta: 'Waterloo Aerial Robotics Group, Waterloo, ON', when: 'September 2026 to now',
     points: [
       'Write Python for the autonomy subteam’s shared codebase, submitting all changes as reviewed pull requests.',
-      'Built the team’s groundside image stitcher (pull request #215) and worked through two rounds of review changes (lens undistortion, photo quality checks, numbered map saves), and found and fixed sensor noise fooling the blur check.',
+      'Built the team’s groundside image stitcher (pull request #215) and worked through two rounds of review changes, including a fix for sensor noise fooling the blur check.',
     ],
   },
   {
@@ -85,7 +85,7 @@ const skills = [
     <header class="cv-side">
       <h1 class="display">Resume</h1>
       <p class="who">Abtin Aryanpour<br /><span class="dim">Computer Engineering, University of Waterloo</span></p>
-      <a class="get" href={pdf} download><Icon name="file" /><span>Download the PDF<span class="small dim">One page, 118&nbsp;KB</span></span></a>
+      <a class="get" href={pdf} download><Icon name="file" /><span>Download the PDF<span class="small dim">One page, 126&nbsp;KB</span></span></a>
       <ul class="reach">
         <li><a href="mailto:aaryanpo@uwaterloo.ca"><Icon name="mail" />aaryanpo@uwaterloo.ca</a></li>
         <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><Icon name="linkedin" />linkedin.com/in/abtin-aryanpour</a></li>
