@@ -17,28 +17,28 @@
 
   .replay-sec { padding-top: var(--s8); }
 
-  .why { padding-block: var(--s10) var(--s9); }
+  .why { padding-block: var(--s9) var(--s8); }
   .statement { font-size: clamp(26px, 3.3vw, 48px); line-height: 1.15; letter-spacing: -0.01em; max-width: 26em; text-wrap: balance; }
   .why-more { margin-top: var(--s6); max-width: 36em; color: var(--dim); font-size: var(--t-lead); line-height: 1.4; }
 
   .proj h2 { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; text-wrap: balance; }
-  .results { padding-block: var(--s8) var(--s9); border-top: 1px solid var(--line); row-gap: var(--s7); }
+  .results { padding-block: var(--s8); border-top: 1px solid var(--line); row-gap: var(--s7); }
   .results h2 { grid-column: 1 / 13; max-width: 18em; padding-top: var(--s5); }
   .chart { grid-column: 1 / 7; }
   .notes { grid-column: 7 / 13; display: grid; gap: var(--s5); align-content: start; max-width: 34em; }
   .notes b { font-weight: 500; }
 
-  .how { padding-block: var(--s10) var(--s9); row-gap: var(--s6); }
-  .how h2 { grid-column: 1 / 7; }
-  .how ol { grid-column: 7 / 13; list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s5); counter-reset: step; max-width: 36em; }
+  .how { padding-block: var(--s8); row-gap: var(--s6); }
+  .how h2 { grid-column: 1 / 5; }
+  .how ol { grid-column: 5 / 12; list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s5); counter-reset: step; max-width: 36em; }
   .how li { counter-increment: step; display: grid; grid-template-columns: 2.2em 1fr; }
   .how li::before { content: counter(step); color: var(--dim); font-variant-numeric: tabular-nums; }
   .how b { font-weight: 500; }
 
-  .story { padding-block: var(--s9) var(--s10); }
+  .story { padding-block: var(--s8) var(--s9); }
   /* Each hard problem is a row: the heading hangs on the left, evidence sits on the right. */
   .problem { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: start; }
-  .problem + .problem { margin-top: var(--s9); }
+  .problem + .problem { margin-top: var(--s8); }
   .problem h3 { grid-column: 1 / 5; font-size: var(--t-h3); font-weight: 500; line-height: 1.25; padding-right: var(--s5); }
   .problem > p { grid-column: 5 / 10; max-width: 36em; }
   .problem:has(.ev) > p { grid-column: 5 / 9; }
@@ -56,8 +56,8 @@
   }
 
   .next { padding-block: var(--s9); row-gap: var(--s6); }
-  .next h2 { grid-column: 1 / 7; max-width: 20em; }
-  .next-text { grid-column: 7 / 13; display: grid; gap: var(--s4); max-width: 36em; }
+  .next h2 { grid-column: 1 / 5; max-width: 20em; }
+  .next-text { grid-column: 5 / 11; display: grid; gap: var(--s4); max-width: 36em; }
 
   .onward { padding-block: var(--s9) var(--s4); }
   .onward a { font-size: var(--t-h3); line-height: 1.2; text-decoration-thickness: 2px; text-underline-offset: 0.2em; }

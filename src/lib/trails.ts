@@ -63,7 +63,7 @@ export function layout(projects: TrailProject[], W: number, H: number, now: Date
   const rMax = S * (mobile ? 0.95 : 1.0);
   const yTop = H * (opts.yTop ?? 0.2);
   const yBottom = H * (opts.yBottom ?? (mobile ? 0.7 : 0.48));
-  const labelled = mobile ? 3 : 6;
+  const labelled = mobile ? 4 : 6;
 
   const trails: ProjectTrail[] = projects.map((p, i) => {
     const t = n === 1 ? 0.5 : i / (n - 1);
@@ -91,23 +91,35 @@ export function arcPath(cx: number, cy: number, { r, a0, a1 }: Arc): string {
   return `M${x0.toFixed(1)} ${y0.toFixed(1)}A${r.toFixed(1)} ${r.toFixed(1)} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;
 }
 
-/** The whole sky as SVG markup, without labels. */
-export function svgMarkup(L: Layout): string {
-  const bg = L.background
-    .map((b) => `<path class="t-bg" d="${arcPath(L.cx, L.cy, b)}" stroke-width="${b.w.toFixed(2)}" stroke-opacity="${b.o.toFixed(2)}"/>`)
+/** When each part of the homepage sky finishes drawing in, in seconds. A project trail draws
+ *  from its start to its head, oldest first; its head and label appear as it arrives. */
+export const DRAW = { bgMax: 0.5, bgDur: 1.6, first: 0.35, step: 0.28, dur: 1.7 };
+export const trailArrives = (k: number) => DRAW.first + k * DRAW.step + DRAW.dur;
+
+/** The background exposure, on its own layer so it can turn slowly around the pole. */
+export function bgMarkup(L: Layout): string {
+  const rand = rng(7);
+  return L.background
+    .map((b) => `<path class="t-bg" pathLength="1" style="--d:${(rand() * DRAW.bgMax).toFixed(2)}s" d="${arcPath(L.cx, L.cy, b)}" stroke-width="${b.w.toFixed(2)}" stroke-opacity="${b.o.toFixed(2)}"/>`)
     .join('');
+}
+
+/** The project trails as SVG markup, without labels. */
+export function svgMarkup(L: Layout): string {
   const fg = L.trails
     .map((t) => {
       const d = arcPath(L.cx, L.cy, t);
+      const k = t.i;
+      const at = `--d:${(DRAW.first + k * DRAW.step).toFixed(2)}s;--d2:${(trailArrives(k) - 0.15).toFixed(2)}s`;
       // An unlabelled trail gets no head, so it never looks like a missing label.
       const head = !t.label ? ''
         : t.live
         ? `<circle class="t-halo" cx="${t.head.x.toFixed(1)}" cy="${t.head.y.toFixed(1)}" r="16"/><circle class="t-head live" cx="${t.head.x.toFixed(1)}" cy="${t.head.y.toFixed(1)}" r="3.6"/>`
         : `<circle class="t-head" cx="${t.head.x.toFixed(1)}" cy="${t.head.y.toFixed(1)}" r="2.6"/>`;
-      return `<g class="t-proj${t.live ? ' live' : ''}" data-i="${t.i}"><path class="t-line" d="${d}"/>${head}</g>`;
+      return `<g class="t-proj${t.live ? ' live' : ''}" data-i="${t.i}" style="${at}"><path class="t-line" pathLength="1" d="${d}"/>${head}</g>`;
     })
     .join('');
-  return `<defs><radialGradient id="t-halo"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#9fb4ff" stop-opacity="0"/></radialGradient></defs>${bg}${fg}`;
+  return `<defs><radialGradient id="t-halo"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#9fb4ff" stop-opacity="0"/></radialGradient></defs>${fg}`;
 }
 
 /** Heads on project pages sit higher than on the homepage, clear of the title. */

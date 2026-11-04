@@ -1,16 +1,21 @@
 ---
-import { layout, svgMarkup, type TrailProject } from '../lib/trails';
+import { layout, svgMarkup, bgMarkup, type TrailProject } from '../lib/trails';
 
 interface Props { projects: TrailProject[]; }
 const { projects } = Astro.props;
 // First paint (and the no-JS view) uses a desktop-sized sky drawn at build time.
 // The script below redraws it for the real screen size, with today's date, and adds the labels.
-const initial = svgMarkup(layout(projects, 1440, 900, new Date()));
+const L0 = layout(projects, 1440, 900, new Date());
 ---
 <div class="sky-field" data-trails={JSON.stringify(projects)}>
-  <svg class="sky-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" set:html={initial} />
+  <svg class="sky-svg sky-bg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" set:html={bgMarkup(L0)} />
+  <svg class="sky-svg sky-fg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" set:html={svgMarkup(L0)} />
   <ul class="sky-labels" aria-label="Projects on the sky" hidden></ul>
 </div>
+<script is:inline>
+  // Set before first paint, so the sky starts empty and draws in instead of flashing complete.
+  if (matchMedia('(prefers-reduced-motion: no-preference)').matches) document.currentScript.previousElementSibling.classList.add('develop');
+</script>
 
 <style is:global>
   .sky-field { position: absolute; inset: 0; }
@@ -36,18 +41,32 @@ const initial = svgMarkup(layout(projects, 1440, 900, new Date()));
     .sky-labels .l { display: none; }
     .sky-labels .n { font-size: 13px; }
   }
+  .sky-bg { overflow: visible; }
   @media (prefers-reduced-motion: no-preference) {
     .t-head.live { animation: t-breathe 3.2s ease-in-out 3; }
     @keyframes t-breathe { 50% { opacity: 0.5; } }
+    /* On load the exposure draws in: faint stars first, then each project from its start to today. */
+    .develop .t-bg, .develop .t-line, .t-proj.retrace .t-line { stroke-dasharray: 1 1; stroke-dashoffset: 1;
+      animation: t-draw 1.6s cubic-bezier(0.35, 0.1, 0.25, 1) var(--d, 0s) forwards; }
+    .develop .t-line { animation-duration: 1.7s; }
+    .t-proj.retrace .t-line { animation-duration: 700ms; animation-delay: 0s; }
+    .develop :is(.t-head, .t-halo), .develop .sky-labels li { opacity: 0; animation: t-in 300ms ease-out var(--d2, 0s) forwards; }
+    .develop .t-head.live { animation: t-in 300ms ease-out var(--d2, 0s) forwards, t-breathe 3.2s ease-in-out calc(var(--d2, 0s) + 300ms) 3; }
+    @keyframes t-draw { to { stroke-dashoffset: 0; } }
+    @keyframes t-in { to { opacity: 1; } }
+    /* Afterwards the background keeps turning around the pole, as the real sky does. */
+    .sky-bg.turning { animation: t-turn 720s linear infinite; }
+    @keyframes t-turn { to { transform: rotate(360deg); } }
   }
 </style>
 
 <script>
-  import { layout, svgMarkup, type TrailProject } from '../lib/trails';
+  import { layout, svgMarkup, bgMarkup, trailArrives, type TrailProject } from '../lib/trails';
 
   for (const field of document.querySelectorAll<HTMLElement>('[data-trails]')) {
     const projects: TrailProject[] = JSON.parse(field.dataset.trails!);
-    const svg = field.querySelector('svg')!;
+    const bg = field.querySelector<SVGSVGElement>('.sky-bg')!;
+    const svg = field.querySelector<SVGSVGElement>('.sky-fg')!;
     const list = field.querySelector('ul')!;
     list.hidden = false;
 
@@ -55,7 +74,10 @@ const initial = svgMarkup(layout(projects, 1440, 900, new Date()));
       const W = field.clientWidth, H = field.clientHeight;
       if (!W || !H) return;
       const L = layout(projects, W, H, new Date());
-      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      for (const s of [bg, svg]) s.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      bg.innerHTML = bgMarkup(L);
+      bg.style.transformOrigin = `${L.cx}px ${L.cy}px`;
+      bg.classList.add('turning');
       svg.innerHTML = svgMarkup(L);
       list.replaceChildren();
       for (const t of L.trails) {
@@ -65,13 +87,22 @@ const initial = svgMarkup(layout(projects, 1440, 900, new Date()));
         li.className = t.label.side;
         li.style.left = `${t.head.x}px`;
         li.style.top = `${t.head.y}px`;
+        li.style.setProperty('--d2', `${(trailArrives(t.i) - 0.15).toFixed(2)}s`);
         const a = document.createElement('a');
         a.href = p.link;
         a.innerHTML = `<span class="n"></span><span class="l"></span>`;
         a.querySelector('.n')!.textContent = p.name;
         a.querySelector('.l')!.textContent = p.line;
         const group = () => svg.querySelector(`.t-proj[data-i="${t.i}"]`);
-        const on = () => group()?.classList.add('on');
+        // Pointing at a name lights its trail and traces it again from the start.
+        const on = () => {
+          const g = group();
+          if (!g || field.classList.contains('develop')) { g?.classList.add('on'); return; }
+          g.classList.add('on');
+          g.classList.remove('retrace');
+          void g.getBoundingClientRect();
+          g.classList.add('retrace');
+        };
         const off = () => group()?.classList.remove('on');
         a.addEventListener('pointerenter', on);
         a.addEventListener('pointerleave', off);
@@ -82,12 +113,23 @@ const initial = svgMarkup(layout(projects, 1440, 900, new Date()));
         // On phones every label sits left of its head; flip only one that would leave the screen.
         if (W < 760) {
           li.className = 'left';
-          if (li.getBoundingClientRect().left < 12) li.className = 'right';
+          if (li.getBoundingClientRect().left < 12) {
+            // Too long for the space left of its head: wrap onto two lines instead of leaving the screen.
+            const room = t.head.x - 28;
+            if (room >= 96) { li.style.whiteSpace = 'normal'; li.style.width = room + 'px'; }
+            else li.className = 'right';
+          }
         }
       }
     };
 
     draw();
+    // Once the first draw-in is over, resizing redraws the sky without replaying it.
+    if (field.classList.contains('develop')) {
+      const last = Math.max(...projects.map((_, i) => trailArrives(i))) + 0.4;
+      setTimeout(() => field.classList.remove('develop'), last * 1000);
+    }
+    svg.addEventListener('animationend', (e) => (e.target as Element).closest('.retrace')?.classList.remove('retrace'));
     let raf = 0;
     new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); }).observe(field);
   }

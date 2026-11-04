@@ -116,3 +116,20 @@ test('every page has its own sharing image, and the sitemap lists the pages', as
   for (const path of pages.filter((p) => p !== '/404')) expect(map).toContain(`https://abtinmbm.github.io${path}<`);
   expect((await request.get('/robots.txt')).status()).toBe(200);
 });
+
+test('the photo viewer moves with the buttons, the keyboard and the film strip', async ({ page }) => {
+  await page.goto('/photography/');
+  const count = page.locator('.count b');
+  await expect(count).toHaveText('1');
+  await expect(page.getByRole('button', { name: 'Previous photo' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Next photo' }).click();
+  await expect(count).toHaveText('2');
+  await page.keyboard.press('ArrowRight');
+  await expect(count).toHaveText('3');
+  await page.locator('.thumb').nth(9).click();
+  await expect(count).toHaveText('10');
+  await expect(page.locator('.thumb').nth(9)).toHaveAttribute('aria-current', 'true');
+  await expect(page).toHaveURL(/#p10$/);
+  await page.keyboard.press('ArrowLeft');
+  await expect(count).toHaveText('9');
+});
