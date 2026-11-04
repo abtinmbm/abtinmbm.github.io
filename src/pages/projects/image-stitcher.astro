@@ -12,7 +12,8 @@ import s80 from '../../assets/stitcher/stages/stage-80.webp';
 import s91 from '../../assets/stitcher/stages/stage-91.webp';
 
 const p = projects.find((x) => x.slug === 'image-stitcher')!;
-const stages = [[20, s20], [40, s40], [60, s60], [80, s80]] as const;
+const stages = [[20, s20], [40, s40], [60, s60], [80, s80], [91, s91]] as const;
+const last = stages.length - 1;
 ---
 <Base
   title="Image Stitcher: one map from several drones | Abtin Aryanpour"
@@ -30,19 +31,25 @@ const stages = [[20, s20], [40, s40], [60, s60], [80, s80]] as const;
     </header>
 
     <section class="stages-sec wrap" aria-label="The map as it grows">
-      <figure class="stages">
-        <div class="final">
-          <Picture src={s91} fallbackFormat="webp" formats={['avif', 'webp']} widths={[700, 1100, 1664]} sizes="(max-width: 759px) 92vw, 90vw" alt="The finished map after all 91 photos" />
-          <span class="small num">91 photos</span>
-        </div>
-        <ol>
-          {stages.map(([n, img]) => (
-            <li>
-              <Picture src={img} fallbackFormat="webp" formats={['avif', 'webp']} widths={[400, 700, 1100]} sizes="(max-width: 759px) 46vw, 23vw" alt={`The map after ${n} photos`} />
-              <span class="small num">{n} photos</span>
-            </li>
+      <figure class="stages grow" data-grow>
+        <div class="grow-stack">
+          {stages.map(([n, img], k) => (
+            <div class:list={['grow-frame', { on: k === last }]} data-n={n} aria-hidden={k === last ? undefined : 'true'}>
+              <Picture src={img} fallbackFormat="webp" formats={['avif', 'webp']} widths={[700, 1100, 1664]} sizes="(max-width: 759px) 92vw, 880px"
+                loading={k === last ? 'eager' : 'lazy'} alt={k === last ? 'The finished map after all 91 photos' : `The map after ${n} photos`} />
+            </div>
           ))}
-        </ol>
+        </div>
+        <div class="grow-ctl" hidden>
+          <output class="grow-out num" for="grow-range" aria-hidden="true"><b>91</b> photos</output>
+          <div class="grow-track">
+            <input id="grow-range" type="range" min="0" max={last} step="1" value={last}
+              aria-label="Photos stitched so far" aria-valuetext="91 photos" />
+            <ol class="grow-ticks small num" aria-hidden="true">
+              {stages.map(([n], k) => <li style={`--k:${k}`}><button type="button" tabindex="-1" data-k={k}>{n}</button></li>)}
+            </ol>
+          </div>
+        </div>
         <figcaption class="small">One simulated mission, saved after 20, 40, 60, 80 and all 91 photos, each drawn in the same GPS frame. The stepped outline is the edge of the stitched photos, and only the painted ground markers are kept inside it.</figcaption>
       </figure>
     </section>
@@ -126,14 +133,57 @@ const stages = [[20, s20], [40, s40], [60, s60], [80, s80]] as const;
 
 <style>
   .stages-sec { padding-top: var(--s8); }
-  .stages { margin: 0; }
-  .final { display: grid; gap: var(--s2); max-width: 880px; }
-  .stages ol { list-style: none; margin: var(--s6) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap); }
-  .stages li { display: grid; gap: var(--s2); }
-  .stages span { color: var(--dim); }
+  .stages { margin: 0; max-width: 880px; }
+  .grow-stack { display: grid; }
+  .grow-frame { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0s 0.25s; }
+  .grow-frame.on { opacity: 1; visibility: visible; transition: opacity 0.25s ease; }
   .stages :global(img) { width: 100%; height: auto; display: block; }
-  .stages figcaption { margin-top: var(--s4); color: var(--dim); max-width: 64ch; }
-  @media (max-width: 759px) {
-    .stages ol { grid-template-columns: 1fr 1fr; margin-top: var(--s5); }
+  .grow-ctl { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); align-items: start; gap: var(--s5); margin-top: var(--s5); }
+  .grow-ctl[hidden] { display: none; }
+  .grow-out { font-size: var(--t-h3); line-height: 1; color: var(--dim); }
+  .grow-out b { font-weight: 500; color: var(--white); }
+  .grow-track { display: grid; gap: var(--s2); padding-top: 4px; }
+  #grow-range { width: 100%; margin: 0; height: 24px; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
+  #grow-range::-webkit-slider-runnable-track { height: 2px; background: var(--line); }
+  #grow-range::-moz-range-track { height: 2px; background: var(--line); }
+  #grow-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px; border-radius: 50%; background: var(--white); border: 0; box-shadow: 0 0 0 6px rgb(159 180 255 / 0.18); }
+  #grow-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--white); border: 0; box-shadow: 0 0 0 6px rgb(159 180 255 / 0.18); }
+  #grow-range:focus-visible { outline: none; }
+  #grow-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--black), 0 0 0 5px var(--white); }
+  #grow-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--black), 0 0 0 5px var(--white); }
+  /* Each label sits under the thumb position for its step (the thumb is 18px wide). */
+  .grow-ticks { list-style: none; margin: 0; padding: 0; position: relative; height: 1.8em; }
+  .grow-ticks li { position: absolute; left: calc(9px + var(--k) * (100% - 18px) / 4); transform: translateX(-50%); }
+  .grow-ticks button { background: none; border: 0; padding: 4px 0; color: var(--dim); font: inherit; cursor: pointer; }
+  .grow-ticks button[aria-current="true"] { color: var(--white); }
+  .stages figcaption { margin-top: var(--s5); color: var(--dim); max-width: 64ch; }
+  @media (max-width: 599px) {
+    .grow-ctl { grid-template-columns: 1fr; gap: var(--s3); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .grow-frame, .grow-frame.on { transition: none; }
   }
 </style>
+
+<script>
+  // The map growth slider. Without JavaScript the finished map shows on its own.
+  for (const fig of document.querySelectorAll<HTMLElement>('[data-grow]')) {
+    const frames = [...fig.querySelectorAll<HTMLElement>('.grow-frame')];
+    const range = fig.querySelector<HTMLInputElement>('input[type=range]')!;
+    const out = fig.querySelector('.grow-out b')!;
+    const ticks = [...fig.querySelectorAll<HTMLButtonElement>('.grow-ticks button')];
+    // Load the earlier maps now, so moving the slider never shows a blank frame.
+    for (const img of fig.querySelectorAll('img')) img.loading = 'eager';
+    const show = (k: number) => {
+      frames.forEach((f, i) => { f.classList.toggle('on', i === k); if (i === k) f.removeAttribute('aria-hidden'); else f.setAttribute('aria-hidden', 'true'); });
+      ticks.forEach((t, i) => t.setAttribute('aria-current', String(i === k)));
+      const n = frames[k].dataset.n!;
+      out.textContent = n;
+      range.setAttribute('aria-valuetext', `${n} photos`);
+    };
+    range.addEventListener('input', () => show(Number(range.value)));
+    ticks.forEach((t) => t.addEventListener('click', () => { range.value = t.dataset.k!; show(Number(t.dataset.k)); range.focus(); }));
+    fig.querySelector<HTMLElement>('.grow-ctl')!.hidden = false;
+    show(Number(range.value));
+  }
+</script>

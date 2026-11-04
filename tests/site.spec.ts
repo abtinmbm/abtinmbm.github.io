@@ -74,3 +74,28 @@ test('the Andon replay plays when motion is allowed and can be paused', async ({
   await page.waitForTimeout(500);
   expect(await now.textContent()).toBe(paused);
 });
+
+test('the stitcher map grows with the slider and the keyboard', async ({ page }) => {
+  await page.goto('/projects/image-stitcher/');
+  const range = page.locator('#grow-range');
+  const on = page.locator('.grow-frame.on');
+  await expect(on).toHaveAttribute('data-n', '91');
+  await range.focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(on).toHaveAttribute('data-n', '80');
+  await expect(range).toHaveAttribute('aria-valuetext', '80 photos');
+  await page.keyboard.press('Home');
+  await expect(on).toHaveAttribute('data-n', '20');
+  await expect(page.locator('.grow-frame[aria-hidden="true"]')).toHaveCount(4);
+  await page.locator('.grow-ticks button', { hasText: '60' }).click();
+  await expect(on).toHaveAttribute('data-n', '60');
+});
+
+test('the stitcher page shows the finished map without JavaScript', async ({ browser }) => {
+  const ctx = await browser.newContext({ javaScriptEnabled: false });
+  const page = await ctx.newPage();
+  await page.goto('/projects/image-stitcher/');
+  await expect(page.locator('.grow-frame.on')).toHaveAttribute('data-n', '91');
+  await expect(page.locator('.grow-ctl')).toBeHidden();
+  await ctx.close();
+});
