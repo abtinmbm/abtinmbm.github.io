@@ -62,7 +62,7 @@ export const stitcher = {
   // README: no photo rejected in the evaluation (10 × 91). Blur limit check: 2,730 photos × 9 cases.
   rejectedGood: '0 of 910',
   blurWrong: '0 of 2,730 photos × 9 blur cases',
-  // Refinement-on runs of the 2026-11-04 rerun (current code).
+  // portfolio/eval_179_results_2026-11-04_site.txt: refinement-on runs, current code.
   speed: '0.43–0.71 s',
   tests: '80',
   // portfolio/tools/guide_worked_example_179.py, one pair across a row turn (rerun 2026-11-04).
