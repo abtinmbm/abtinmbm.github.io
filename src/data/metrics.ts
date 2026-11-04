@@ -58,23 +58,6 @@ export const stitcher = {
   rowMatches: '6 to 13 of 600',
 };
 
-export const doppel = {
-  // Public datasets, comparing methods. Not the accuracy of the live app.
-  eerBefore: '0.164',
-  eerAfter: '0.023',
-  heldOutUsers: '500',
-  cmuGap: '0.0002',
-  exampleRecord: '[false, 2, 122.0, 35.0, −87.0]',
-  batch: '200',
-  // README results 2: privacy label (geometry + key kinds) vs real letter pairs, with the improved scorer.
-  labelEer: '0.025',
-  lettersEer: '0.046',
-  // Owner typing collected, from Abtin's own db summary (data/doppel.db, 2026-10-15), given 2026-11-04.
-  ownerRecords: '25,923',
-  ownerDays: 'eight',
-  secondRecord: '["right", "space", 76.5, 93.0, 16.5]',
-};
-
 export const awards = {
   fblc2025: '1st of 32 teams, Coding & Programming, FBLC Canada 2025',
   fbla2024: '4th of 32 teams, Coding & Programming, FBLA Canada 2024',

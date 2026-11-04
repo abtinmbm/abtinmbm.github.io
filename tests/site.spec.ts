@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const pages = ['/', '/projects/andon/', '/projects/image-stitcher/', '/projects/doppel/', '/about/', '/resume/', '/photography/', '/404'];
+const pages = ['/', '/projects/andon/', '/projects/image-stitcher/', '/about/', '/resume/', '/photography/', '/404'];
 const widths = [320, 390, 768, 1280, 1920];
 
 for (const path of pages) {
@@ -46,16 +46,16 @@ for (const path of pages) {
 test('star trails draw one labelled trail per recent project', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  await expect(page.locator('.sky-labels a')).toHaveCount(5);
+  await expect(page.locator('.sky-labels a')).toHaveCount(4);
   await expect(page.locator('.sky-labels a', { hasText: 'Andon' })).toHaveAttribute('href', '/projects/andon/');
-  await expect(page.locator('.t-proj')).toHaveCount(5);
+  await expect(page.locator('.t-proj')).toHaveCount(4);
 });
 
 test('star trails still show a sky without JavaScript', async ({ browser }) => {
   const ctx = await browser.newContext({ javaScriptEnabled: false });
   const page = await ctx.newPage();
   await page.goto('/');
-  await expect(page.locator('.t-proj')).toHaveCount(5);
+  await expect(page.locator('.t-proj')).toHaveCount(4);
   await expect(page.locator('#work a[href="/projects/andon/"]')).toBeVisible();
   await ctx.close();
 });

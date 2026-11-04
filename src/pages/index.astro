@@ -4,7 +4,7 @@ import Base from '../layouts/Base.astro';
 import StarTrails from '../components/StarTrails.astro';
 import AndonReplay from '../components/AndonReplay.astro';
 import { projects } from '../data/projects';
-import { andon, stitcher, doppel, awards } from '../data/metrics';
+import { andon, stitcher, awards } from '../data/metrics';
 import portrait from '../assets/photos/abtin-portrait.jpg';
 import map91 from '../assets/stitcher/map-91-shape.webp';
 
@@ -39,8 +39,8 @@ const trailProjects = projects.map((p) => ({
   <section class="intro wrap grid" aria-label="About me">
     <Picture pictureAttributes={{ class: "portrait" }} src={portrait} alt="Abtin at a formal event in a suit and bow tie, pointing at the camera" widths={[360, 560, 820]} sizes="(max-width: 759px) 60vw, 26vw" formats={['avif', 'webp']} />
     <div class="intro-text">
-      <p class="lead">I’m Abtin. I’m on the autonomy software team at the Waterloo Aerial Robotics Group, and before Waterloo I won first place in Coding &amp; Programming at the FBLC Canada national conference.</p>
-      <p>I like projects with a real, slightly funny reason to exist, and I check my work against the published baseline before I claim to beat it.</p>
+      <p class="lead">I’m Abtin. I’m in first-year Computer Engineering at the University of Waterloo, on the autonomy software team at the Waterloo Aerial Robotics Group.</p>
+      <p>I like projects with a real reason to exist, and I check my work against the published baseline before I claim to beat it.</p>
       <p><a href="/about/">More about me</a></p>
     </div>
   </section>
@@ -77,21 +77,6 @@ const trailProjects = projects.map((p) => ({
       </div>
     </article>
 
-    <article id="doppel" class="p-doppel wrap" aria-labelledby="doppel-h">
-      <p class="record num" aria-hidden="true">{doppel.exampleRecord}</p>
-      <p class="record-cap small">That record is everything Doppel keeps about one pair of keys: a rough label and three timings. Letters are never stored.</p>
-      <div class="grid">
-        <div class="p-text">
-          <h3 id="doppel-h" class="display">Doppel.exe</h3>
-          <p class="lead">My brother waits until I walk away from my PC, then uses my logged-in session. A password checks you once. Doppel keeps checking, from typing rhythm alone.</p>
-          <p class="status"><b>Finished</b> in October 2026.</p>
-        </div>
-        <div class="p-side">
-          <p>On public datasets, my method cut the mean equal error rate from {doppel.eerBefore} to {doppel.eerAfter}, confirmed on {doppel.heldOutUsers} held-out users.</p>
-          <p><a href="/projects/doppel/">Read about Doppel</a></p>
-        </div>
-      </div>
-    </article>
   </section>
 
   <section class="earlier wrap" aria-labelledby="earlier-h">
@@ -159,10 +144,6 @@ const trailProjects = projects.map((p) => ({
   .p-map .cap { margin-top: var(--s3); color: var(--dim); max-width: 64ch; }
   .p-stitch .p-text { margin-top: var(--s8); max-width: calc(36em + 2 * var(--edge)); }
 
-  .record { font-size: clamp(30px, 5vw, 72px); line-height: 1; font-weight: 500; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: clip; }
-  .record-cap { margin: var(--s3) 0 var(--s8); color: var(--dim); max-width: 60ch; }
-  .p-doppel .p-text { grid-column: 1 / 7; }
-  .p-doppel .p-side { grid-column: 7 / 13; max-width: 34em; display: grid; gap: var(--s4); align-content: start; padding-top: var(--s2); }
 
   /* earlier work */
   .earlier { padding-block: var(--s9); border-top: 1px solid var(--line); }
@@ -196,9 +177,6 @@ const trailProjects = projects.map((p) => ({
     :global(.p-bleed) { overflow: hidden; aspect-ratio: 1 / 1; }
     :global(.p-bleed img) { width: 230%; max-width: none; aspect-ratio: auto; }
     .p-stitch .p-text { margin-top: var(--s7); }
-    .record { white-space: normal; font-size: 30px; }
-    .p-doppel .p-text, .p-doppel .p-side { grid-column: 1 / 13; }
-    .p-doppel .p-side { margin-top: var(--s6); }
     .earlier ul { grid-template-columns: 1fr; }
   }
 </style>
