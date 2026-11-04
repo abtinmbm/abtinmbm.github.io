@@ -280,5 +280,17 @@
   "alt": "A city at night seen from high above, its roads glowing orange",
   "w": 1800,
   "h": 1200
+ },
+ {
+  "file": "48.webp",
+  "alt": "An apartment building on top of a cliff, lit gold, with trees in front",
+  "w": 1200,
+  "h": 1800
+ },
+ {
+  "file": "49.webp",
+  "alt": "Cars on a road through a steep green gorge",
+  "w": 1200,
+  "h": 1800
  }
 ]
