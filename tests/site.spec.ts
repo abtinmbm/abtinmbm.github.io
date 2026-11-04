@@ -99,3 +99,20 @@ test('the stitcher page shows the finished map without JavaScript', async ({ bro
   await expect(page.locator('.grow-ctl')).toBeHidden();
   await ctx.close();
 });
+
+test('every page has its own sharing image, and the sitemap lists the pages', async ({ page, request }) => {
+  const seen = new Set<string>();
+  for (const path of pages.filter((p) => p !== '/404')) {
+    await page.goto(path);
+    const img = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect(img).toBeTruthy();
+    const res = await request.get(new URL(img!).pathname);
+    expect(res.status(), img!).toBe(200);
+    seen.add(img!);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://abtinmbm.github.io${path}`);
+  }
+  expect(seen.size).toBe(pages.length - 1);
+  const map = await (await request.get('/sitemap.xml')).text();
+  for (const path of pages.filter((p) => p !== '/404')) expect(map).toContain(`https://abtinmbm.github.io${path}<`);
+  expect((await request.get('/robots.txt')).status()).toBe(200);
+});

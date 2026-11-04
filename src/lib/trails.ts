@@ -111,7 +111,7 @@ export function svgMarkup(L: Layout): string {
 }
 
 /** Heads on project pages sit higher than on the homepage, clear of the title. */
-export const PAGE_SKY: LayoutOptions = { yTop: 0.1, yBottom: 0.34 };
+export const PAGE_SKY: LayoutOptions = { yTop: 0.1, yBottom: 0.28 };
 
 /** The sky behind a project page: every trail faint, the page's own trail bright.
  *  With cur = -1 (the 404) only the background exposure is drawn. */
