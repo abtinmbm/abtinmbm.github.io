@@ -61,6 +61,9 @@ export function chartSvg(tr: Trace, n: number, W: number, H: number): string {
     out.push(`<text class="rp-note rp-strong" x="${f(xf - 8)}" y="${pad.t - 4}" text-anchor="end">Red ${redDelay(tr).toFixed(1)} s later</text>`);
   }
 
+  // the whole run, faint, under the part played so far
+  out.push(`<polyline class="rp-ghost" points="${tr.t.map((t, i) => `${f(x(t))},${f(y(tr.s[i]))}`).join(' ')}"/>`);
+
   // the score so far
   if (n > 0) {
     const pts = tr.t.slice(0, n).map((t, i) => `${f(x(t))},${f(y(tr.s[i]))}`).join(' ');

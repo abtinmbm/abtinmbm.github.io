@@ -6,7 +6,7 @@ import AndonReplay from '../components/AndonReplay.astro';
 import { projects } from '../data/projects';
 import { andon, stitcher, awards } from '../data/metrics';
 import portrait from '../assets/photos/abtin-portrait.jpg';
-import map91 from '../assets/stitcher/map-91-shape.webp';
+import mapStage from '../assets/stitcher/stages/stage-20.webp';
 
 const trailProjects = projects.map((p) => ({
   name: p.name,
@@ -15,13 +15,27 @@ const trailProjects = projects.map((p) => ({
   start: p.start,
   end: p.end,
 }));
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Abtin Aryanpour',
+  url: 'https://abtinmbm.github.io/',
+  email: 'mailto:aaryanpo@uwaterloo.ca',
+  description: 'First-year Computer Engineering student at the University of Waterloo.',
+  affiliation: [
+    { '@type': 'CollegeOrUniversity', name: 'University of Waterloo' },
+    { '@type': 'Organization', name: 'Waterloo Aerial Robotics Group' },
+  ],
+  sameAs: ['https://github.com/abtinmbm', 'https://www.linkedin.com/in/abtin-aryanpour'],
+};
 ---
 <Base
   title="Abtin Aryanpour, Computer Engineering at Waterloo"
-  description="First-year Computer Engineering student at the University of Waterloo, building across software and firmware. Looking for a co-op, May to August 2027."
+  description="First-year Computer Engineering student at the University of Waterloo, building across software and firmware. Looking for a co&#8209;op, May to August 2027."
   overlay
   current="home"
 >
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(person)} />
   <section class="hero" aria-labelledby="hero-name">
     <div class="sky">
       <StarTrails projects={trailProjects} />
@@ -30,7 +44,7 @@ const trailProjects = projects.map((p) => ({
       <h1 id="hero-name" class="display">Abtin Aryanpour</h1>
       <div class="who-text">
         <p>First-year Computer Engineering student at the University of Waterloo. I build across software and firmware, and I’ve started two projects since October.</p>
-        <p class="avail">Looking for a co-op, May to August 2027.</p>
+        <p class="avail">Looking for a co&#8209;op, May to August 2027.</p>
       </div>
       <p class="key small">Each bright trail above is one of my projects, as long as I worked on it. Trails with a glowing head are still growing. Click a name to open it.</p>
     </div>
@@ -65,8 +79,8 @@ const trailProjects = projects.map((p) => ({
 
     <article id="image-stitcher" class="p-stitch" aria-labelledby="stitch-h">
       <figure class="p-map wrap">
-        <Picture pictureAttributes={{ class: "p-bleed" }} src={map91} fallbackFormat="webp" alt="A map stitched from 91 simulated drone photos. Its stepped outline shows where the photos landed, and only its painted ground markers are drawn inside." widths={[800, 1400, 2400]} sizes="(max-width: 759px) 100vw, 95vw" formats={['avif', 'webp']} />
-        <figcaption class="cap small">One simulated mission of {stitcher.photos} photos. The stepped outline is the edge of the stitched photos, and only the painted ground markers are kept inside it.</figcaption>
+        <Picture pictureAttributes={{ class: "p-bleed" }} src={mapStage} fallbackFormat="webp" alt="A map stitched from the first 20 of 91 simulated drone photos. Its stepped outline shows where the photos landed, with gaps where photos haven’t arrived yet." widths={[800, 1200, 1664]} sizes="(max-width: 759px) 100vw, 95vw" formats={['avif', 'webp']} />
+        <figcaption class="cap small">One simulated mission, after 20 of its {stitcher.photos} photos. The stepped outline is the edge of the stitched photos, the gaps are ground no photo has covered yet, and only the painted ground markers are kept inside.</figcaption>
       </figure>
       <div class="p-text wrap">
         <h3 id="stitch-h" class="display">Image Stitcher</h3>
@@ -90,7 +104,7 @@ const trailProjects = projects.map((p) => ({
       </li>
       <li id="school-partner-directory">
         <h3>School Partner Directory</h3>
-        <p>A Django directory for linking a school with local partners, seeded with 25+ sample organizations. I handled hosting and production debugging.</p>
+        <p>A Django directory for linking a school with local partners, seeded with 25 sample organizations. I handled hosting and production debugging.</p>
         <p class="dim">{awards.fbla2024}</p>
         <a href="https://github.com/abtinmbm/FBLA2024">Code on GitHub<span class="visually-hidden"> for School Partner Directory</span></a>
       </li>
@@ -106,7 +120,7 @@ const trailProjects = projects.map((p) => ({
 
 <style>
   /* first screen */
-  .hero { position: relative; height: 100svh; min-height: 660px; overflow: hidden;
+  .hero { position: relative; height: 100svh; min-height: 820px; overflow: hidden;
     background: radial-gradient(120% 90% at 30% 120%, var(--glow), var(--deep) 45%, var(--black) 85%); }
   .sky { position: absolute; inset: 0; }
   .hero::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
@@ -140,7 +154,7 @@ const trailProjects = projects.map((p) => ({
   .p-stitch { position: relative; }
   :global(.p-bleed) { display: block; }
   .p-map { margin: 0; }
-  :global(.p-bleed img) { width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; object-position: 50% 0; }
+  :global(.p-bleed img) { width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: contain; object-position: 50% 50%; }
   .p-map .cap { margin-top: var(--s3); color: var(--dim); max-width: 64ch; }
   .p-stitch .p-text { margin-top: var(--s8); max-width: calc(36em + 2 * var(--edge)); }
 
@@ -174,8 +188,7 @@ const trailProjects = projects.map((p) => ({
     .p-map { padding-inline: 0; }
     .p-map .cap { padding-inline: var(--edge); }
     /* phones: show a third of the mission larger, so the markers read as shapes */
-    :global(.p-bleed) { overflow: hidden; aspect-ratio: 1 / 1; }
-    :global(.p-bleed img) { width: 230%; max-width: none; aspect-ratio: auto; }
+    :global(.p-bleed img) { aspect-ratio: auto; }
     .p-stitch .p-text { margin-top: var(--s7); }
     .earlier ul { grid-template-columns: 1fr; }
   }

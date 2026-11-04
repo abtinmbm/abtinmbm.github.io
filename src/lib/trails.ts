@@ -63,7 +63,7 @@ export function layout(projects: TrailProject[], W: number, H: number, now: Date
   const rMax = S * (mobile ? 0.95 : 1.0);
   const yTop = H * (opts.yTop ?? 0.2);
   const yBottom = H * (opts.yBottom ?? (mobile ? 0.7 : 0.48));
-  const labelled = mobile ? 4 : 6;
+  const labelled = mobile ? 3 : 6;
 
   const trails: ProjectTrail[] = projects.map((p, i) => {
     const t = n === 1 ? 0.5 : i / (n - 1);
@@ -111,7 +111,7 @@ export function svgMarkup(L: Layout): string {
 }
 
 /** Heads on project pages sit higher than on the homepage, clear of the title. */
-export const PAGE_SKY: LayoutOptions = { yTop: 0.1, yBottom: 0.34 };
+export const PAGE_SKY: LayoutOptions = { yTop: 0.1, yBottom: 0.28 };
 
 /** The sky behind a project page: every trail faint, the page's own trail bright.
  *  With cur = -1 (the 404) only the background exposure is drawn. */

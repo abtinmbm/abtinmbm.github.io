@@ -27,8 +27,8 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
       <h2 id="skills">Technical skills</h2>
       <dl class="skills">
         <div><dt>Languages</dt><dd>Python, C/C++, Java, JavaScript, SQL, HTML/CSS</dd></div>
-        <div><dt>Frameworks and libraries</dt><dd>Django, REST APIs, PyTorch, OpenCV, NumPy, scikit-learn, Streamlit</dd></div>
-        <div><dt>Tools and platforms</dt><dd>Git, GitHub Actions (CI), pytest, CMake, SQLite, AWS CloudFront</dd></div>
+        <div><dt>Frameworks and libraries</dt><dd>PyTorch, NumPy, OpenCV, scikit-learn, Django, Streamlit, jQuery</dd></div>
+        <div><dt>Tools and platforms</dt><dd>Git, GitHub Actions (CI), pytest, uv, CMake, SQLite, AWS (EC2, CloudFront)</dd></div>
       </dl>
     </section>
 
@@ -48,7 +48,7 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
         <h3><a href="/projects/image-stitcher/">Image Stitcher, Waterloo Aerial Robotics Group</a></h3>
         <p class="meta">Python, PyTorch, OpenCV. Pull request #215. October 2026 to now.</p>
         <ul>
-          <li>Developed a groundside orthomosaic stitcher on the autonomy subteam, merging out-of-order, GPS-tagged photos from 3 drones into one georeferenced map using XFeat learned features and RANSAC.</li>
+          <li>Developed a groundside orthomosaic stitcher on the autonomy subteam, merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map using XFeat learned features and RANSAC.</li>
           <li>Fused images with noisy GPS to recover heading, aligning photos within 6.9&nbsp;cm at 3&nbsp;m of simulated GPS error.</li>
           <li>Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13–41&nbsp;cm to 4–7&nbsp;cm.</li>
           <li>Handled 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated 91-photo missions.</li>
@@ -59,7 +59,7 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
         <h3><a href="https://github.com/abtinmbm/cybershield">CyberShield: full-stack discussion forum</a></h3>
         <p class="meta">Python, Django, JavaScript, Tailwind CSS. March 2025.</p>
         <ul>
-          <li>Sole developer of a responsive forum where users post, comment and vote, with sorting, topic filtering and fuzzy search (Fuse.js), built on Django, Django REST Framework and SQLite.</li>
+          <li>Sole developer of a responsive forum where users post, comment and vote, with sorting, topic filtering and fuzzy search (Fuse.js), built on Django, jQuery (AJAX) and SQLite.</li>
           <li>Secured accounts with Django authentication, CSRF protection and reCAPTCHA on login and signup, and added rich-text posts (CKEditor) and profile picture uploads.</li>
           <li>Deployed live behind AWS CloudFront with a seeded demo dataset. Won 1st place in Coding &amp; Programming at the Canadian National Leadership Conference 2025 (32 teams).</li>
         </ul>
@@ -111,7 +111,7 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
   h3 { font-size: 18px; font-weight: 500; }
   .meta { color: var(--dim); font-size: 15px; }
   ul { margin: var(--s2) 0 0 -1.1em; padding-left: 1.1em; display: grid; gap: var(--s2); }
-  ul.plain { margin: 0; }
+  ul.plain { margin: 0 0 0 -1.1em; }
   .skills { margin: 0; display: grid; gap: var(--s3); }
   .skills dt { font-weight: 500; }
   .skills dd { margin: 0; color: var(--dim); }
@@ -119,6 +119,6 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
     .cv { padding-top: var(--s7); }
     h2, section > :not(h2) { grid-column: 1 / 13; }
     h2 { margin-bottom: var(--s4); }
-    ul { margin-left: 0; }
+    ul, ul.plain { margin-left: 0; }
   }
 </style>

@@ -79,13 +79,13 @@ test('the stitcher map grows with the slider and the keyboard', async ({ page })
   await page.goto('/projects/image-stitcher/');
   const range = page.locator('#grow-range');
   const on = page.locator('.grow-frame.on');
-  await expect(on).toHaveAttribute('data-n', '91');
-  await range.focus();
-  await page.keyboard.press('ArrowLeft');
-  await expect(on).toHaveAttribute('data-n', '80');
-  await expect(range).toHaveAttribute('aria-valuetext', '80 photos');
-  await page.keyboard.press('Home');
   await expect(on).toHaveAttribute('data-n', '20');
+  await range.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(on).toHaveAttribute('data-n', '40');
+  await expect(range).toHaveAttribute('aria-valuetext', '40 photos');
+  await page.keyboard.press('End');
+  await expect(on).toHaveAttribute('data-n', '91');
   await expect(page.locator('.grow-frame[aria-hidden="true"]')).toHaveCount(4);
   await page.locator('.grow-ticks button', { hasText: '60' }).click();
   await expect(on).toHaveAttribute('data-n', '60');
@@ -98,4 +98,21 @@ test('the stitcher page shows the finished map without JavaScript', async ({ bro
   await expect(page.locator('.grow-frame.on')).toHaveAttribute('data-n', '91');
   await expect(page.locator('.grow-ctl')).toBeHidden();
   await ctx.close();
+});
+
+test('every page has its own sharing image, and the sitemap lists the pages', async ({ page, request }) => {
+  const seen = new Set<string>();
+  for (const path of pages.filter((p) => p !== '/404')) {
+    await page.goto(path);
+    const img = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect(img).toBeTruthy();
+    const res = await request.get(new URL(img!).pathname);
+    expect(res.status(), img!).toBe(200);
+    seen.add(img!);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://abtinmbm.github.io${path}`);
+  }
+  expect(seen.size).toBe(pages.length - 1);
+  const map = await (await request.get('/sitemap.xml')).text();
+  for (const path of pages.filter((p) => p !== '/404')) expect(map).toContain(`https://abtinmbm.github.io${path}<`);
+  expect((await request.get('/robots.txt')).status()).toBe(200);
 });

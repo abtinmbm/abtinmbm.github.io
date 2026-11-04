@@ -2,6 +2,7 @@
 import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import ProjectTrail from '../../components/ProjectTrail.astro';
+import Bars from '../../components/Bars.astro';
 import { stitcher } from '../../data/metrics';
 import { projects } from '../../data/projects';
 import '../../styles/project.css';
@@ -14,6 +15,16 @@ import s91 from '../../assets/stitcher/stages/stage-91.webp';
 const p = projects.find((x) => x.slug === 'image-stitcher')!;
 const stages = [[20, s20], [40, s40], [60, s60], [80, s80], [91, s91]] as const;
 const last = stages.length - 1;
+// 600 candidate matches between rows, 30 by 20; the best simulated run kept 13.
+const kept = 13;
+// Which dots are bright is arbitrary (a fixed seed), so they scatter instead of forming a pattern.
+let seed = 11;
+const lit = new Set<number>();
+while (lit.size < kept) lit.add((seed = (seed * 16807) % 2147483647) % 600);
+const dots = Array.from({ length: 600 }, (_, i) => ({ x: (i % 30) * 10 + 5, y: Math.floor(i / 30) * 10 + 5, on: lit.has(i) }));
+// Without JavaScript the finished map shows. With it, the slider opens on the first stage
+// (the section is below the first screen, so the switch is never seen), and visitors grow it.
+const first = 0;
 ---
 <Base
   title="Image Stitcher: one map from several drones | Abtin Aryanpour"
@@ -41,10 +52,10 @@ const last = stages.length - 1;
           ))}
         </div>
         <div class="grow-ctl" hidden>
-          <output class="grow-out num" for="grow-range" aria-hidden="true"><b>91</b> photos</output>
+          <output class="grow-out num" for="grow-range" aria-hidden="true"><b>20</b> photos</output>
           <div class="grow-track">
-            <input id="grow-range" type="range" min="0" max={last} step="1" value={last}
-              aria-label="Photos stitched so far" aria-valuetext="91 photos" />
+            <input id="grow-range" type="range" min="0" max={last} step="1" value={first}
+              aria-label="Photos stitched so far" aria-valuetext="20 photos" />
             <ol class="grow-ticks small num" aria-hidden="true">
               {stages.map(([n], k) => <li style={`--k:${k}`}><button type="button" tabindex="-1" data-k={k}>{n}</button></li>)}
             </ol>
@@ -98,10 +109,20 @@ const last = stages.length - 1;
       <div class="problem">
         <h3>Rows wouldn’t connect</h3>
         <p>The drones turn 180 degrees at the end of each row, and XFeat isn’t rotation invariant. In simulated missions, of 600 candidate matches between rows, only {stitcher.rowMatches.replace(' of 600', '')} survived RANSAC. Extracting features at four quarter turns fixed it.</p>
+        <figure class="ev">
+          <svg class="dots" viewBox="0 0 300 200" role="img" aria-label={`600 dots for the candidate matches, ${kept} of them bright`}>
+            {dots.map((d) => <circle cx={d.x} cy={d.y} r={d.on ? 3.2 : 1.6} class:list={{ on: d.on }} />)}
+          </svg>
+          <figcaption class="small">Before the fix: at best 13 of 600 candidate matches between rows survived, in simulated missions.</figcaption>
+        </figure>
       </div>
       <div class="problem">
         <h3>Refinement made the map worse</h3>
         <p>The first version gave simulated errors of 20 to 30 m, because a huge penalty weight on the pinned photo made the solver unstable. Removing that photo’s unknowns from the system fixed it.</p>
+        <div class="ev">
+          <Bars min={0} max={45} ticks={[0, 15, 30, 45]} unit="cm" caption="After the fix: misalignment between neighbouring photos, across simulated missions."
+            rows={[{ label: 'Without it', from: 13, to: 41, text: stitcher.refineBefore }, { label: 'With it', from: 4, to: 7, text: stitcher.refineAfter, strong: true }]} />
+        </div>
       </div>
       <div class="problem">
         <h3>One simulated run in 10 split the map</h3>
@@ -133,6 +154,9 @@ const last = stages.length - 1;
 
 <style>
   .stages-sec { padding-top: var(--s8); }
+  .dots { display: block; width: 100%; height: auto; }
+  .dots circle { fill: var(--dim); opacity: 0.35; }
+  .dots circle.on { fill: var(--white); opacity: 1; }
   .stages { margin: 0; max-width: 880px; }
   .grow-stack { display: grid; }
   .grow-frame { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0s 0.25s; }

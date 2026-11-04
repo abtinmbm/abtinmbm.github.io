@@ -59,6 +59,7 @@ export const stitcher = {
 };
 
 export const awards = {
-  fblc2025: '1st of 32 teams, Coding & Programming, FBLC Canada 2025',
+  // CNLC is the competition; FBLC Canada (2025) and FBLA Canada (2024) ran it. Abtin, 2026-11-04.
+  fblc2025: '1st of 32 teams, Coding & Programming, CNLC 2025 (FBLC Canada)',
   fbla2024: '4th of 32 teams, Coding & Programming, FBLA Canada 2024',
 };

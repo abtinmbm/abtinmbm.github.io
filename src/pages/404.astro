@@ -18,7 +18,7 @@ import ProjectTrail from '../components/ProjectTrail.astro';
 </Base>
 
 <style>
-  .lost { position: relative; min-height: 78svh; display: grid; align-items: end; overflow: hidden;
+  .lost { position: relative; min-height: min(78svh, calc(100svh - 200px)); display: grid; align-items: end; overflow: hidden;
     background: radial-gradient(110% 80% at 20% 130%, var(--glow), var(--deep) 45%, var(--black) 85%); }
   .lost-sky { position: absolute; inset: 0; }
   .lost::after { content: ""; position: absolute; inset: 0; pointer-events: none;
