@@ -22,6 +22,17 @@ const projectEntries: Entry[] = [
     ],
   },
   {
+    title: 'Image Stitcher, Waterloo Aerial Robotics Group', href: '/projects/image-stitcher/',
+    meta: 'Python, PyTorch, OpenCV. Pull request #215', when: 'October 2026 to now',
+    points: [
+      'Developed a groundside orthomosaic stitcher on the autonomy subteam, merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map using XFeat learned features and RANSAC.',
+      'Fused images with noisy GPS to recover heading, aligning photos within 6.9 cm at 3 m of simulated GPS error.',
+      'Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13–41 cm to 4–7 cm.',
+      'Handled 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated 91-photo missions.',
+      'Added lens undistortion and blur, exposure and tilt checks, and built a ground-truth mission simulator and 80 tests.',
+    ],
+  },
+  {
     title: 'CyberShield: full-stack discussion forum', href: 'https://github.com/abtinmbm/cybershield',
     meta: 'Python, Django, JavaScript, Tailwind CSS', when: 'March 2025',
     points: [
@@ -33,14 +44,10 @@ const projectEntries: Entry[] = [
 ];
 const experience: Entry[] = [
   {
-    title: 'Autonomy Software Member',
-    meta: 'Waterloo Aerial Robotics Group, Waterloo, ON. Python, PyTorch, OpenCV', when: 'September 2026 to now',
+    title: 'Autonomy Software Member', meta: 'Waterloo Aerial Robotics Group, Waterloo, ON', when: 'September 2026 to now',
     points: [
-      'Developed a groundside orthomosaic stitcher (pull request #215), merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map using XFeat learned features and RANSAC.',
-      'Fused images with noisy GPS to recover heading, aligning photos within 6.9 cm at 3 m of simulated GPS error.',
-      'Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13–41 cm to 4–7 cm.',
-      'Handled 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated 91-photo missions.',
-      'Added lens undistortion and blur, exposure and tilt checks, and built a ground-truth mission simulator and 80 tests.',
+      'Write Python for the autonomy subteam’s shared codebase, submitting all changes as reviewed pull requests.',
+      'Built the team’s groundside image stitcher (pull request #215) and worked through two rounds of review changes, including a fix for sensor noise fooling the blur check.',
     ],
   },
   {
@@ -58,6 +65,11 @@ const experience: Entry[] = [
     ],
   },
 ];
+const awards = [
+  '1st place (2025, CNLC) and 4th place (2024, FBLA), Coding & Programming, national competitions',
+  'Euclid (86) and Hypatia (33) Honour Roll, and Fermat and CSMC Distinction, University of Waterloo, 2025–2026',
+  'Excellence in Mathematics, Bayview Secondary School Mathematics Department: Advanced Functions (MHF4U), 2025, and Data Management (MDM4U), 2026',
+];
 const skills = [
   ['Languages', 'Python, C/C++, Java, JavaScript, SQL, HTML/CSS'],
   ['Frameworks and libraries', 'PyTorch, NumPy, OpenCV, scikit-learn, Django, Streamlit, jQuery'],
@@ -66,14 +78,14 @@ const skills = [
 ---
 <Base
   title="Resume | Abtin Aryanpour"
-  description="The resume of Abtin Aryanpour, first-year Computer Engineering at the University of Waterloo: experience, projects and skills, with a PDF to download."
+  description="The resume of Abtin Aryanpour, first-year Computer Engineering at the University of Waterloo: projects, experience, skills and awards, with a PDF to download."
   current="resume"
 >
   <div class="cv wrap grid">
     <header class="cv-side">
       <h1 class="display">Resume</h1>
       <p class="who">Abtin Aryanpour<br /><span class="dim">Computer Engineering, University of Waterloo</span></p>
-      <a class="get" href={pdf} download><Icon name="file" /><span>Download the PDF<span class="small dim">One page, 119&nbsp;KB</span></span></a>
+      <a class="get" href={pdf} download><Icon name="file" /><span>Download the PDF<span class="small dim">One page, 118&nbsp;KB</span></span></a>
       <ul class="reach">
         <li><a href="mailto:aaryanpo@uwaterloo.ca"><Icon name="mail" />aaryanpo@uwaterloo.ca</a></li>
         <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><Icon name="linkedin" />linkedin.com/in/abtin-aryanpour</a></li>
@@ -100,6 +112,16 @@ const skills = [
         </dl>
       </section>
 
+      <section aria-labelledby="projects">
+        <h2 id="projects">Projects</h2>
+        {projectEntries.map((e) => (
+          <div class="entry">
+            <div class="e-head"><h3><a href={e.href}>{e.title}</a></h3><p class="when">{e.when}</p></div>
+            <p class="meta">{e.meta}</p>
+            <ul>{e.points!.map((pt) => <li>{pt}</li>)}</ul>
+          </div>
+        ))}
+      </section>
 
       <section aria-labelledby="exp">
         <h2 id="exp">Experience</h2>
@@ -112,15 +134,9 @@ const skills = [
         ))}
       </section>
 
-      <section aria-labelledby="projects">
-        <h2 id="projects">Projects</h2>
-        {projectEntries.map((e) => (
-          <div class="entry">
-            <div class="e-head"><h3><a href={e.href}>{e.title}</a></h3><p class="when">{e.when}</p></div>
-            <p class="meta">{e.meta}</p>
-            <ul>{e.points!.map((pt) => <li>{pt}</li>)}</ul>
-          </div>
-        ))}
+      <section aria-labelledby="awards">
+        <h2 id="awards">Awards</h2>
+        <ul>{awards.map((a) => <li>{a}</li>)}</ul>
       </section>
 
     </div>
