@@ -10,7 +10,7 @@ const photos = list.map((p) => ({ ...p, src: files[`../assets/photography/${p.fi
 // The page reads like a photo book: panoramas run edge to edge, photos of the same shape
 // sit in pairs, and single photos take turns between the full measure and an offset.
 // Numbers are positions in photos.json, counting from 1.
-const groups = [[1], [2, 4], [3, 5], [6], [7, 8], [9], [10, 30], [11, 12], [13], [14, 15], [16], [17, 19], [18], [21, 22], [20], [25, 26], [23, 24], [27], [28, 29], [31], [32, 33], [34, 35], [36], [37]];
+const groups = [[1], [2, 4], [3, 5], [6], [7, 8], [9], [10, 30], [11, 12], [13], [14, 47], [15], [16], [38, 40], [39, 41], [42, 45], [43, 44], [17, 22], [18], [19, 46], [20], [21, 25], [23, 24], [26, 27], [28, 29], [31], [32, 33], [34, 35], [36], [37]];
 type Row = { kind: 'pano' | 'pair' | 'wide' | 'offset' | 'single-tall'; items: typeof photos };
 let flip = false;
 const rows: Row[] = groups.map((g) => {
@@ -27,7 +27,7 @@ const sizes = { pano: '100vw', pair: '(max-width: 759px) 92vw, 46vw', wide: '(ma
 ---
 <Base
   title="Photography | Abtin Aryanpour"
-  description="Photos by Abtin Aryanpour, taken on a Canon EOS 90D: cities at night, mountains, a summer trip to China, and a few cats."
+  description="Photos by Abtin Aryanpour, taken on a Canon EOS 90D: cities at night, school sports, fire performers, mountains, a summer trip to China, and a few cats."
 >
   <header class="ph-head wrap">
     <h1 class="display">Photography</h1>
