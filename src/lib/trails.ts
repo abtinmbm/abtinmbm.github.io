@@ -63,7 +63,7 @@ export function layout(projects: TrailProject[], W: number, H: number, now: Date
   const rMax = S * (mobile ? 0.95 : 1.0);
   const yTop = H * (opts.yTop ?? 0.2);
   const yBottom = H * (opts.yBottom ?? (mobile ? 0.7 : 0.48));
-  const labelled = mobile ? 4 : 6;
+  const labelled = mobile ? 3 : 6;
 
   const trails: ProjectTrail[] = projects.map((p, i) => {
     const t = n === 1 ? 0.5 : i / (n - 1);

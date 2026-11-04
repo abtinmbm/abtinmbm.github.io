@@ -111,7 +111,7 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
   h3 { font-size: 18px; font-weight: 500; }
   .meta { color: var(--dim); font-size: 15px; }
   ul { margin: var(--s2) 0 0 -1.1em; padding-left: 1.1em; display: grid; gap: var(--s2); }
-  ul.plain { margin: 0; }
+  ul.plain { margin: 0 0 0 -1.1em; }
   .skills { margin: 0; display: grid; gap: var(--s3); }
   .skills dt { font-weight: 500; }
   .skills dd { margin: 0; color: var(--dim); }
@@ -119,6 +119,6 @@ const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
     .cv { padding-top: var(--s7); }
     h2, section > :not(h2) { grid-column: 1 / 13; }
     h2 { margin-bottom: var(--s4); }
-    ul { margin-left: 0; }
+    ul, ul.plain { margin-left: 0; }
   }
 </style>
