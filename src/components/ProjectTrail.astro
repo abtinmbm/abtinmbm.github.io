@@ -13,6 +13,10 @@ const initial = pageSkyMarkup(layout(sky, 1440, 760, new Date(), PAGE_SKY), cur)
 ---
 <svg class="ptrail" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMin slice" aria-hidden="true"
   data-sky={JSON.stringify(sky)} data-cur={cur} set:html={initial} />
+<script is:inline>
+  // Set before first paint, so the sky draws in instead of flashing complete.
+  if (matchMedia('(prefers-reduced-motion: no-preference)').matches) document.currentScript.previousElementSibling.classList.add('develop');
+</script>
 
 <style is:global>
   .ptrail { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -24,6 +28,14 @@ const initial = pageSkyMarkup(layout(sky, 1440, 760, new Date(), PAGE_SKY), cur)
   @media (prefers-reduced-motion: no-preference) {
     .ptrail .pt-head.live { animation: pt-breathe 3.2s ease-in-out 3; }
     @keyframes pt-breathe { 50% { opacity: 0.5; } }
+    /* On load: the faint sky draws in, then this page's trail traces from its start to its head. */
+    .ptrail.develop :is(.t-bg, .pt-line) { stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: pt-draw 1.5s cubic-bezier(0.35, 0.1, 0.25, 1) var(--d, 0s) forwards; }
+    .ptrail.develop .pt-line { animation-delay: 0.2s; }
+    .ptrail.develop .pt-line.on { animation-duration: 1.8s; animation-delay: 0.5s; }
+    .ptrail.develop :is(.pt-head, .pt-halo) { opacity: 0; animation: pt-in 300ms ease-out 2.2s forwards; }
+    .ptrail.develop .pt-head.live { animation: pt-in 300ms ease-out 2.2s forwards, pt-breathe 3.2s ease-in-out 2.5s 3; }
+    @keyframes pt-draw { to { stroke-dashoffset: 0; } }
+    @keyframes pt-in { to { opacity: 1; } }
   }
 </style>
 
@@ -41,6 +53,8 @@ const initial = pageSkyMarkup(layout(sky, 1440, 760, new Date(), PAGE_SKY), cur)
     }
   }
   draw();
+  // Resizing after the draw-in redraws the sky complete, without replaying it.
+  setTimeout(() => svgs.forEach((s) => s.classList.remove('develop')), 2800);
   let t = 0;
   addEventListener('resize', () => { clearTimeout(t); t = window.setTimeout(draw, 150); });
 </script>

@@ -41,12 +41,17 @@ const first = 0;
       </div>
     </header>
 
-    <section class="stages-sec wrap" aria-label="The map as it grows">
-      <figure class="stages grow" data-grow>
+    <section class="sec first wrap grid" aria-labelledby="why-h">
+      <div class="side">
+        <h2 id="why-h" class="visually-hidden">Why it exists</h2>
+        <p class="lede">Drones fly back and forth over a field taking photos. The photos reach the ground laptop out of order, from several drones, with GPS that’s metres off and no compass heading.</p>
+        <p class="lede-more">GPS finds which photos should overlap, image matching lines them up, and all the GPS readings together place the finished map on the Earth.</p>
+      </div>
+      <figure class="main stages grow" data-grow>
         <div class="grow-stack">
           {stages.map(([n, img], k) => (
             <div class:list={['grow-frame', { on: k === last }]} data-n={n} aria-hidden={k === last ? undefined : 'true'}>
-              <Picture src={img} fallbackFormat="webp" formats={['avif', 'webp']} widths={[700, 1100, 1664]} sizes="(max-width: 759px) 92vw, 880px"
+              <Picture src={img} fallbackFormat="webp" formats={['avif', 'webp']} widths={[700, 1100, 1664]} sizes="(max-width: 899px) 92vw, 62vw"
                 loading={k === last ? 'eager' : 'lazy'} alt={k === last ? 'The finished map after all 91 photos' : `The map after ${n} photos`} />
             </div>
           ))}
@@ -65,15 +70,25 @@ const first = 0;
       </figure>
     </section>
 
-    <section class="why wrap" aria-labelledby="why-h">
-      <h2 id="why-h" class="visually-hidden">Why it exists</h2>
-      <p class="statement">Drones fly back and forth over a field taking photos. The photos reach the ground laptop out of order, from several drones, with GPS that’s metres off and no compass heading.</p>
-      <p class="why-more">GPS finds which photos should overlap, image matching lines them up, and all the GPS readings together place the finished map on the Earth.</p>
+    <section class="sec wrap grid" aria-labelledby="how-h">
+      <div class="side"><h2 id="how-h">From shuffled photos to one map</h2></div>
+      <ol class="main steps">
+        <li><p><b>Check.</b> Each photo is checked for blur, exposure and tilt. The ones that pass are undistorted for the lens.</p></li>
+        <li><p><b>Find neighbours.</b> GPS says which photos should overlap, even when they arrive out of order from different drones.</p></li>
+        <li><p><b>Match.</b> XFeat learned features and RANSAC line each pair up and throw out wrong matches.</p></li>
+        <li><p><b>Recover heading.</b> There’s no compass, so the matches and the noisy GPS together work out which way each photo faces.</p></li>
+        <li><p><b>Refine.</b> A least-squares solver, in the style of bundle adjustment, adjusts every photo at once so the whole map agrees.</p></li>
+        <li><p><b>Place.</b> All the GPS readings together put the finished map in the right place on the Earth.</p></li>
+      </ol>
     </section>
 
-    <section class="results wrap grid" aria-labelledby="results-h">
-      <h2 id="results-h">One connected map in {stitcher.missions} simulated missions</h2>
-      <div class="chart">
+    <section class="sec wrap grid" aria-labelledby="results-h">
+      <div class="side">
+        <h2 id="results-h">One connected map in {stitcher.missions} simulated missions</h2>
+        <p class="note">The simulator knows where every photo really was, so each run can be scored against the truth instead of by eye.</p>
+        <p class="note">Alignment is how far apart the same ground point lands in two neighbouring photos. Map position is how far the whole map sits from where it should be on the Earth.</p>
+      </div>
+      <div class="main">
         <table class="facts-table">
           <caption class="small">All simulated: 10 missions of 91 photos from 3 drones, arriving shuffled, with the heading unknown.</caption>
           <tbody>
@@ -86,63 +101,58 @@ const first = 0;
           </tbody>
         </table>
       </div>
-      <div class="notes">
-        <p>The simulator knows where every photo really was, so each run can be scored against the truth instead of by eye.</p>
-        <p>Alignment is how far apart the same ground point lands in two neighbouring photos. Map position is how far the whole map sits from where it should be on the Earth.</p>
-      </div>
     </section>
 
-    <section class="how wrap grid" aria-labelledby="how-h">
-      <h2 id="how-h">From shuffled photos to one map</h2>
-      <ol>
-        <li><p><b>Check.</b> Each photo is checked for blur, exposure and tilt. The ones that pass are undistorted for the lens.</p></li>
-        <li><p><b>Find neighbours.</b> GPS says which photos should overlap, even when they arrive out of order from different drones.</p></li>
-        <li><p><b>Match.</b> XFeat learned features and RANSAC line each pair up and throw out wrong matches.</p></li>
-        <li><p><b>Recover heading.</b> There’s no compass, so the matches and the noisy GPS together work out which way each photo faces.</p></li>
-        <li><p><b>Refine.</b> A least-squares solver, in the style of bundle adjustment, adjusts every photo at once so the whole map agrees.</p></li>
-        <li><p><b>Place.</b> All the GPS readings together put the finished map in the right place on the Earth.</p></li>
-      </ol>
-    </section>
-
-    <section class="story wrap" aria-labelledby="hard-h">
-      <h2 id="hard-h" class="visually-hidden">What was hard</h2>
-      <div class="problem">
-        <h3>Rows wouldn’t connect</h3>
-        <p>The drones turn 180 degrees at the end of each row, and XFeat isn’t rotation invariant. In simulated missions, of 600 candidate matches between rows, only {stitcher.rowMatches.replace(' of 600', '')} survived RANSAC. Extracting features at four quarter turns fixed it.</p>
-        <figure class="ev">
-          <svg class="dots" viewBox="0 0 300 200" role="img" aria-label={`600 dots for the candidate matches, ${kept} of them bright`}>
-            {dots.map((d) => <circle cx={d.x} cy={d.y} r={d.on ? 3.2 : 1.6} class:list={{ on: d.on }} />)}
-          </svg>
-          <figcaption class="small">Before the fix: at best 13 of 600 candidate matches between rows survived, in simulated missions.</figcaption>
-        </figure>
-      </div>
-      <div class="problem">
-        <h3>Refinement made the map worse</h3>
-        <p>The first version gave simulated errors of 20 to 30 m, because a huge penalty weight on the pinned photo made the solver unstable. Removing that photo’s unknowns from the system fixed it.</p>
-        <div class="ev">
-          <Bars min={0} max={45} ticks={[0, 15, 30, 45]} unit="cm" caption="After the fix: misalignment between neighbouring photos, across simulated missions."
-            rows={[{ label: 'Without it', from: 13, to: 41, text: stitcher.refineBefore }, { label: 'With it', from: 4, to: 7, text: stitcher.refineAfter, strong: true }]} />
+    <div class="story">
+      <h2 class="visually-hidden">What was hard</h2>
+      <section class="sec wrap grid" aria-labelledby="hard-1">
+        <div class="side"><h3 id="hard-1">Rows wouldn’t connect</h3></div>
+        <div class="main pair">
+          <p>The drones turn 180 degrees at the end of each row, and XFeat isn’t rotation invariant. In simulated missions, of 600 candidate matches between rows, only {stitcher.rowMatches.replace(' of 600', '')} survived RANSAC. Extracting features at four quarter turns fixed it.</p>
+          <figure class="ev">
+            <svg class="dots" viewBox="0 0 300 200" role="img" aria-label={`600 dots for the candidate matches, ${kept} of them bright`}>
+              {dots.map((d) => <circle cx={d.x} cy={d.y} r={d.on ? 3.2 : 1.6} class:list={{ on: d.on }} />)}
+            </svg>
+            <figcaption class="small">Before the fix: at best 13 of 600 candidate matches between rows survived, in simulated missions.</figcaption>
+          </figure>
         </div>
-      </div>
-      <div class="problem">
-        <h3>One simulated run in 10 split the map</h3>
-        <p>Small clusters with noisy GPS rejected good matches. Now a cluster’s GPS check only counts once the cluster spans four times the GPS error, and a repeating-ground test proves wrong matches stay blocked.</p>
-      </div>
-      <div class="problem">
-        <h3>The blur check rejected good photos</h3>
-        <p>Sharp and blurred scores overlapped, so no limit could work. The new score compares a photo with itself at half resolution, in each direction. Code review then showed sensor noise could fool it, so a 3×3 median filter runs first. Heavy noise can still get a blurry photo through, and the limits are tuned on synthetic photos.</p>
-      </div>
-      <div class="problem">
-        <h3>Where it still falls short</h3>
+      </section>
+      <section class="sec wrap grid" aria-labelledby="hard-2">
+        <div class="side"><h3 id="hard-2">Refinement made the map worse</h3></div>
+        <div class="main pair">
+          <p>The first version gave simulated errors of 20 to 30 m, because a huge penalty weight on the pinned photo made the solver unstable. Removing that photo’s unknowns from the system fixed it.</p>
+          <div class="ev">
+            <Bars min={0} max={45} ticks={[0, 15, 30, 45]} unit="cm" caption="After the fix: misalignment between neighbouring photos, across simulated missions."
+              rows={[{ label: 'Without it', from: 13, to: 41, text: stitcher.refineBefore }, { label: 'With it', from: 4, to: 7, text: stitcher.refineAfter, strong: true }]} />
+          </div>
+        </div>
+      </section>
+      <section class="sec wrap grid" aria-labelledby="hard-3">
+        <div class="side"><h3 id="hard-3">One simulated run in 10 split the map</h3></div>
+        <div class="main">
+          <p>Small clusters with noisy GPS rejected good matches. Now a cluster’s GPS check only counts once the cluster spans four times the GPS error, and a repeating-ground test proves wrong matches stay blocked.</p>
+        </div>
+      </section>
+      <section class="sec wrap grid" aria-labelledby="hard-4">
+        <div class="side"><h3 id="hard-4">The blur check rejected good photos</h3></div>
+        <div class="main">
+          <p>Sharp and blurred scores overlapped, so no limit could work. The new score compares a photo with itself at half resolution, in each direction. Code review then showed sensor noise could fool it, so a 3×3 median filter runs first. Heavy noise can still get a blurry photo through, and the limits are tuned on synthetic photos.</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="sec wrap grid" aria-labelledby="short-h">
+      <div class="side"><h2 id="short-h">Where it still falls short</h2></div>
+      <div class="main">
         <p>Every result is from simulation. There are no real flight photos yet. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms. The pull request hasn’t merged.</p>
       </div>
     </section>
 
-    <section class="next wrap grid" aria-labelledby="next-h">
-      <h2 id="next-h">Where it stands</h2>
-      <div class="next-text">
+    <section class="sec wrap grid" aria-labelledby="next-h">
+      <div class="side"><h2 id="next-h">Where it stands</h2></div>
+      <div class="main">
         <p>The stitcher is a pull request to the team’s autonomy code, reviewed by the autonomy subteam. The second round of review changes was pushed on November 3, 2026.</p>
-        <p class="small dim">Built with Python, PyTorch, OpenCV, NumPy and pytest.</p>
+        <p class="small built">Built with Python, PyTorch, OpenCV, NumPy and pytest.</p>
       </div>
     </section>
 
@@ -153,19 +163,16 @@ const first = 0;
 </Base>
 
 <style>
-  .stages-sec { padding-top: var(--s8); }
   .dots { display: block; width: 100%; height: auto; }
   .dots circle { fill: var(--dim); opacity: 0.35; }
   .dots circle.on { fill: var(--white); opacity: 1; }
-  .stages { margin: 0; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: end; }
-  .grow-stack { grid-column: 1 / 9; grid-row: 1 / 3; }
-  .grow-ctl { grid-column: 9 / 13; grid-row: 1; }
-  .stages figcaption { grid-column: 9 / 13; grid-row: 2; }
+  .stages { margin: 0; gap: var(--s4); }
+  .dots { max-width: 420px; }
   .grow-stack { display: grid; }
   .grow-frame { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0s 0.25s; }
   .grow-frame.on { opacity: 1; visibility: visible; transition: opacity 0.25s ease; }
   .stages :global(img) { width: 100%; height: auto; display: block; }
-  .grow-ctl { display: grid; grid-template-columns: 1fr; align-items: start; gap: var(--s4); margin-top: var(--s5); }
+  .grow-ctl { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); align-items: start; gap: var(--s5); }
   .grow-ctl[hidden] { display: none; }
   .grow-out { font-size: var(--t-h3); line-height: 1; color: var(--dim); }
   .grow-out b { font-weight: 500; color: var(--white); }
@@ -183,9 +190,9 @@ const first = 0;
   .grow-ticks li { position: absolute; left: calc(9px + var(--k) * (100% - 18px) / 4); transform: translateX(-50%); }
   .grow-ticks button { background: none; border: 0; padding: 4px 0; color: var(--dim); font: inherit; cursor: pointer; }
   .grow-ticks button[aria-current="true"] { color: var(--white); }
-  .stages figcaption { margin-top: var(--s5); color: var(--dim); max-width: 64ch; }
-  @media (max-width: 899px) {
-    .grow-stack, .grow-ctl, .stages figcaption { grid-column: 1 / -1; grid-row: auto; }
+  .stages figcaption { color: var(--dim); max-width: 64ch; }
+  @media (max-width: 599px) {
+    .grow-ctl { grid-template-columns: 1fr; gap: var(--s2); }
   }
   @media (prefers-reduced-motion: reduce) {
     .grow-frame, .grow-frame.on { transition: none; }
@@ -194,6 +201,7 @@ const first = 0;
 
 <script>
   // The map growth slider. Without JavaScript the finished map shows on its own.
+  const last = 4;
   for (const fig of document.querySelectorAll<HTMLElement>('[data-grow]')) {
     const frames = [...fig.querySelectorAll<HTMLElement>('.grow-frame')];
     const range = fig.querySelector<HTMLInputElement>('input[type=range]')!;
@@ -212,5 +220,24 @@ const first = 0;
     ticks.forEach((t) => t.addEventListener('click', () => { range.value = t.dataset.k!; show(Number(t.dataset.k)); range.focus(); }));
     fig.querySelector<HTMLElement>('.grow-ctl')!.hidden = false;
     show(Number(range.value));
+
+    // The first time the map is well in view, it builds itself once from 20 to 91 photos,
+    // then the slider is the visitor's. Touching the slider stops it at once.
+    if (matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+      let timer = 0, done = false;
+      const stop = () => { done = true; clearInterval(timer); };
+      for (const ev of ['pointerdown', 'keydown', 'focusin']) fig.addEventListener(ev, stop);
+      const io = new IntersectionObserver((entries) => {
+        if (done || !entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        timer = window.setInterval(() => {
+          const k = Number(range.value) + 1;
+          if (done || k > last) return stop();
+          range.value = String(k);
+          show(k);
+        }, 750);
+      }, { threshold: 0.6 });
+      io.observe(fig.querySelector('.grow-stack')!);
+    }
   }
 </script>

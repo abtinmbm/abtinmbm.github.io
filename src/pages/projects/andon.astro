@@ -29,33 +29,22 @@ const num = (s: string) => Number(s.replace('%', ''));
       </div>
     </header>
 
-    <section class="replay-sec wrap" aria-label="Replay">
-      <AndonReplay captionId="replay-cap">
-        <figcaption id="replay-cap" class="small">The real scores from one fan (machine id_06, development test clips, model seed 0), replayed at 8× speed: about two minutes of normal running, then a fault. The yellow light partway through is a real warning that clears by itself without stopping the line. This machine was picked to show how the light works. Typical rates are below.</figcaption>
-      </AndonReplay>
-    </section>
-
-    <section class="why wrap" aria-labelledby="why-h">
-      <h2 id="why-h" class="visually-hidden">Why it exists</h2>
-      <p class="statement">Factories use andon lights to flag a problem on the line. But a fault is rare and expensive to record, so the system has to learn from normal sound alone.</p>
-      <p class="why-more">A small CNN learns to recognise each individual machine by its sound. When it can no longer tell which machine it’s hearing, something has changed.</p>
-    </section>
-
-    <section class="results wrap grid" aria-labelledby="results-h">
-      <h2 id="results-h">Better than the reference on five of six machine types</h2>
-      <div class="chart"><AucChart /></div>
-      <div class="notes">
-        <p><b class="num">{andon.meanAuc}</b> mean AUC on the held-out DCASE 2020 evaluation set, against {andon.baselineAuc} for the reference autoencoder. AUC is the chance a random faulty clip scores as more abnormal than a random normal one.</p>
-        <p>Before changing anything I reproduced the published reference on the development set, to within <b class="num">{andon.reproductionGap}</b> AUC points on all six machine types.</p>
-        <p>Played back as a continuous stream of test audio, the light caught <b class="num">{andon.faultsCaught}</b> of 30-second faults, on average {andon.secondsToRed} after they started, with {andon.falseAlarmsPerHour} false alarms per hour.</p>
-        <p>It has {andon.weights} weights. As int8 it’s <b class="num">{andon.int8Size}</b>, down from {andon.floatSize}, and still scores {andon.int8Auc} AUC.</p>
-        <p>The checkpoints are public, and two commands re-check the held-out CNN AUC results from a fresh clone.</p>
+    <section class="sec first wrap grid" aria-labelledby="why-h">
+      <div class="side">
+        <h2 id="why-h" class="visually-hidden">Why it exists</h2>
+        <p class="lede">Factories use andon lights to flag a problem on the line. But a fault is rare and expensive to record, so the system has to learn from normal sound alone.</p>
+        <p class="lede-more">A small CNN learns to recognise each individual machine by its sound. When it can no longer tell which machine it’s hearing, something has changed.</p>
+      </div>
+      <div class="main">
+        <AndonReplay captionId="replay-cap">
+          <figcaption id="replay-cap" class="small">The real scores from one fan (machine id_06, development test clips, model seed 0), replayed at 8× speed: about two minutes of normal running, then a fault. The yellow light partway through is a real warning that clears by itself without stopping the line. This machine was picked to show how the light works. Typical rates are below.</figcaption>
+        </AndonReplay>
       </div>
     </section>
 
-    <section class="how wrap grid" aria-labelledby="how-h">
-      <h2 id="how-h">From a sound to a light</h2>
-      <ol>
+    <section class="sec wrap grid" aria-labelledby="how-h">
+      <div class="side"><h2 id="how-h">From a sound to a light</h2></div>
+      <ol class="main steps">
         <li><p><b>Listen.</b> Each 10-second clip becomes a log-mel spectrogram: how loud each of 128 frequency bands is, every 32 ms.</p></li>
         <li><p><b>Recognise.</b> One small CNN per machine type learns to tell that type’s machines apart, from normal recordings only.</p></li>
         <li><p><b>Score.</b> If the CNN can’t recognise the machine it’s hearing, the score rises. Each 2-second window gets a score, every second.</p></li>
@@ -64,41 +53,66 @@ const num = (s: string) => Number(s.replace('%', ''));
       </ol>
     </section>
 
-    <section class="story wrap" aria-labelledby="hard-h">
-      <h2 id="hard-h" class="visually-hidden">What was hard</h2>
-      <div class="problem">
-        <h3>There were no faults to train on</h3>
-        <p>Instead of learning what a fault sounds like, the CNN learns to name which machine it hears. Low confidence in the right name becomes the anomaly score. Valve went from {andon.valveAe} AUC with the reference to {andon.valveCnn}.</p>
-        <figure class="ev specs">
-          <div class="spec"><Picture src={specNormal} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a normal clip: steady bright bands in the low frequencies." /><span class="small">Normal</span></div>
-          <div class="spec"><Picture src={specFault} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a faulty clip from the same fan: the bands look almost the same." /><span class="small">Faulty</span></div>
-          <figcaption class="small">Two 10&nbsp;s clips from the replay fan (id_06), as the model hears them: 128 frequency bands, low pitches at the bottom. The fault is hard to see, and training only ever hears the first kind.</figcaption>
-        </figure>
+    <section class="sec wrap grid" aria-labelledby="results-h">
+      <div class="side">
+        <h2 id="results-h">Better than the reference on five of six machine types</h2>
+        <p class="note">AUC is the chance a random faulty clip scores as more abnormal than a random normal one. 50% is guessing.</p>
       </div>
-      <div class="problem">
-        <h3>Overconfidence hurt the score</h3>
-        <p>Without mixup, the ToyConveyor classifier hit 100% training accuracy, which likely left little room for a fault to lower its confidence. Blending pairs of training examples (mixup) raised mean development AUC from {andon.devAucNoMixup} to {andon.devAucMixup}.</p>
-        <div class="ev">
-          <Bars min={50} max={100} ticks={[50, 75, 100]} unit="%" caption="Mean AUC on the development set. 50% is guessing."
-            rows={[{ label: 'No mixup', to: num(andon.devAucNoMixup), text: andon.devAucNoMixup }, { label: 'Mixup', to: num(andon.devAucMixup), text: andon.devAucMixup, strong: true }]} />
+      <div class="main">
+        <AucChart />
+        <div class="two-col">
+          <p><b class="num">{andon.meanAuc}</b> mean AUC on the held-out DCASE 2020 evaluation set, against {andon.baselineAuc} for the reference autoencoder.</p>
+          <p>Before changing anything I reproduced the published reference on the development set, to within <b class="num">{andon.reproductionGap}</b> AUC points on all six machine types.</p>
+          <p>Played back as a continuous stream of test audio, the light caught <b class="num">{andon.faultsCaught}</b> of 30-second faults, on average {andon.secondsToRed} after they started, with {andon.falseAlarmsPerHour} false alarms per hour.</p>
+          <p>It has {andon.weights} weights. As int8 it’s <b class="num">{andon.int8Size}</b>, down from {andon.floatSize}, and still scores {andon.int8Auc} AUC.</p>
+          <p>The checkpoints are public, and two commands re-check the held-out CNN AUC results from a fresh clone.</p>
         </div>
       </div>
-      <div class="problem">
-        <h3>PyTorch doesn’t say how it rounds</h3>
-        <p>Its quantized kernels don’t specify their rounding, and a C port has to match them exactly. So I wrote a NumPy fixed-point reference of {andon.quantRefLines} lines that defines every integer step, and exports test vectors the C version must match.</p>
-      </div>
+    </section>
 
-      <div class="problem">
-        <h3>Where it still falls short</h3>
+    <div class="story">
+      <h2 class="visually-hidden">What was hard</h2>
+      <section class="sec wrap grid" aria-labelledby="hard-1">
+        <div class="side"><h3 id="hard-1">There were no faults to train on</h3></div>
+        <div class="main pair">
+          <p>Instead of learning what a fault sounds like, the CNN learns to name which machine it hears. Low confidence in the right name becomes the anomaly score. Valve went from {andon.valveAe} AUC with the reference to {andon.valveCnn}.</p>
+          <figure class="ev specs">
+            <div class="spec"><Picture src={specNormal} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a normal clip: steady bright bands in the low frequencies." /><span class="small">Normal</span></div>
+            <div class="spec"><Picture src={specFault} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a faulty clip from the same fan: the bands look almost the same." /><span class="small">Faulty</span></div>
+            <figcaption class="small">Two 10&nbsp;s clips from the replay fan (id_06), as the model hears them: 128 frequency bands, low pitches at the bottom. The fault is hard to see, and training only ever hears the first kind.</figcaption>
+          </figure>
+        </div>
+      </section>
+      <section class="sec wrap grid" aria-labelledby="hard-2">
+        <div class="side"><h3 id="hard-2">Overconfidence hurt the score</h3></div>
+        <div class="main pair">
+          <p>Without mixup, the ToyConveyor classifier hit 100% training accuracy, which likely left little room for a fault to lower its confidence. Blending pairs of training examples (mixup) raised mean development AUC from {andon.devAucNoMixup} to {andon.devAucMixup}.</p>
+          <div class="ev">
+            <Bars min={50} max={100} ticks={[50, 75, 100]} unit="%" caption="Mean AUC on the development set. 50% is guessing."
+              rows={[{ label: 'No mixup', to: num(andon.devAucNoMixup), text: andon.devAucNoMixup }, { label: 'Mixup', to: num(andon.devAucMixup), text: andon.devAucMixup, strong: true }]} />
+          </div>
+        </div>
+      </section>
+      <section class="sec wrap grid" aria-labelledby="hard-3">
+        <div class="side"><h3 id="hard-3">PyTorch doesn’t say how it rounds</h3></div>
+        <div class="main">
+          <p>Its quantized kernels don’t specify their rounding, and a C port has to match them exactly. So I wrote a NumPy fixed-point reference of {andon.quantRefLines} lines that defines every integer step, and exports test vectors the C version must match.</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="sec wrap grid" aria-labelledby="short-h">
+      <div class="side"><h2 id="short-h">Where it still falls short</h2></div>
+      <div class="main">
         <p>AUC isn’t real-world performance. {andon.meanAuc} AUC still caught only {andon.faultsCaught} of faults on a continuous stream of test audio, and {andon.valveCaught} for valve. {andon.falseAlarmsPerHour} false alarms per hour is too many for a real line. A much simpler Gaussian mixture beats the CNN on {andon.gmmWins} machine types. And the compute figure for the Pico ({andon.estComputeMs} per 32 ms of audio) is an estimate until it runs on the device.</p>
       </div>
     </section>
 
-    <section class="next wrap grid" aria-labelledby="next-h">
-      <h2 id="next-h">Next, a Raspberry Pi Pico 2 that cuts power to a real fan the moment it hears a fault</h2>
-      <div class="next-text">
+    <section class="sec wrap grid" aria-labelledby="next-h">
+      <div class="side"><h2 id="next-h">Next, a Raspberry Pi Pico 2 that cuts power to a real fan the moment it hears a fault</h2></div>
+      <div class="main">
         <p>The first firmware exists: the light’s state machine in C, tested on a host and cross-compiled in CI. The model doesn’t run on the device yet. Next come the fan switch, a microphone, a dataset of the real fan, and the model in C.</p>
-        <p class="small dim">Built with Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.</p>
+        <p class="small built">Built with Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.</p>
       </div>
     </section>
 

@@ -2,6 +2,7 @@
 import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import StarTrails from '../components/StarTrails.astro';
+import Icon from '../components/Icon.astro';
 import AndonReplay from '../components/AndonReplay.astro';
 import { projects } from '../data/projects';
 import { andon, stitcher, awards } from '../data/metrics';
@@ -112,12 +113,49 @@ const person = {
     </ul>
   </section>
 
-  <section id="contact" class="contact wrap" aria-labelledby="contact-h">
-    <h2 id="contact-h" class="visually-hidden">Contact</h2>
-    <p class="mail display"><a href="mailto:aaryanpo@uwaterloo.ca">aaryanpo@uwaterloo.ca</a></p>
-    <p class="links"><a href="https://github.com/abtinmbm">GitHub</a><a href="https://www.linkedin.com/in/abtin-aryanpour">LinkedIn</a><a href="/resume/">Resume</a></p>
+  <section id="contact" class="contact" aria-labelledby="contact-h">
+    <div class="c-inner wrap grid">
+      <div class="c-side">
+        <h2 id="contact-h" class="display">Contact</h2>
+        <p>Looking for a co&#8209;op, May to August 2027.</p>
+      </div>
+      <div class="c-main">
+        <a class="c-mail" href="mailto:aaryanpo@uwaterloo.ca" data-copy="aaryanpo@uwaterloo.ca">
+          <span class="c-addr display">aaryanpo@uwaterloo.ca</span>
+          <span class="c-hint small"><span class="c-hint-copy"><Icon name="copy" /> Click to copy</span><span class="c-hint-done"><Icon name="check" /> Copied to clipboard</span></span>
+        </a>
+        <p class="c-alt small"><a href="mailto:aaryanpo@uwaterloo.ca">Open in your mail app</a></p>
+        <span class="visually-hidden" aria-live="polite" data-copy-status></span>
+        <ul class="c-links">
+          <li><a href="https://github.com/abtinmbm"><Icon name="github" class="c-ico" /><span class="c-name">GitHub</span><span class="c-sub small">github.com/abtinmbm</span></a></li>
+          <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><Icon name="linkedin" class="c-ico" /><span class="c-name">LinkedIn</span><span class="c-sub small">in/abtin-aryanpour</span></a></li>
+          <li><a href="/resume/"><Icon name="file" class="c-ico" /><span class="c-name">Resume</span><span class="c-sub small">One page, with a PDF</span></a></li>
+        </ul>
+      </div>
+    </div>
   </section>
 </Base>
+
+<script>
+  // Clicking the address copies it. If the browser won't allow that, the link opens the mail app as usual.
+  const mail = document.querySelector<HTMLAnchorElement>('[data-copy]');
+  const status = document.querySelector('[data-copy-status]');
+  let t = 0;
+  mail?.addEventListener('click', async (e) => {
+    if (!navigator.clipboard) return;
+    e.preventDefault();
+    try {
+      await navigator.clipboard.writeText(mail.dataset.copy!);
+    } catch {
+      location.href = mail.href;
+      return;
+    }
+    mail.classList.add('copied');
+    if (status) status.textContent = 'Email address copied to the clipboard';
+    clearTimeout(t);
+    t = window.setTimeout(() => { mail.classList.remove('copied'); if (status) status.textContent = ''; }, 2200);
+  });
+</script>
 
 <style>
   /* first screen */
@@ -171,11 +209,34 @@ const person = {
   .earlier li { display: grid; gap: var(--s2); align-content: start; max-width: 34em; }
   .earlier h3 { font-size: 18px; }
 
-  /* contact */
-  .contact { padding-block: var(--s9) var(--s10); }
-  .mail { font-size: clamp(17px, 4vw, 56px); line-height: 1.1; overflow-wrap: anywhere; }
-  .mail a { text-decoration-thickness: 2px; text-underline-offset: 0.16em; }
-  .links { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s6); margin-top: var(--s6); }
+  /* contact: its own band, lit from below like the sky at the top */
+  .contact { position: relative; overflow: hidden; border-top: 1px solid var(--line);
+    background: radial-gradient(90% 120% at 80% 140%, var(--glow), var(--deep) 50%, var(--black) 90%); }
+  .c-inner { padding-block: var(--s9); row-gap: var(--s7); align-items: start; }
+  .c-side { grid-column: 1 / 5; display: grid; gap: var(--s4); }
+  .c-side h2 { font-size: var(--t-h2); line-height: 1.05; }
+  .c-main { grid-column: 5 / 13; display: grid; gap: var(--s3); min-width: 0; }
+  .c-mail { display: grid; gap: var(--s3); justify-items: start; text-decoration: none; width: fit-content; max-width: 100%; }
+  .c-addr { font-size: clamp(18px, 2.6vw, 40px); line-height: 1.15; white-space: nowrap;
+    text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.16em; text-decoration-color: rgb(243 245 255 / 0.4); transition: text-decoration-color 160ms ease; }
+  .c-mail:hover .c-addr, .c-mail:focus-visible .c-addr { text-decoration-color: var(--white); }
+  .c-mail:focus-visible { outline: 2px solid var(--white); outline-offset: 6px; }
+  .c-hint { color: var(--dim); display: inline-grid; }
+  .c-hint > span { grid-area: 1 / 1; display: inline-flex; align-items: center; gap: 8px; transition: opacity 160ms ease; }
+  .c-hint-done { opacity: 0; color: var(--white); }
+  .c-mail.copied .c-hint-copy { opacity: 0; }
+  .c-mail.copied .c-hint-done { opacity: 1; }
+  .c-alt { color: var(--dim); }
+  .c-links { list-style: none; margin: var(--s6) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
+  .c-links a { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: var(--s4); row-gap: 2px; align-items: center;
+    padding: var(--s4) var(--s5); border: 1px solid var(--line); border-radius: 10px; text-decoration: none; background: rgb(1 3 10 / 0.35);
+    transition: border-color 160ms ease, background-color 160ms ease; }
+  .c-links a:hover { border-color: rgb(243 245 255 / 0.5); background: rgb(1 3 10 / 0.6); }
+  .c-links a:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+  .c-links a:active { background: rgb(243 245 255 / 0.08); }
+  .c-links :global(.c-ico) { grid-row: 1 / 3; width: 26px; height: 26px; }
+  .c-name { font-weight: 500; }
+  .c-sub { color: var(--dim); overflow-wrap: anywhere; }
 
   @media (max-width: 759px) {
     .hero { height: auto; min-height: 0; background: none; overflow: visible; }
@@ -184,16 +245,22 @@ const person = {
       background: radial-gradient(140% 90% at 30% 120%, var(--glow), var(--deep) 45%, var(--black) 85%); }
     .who { position: relative; left: auto; right: auto; bottom: auto; margin-top: -56px; padding: 0 var(--edge); }
     .who h1 { font-size: clamp(24px, 8vw, 44px); margin-bottom: var(--s4); }
-    .intro { padding-block: var(--s9) var(--s8); row-gap: var(--s6); }
+    .intro { padding-block: var(--s7); row-gap: var(--s5); }
     :global(.portrait) { grid-column: 1 / 9; }
     .intro { align-items: start; }
     .intro-text { grid-column: 1 / 13; }
-    .work { gap: var(--s9); }
+    .work { gap: var(--s8); padding-bottom: var(--s8); }
+    .earlier { padding-block: var(--s7); }
+    .earlier h2 { margin-bottom: var(--s5); }
     .p-andon .p-text, .p-media { grid-column: 1 / 13; }
-    .p-media { margin-top: var(--s7); }
+    .p-media { margin-top: var(--s5); }
     .p-stitch .p-map, .p-stitch .p-text { grid-column: 1 / -1; }
     /* phones: show a third of the mission larger, so the markers read as shapes */
-    .p-stitch .p-text { margin-top: var(--s7); }
+    .p-stitch .p-text { margin-top: var(--s5); }
     .earlier ul { grid-template-columns: 1fr; }
+    .c-inner { padding-block: var(--s8); row-gap: var(--s5); }
+    .c-side, .c-main { grid-column: 1 / -1; }
+    .c-addr { font-size: clamp(15px, 4.3vw, 28px); white-space: normal; overflow-wrap: anywhere; }
+    .c-links { grid-template-columns: 1fr; margin-top: var(--s5); }
   }
 </style>

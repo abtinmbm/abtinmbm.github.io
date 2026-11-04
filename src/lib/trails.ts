@@ -129,8 +129,9 @@ export const PAGE_SKY: LayoutOptions = { yTop: 0.1, yBottom: 0.28 };
  *  With cur = -1 (the 404) only the background exposure is drawn. */
 export function pageSkyMarkup(L: Layout, cur: number): string {
   const f = (v: number) => v.toFixed(1);
+  const rand = rng(7);
   const bg = L.background
-    .map((b) => `<path class="t-bg" d="${arcPath(L.cx, L.cy, b)}" stroke-width="${b.w.toFixed(2)}" stroke-opacity="${(b.o * 0.8).toFixed(2)}"/>`)
+    .map((b) => `<path class="t-bg" pathLength="1" style="--d:${(rand() * DRAW.bgMax).toFixed(2)}s" d="${arcPath(L.cx, L.cy, b)}" stroke-width="${b.w.toFixed(2)}" stroke-opacity="${(b.o * 0.8).toFixed(2)}"/>`)
     .join('');
   if (cur < 0) return bg;
   const fg = L.trails
@@ -139,7 +140,7 @@ export function pageSkyMarkup(L: Layout, cur: number): string {
       const head = !on ? ''
         : (t.live ? `<circle class="pt-halo" cx="${f(t.head.x)}" cy="${f(t.head.y)}" r="18"/>` : '')
           + `<circle class="pt-head${t.live ? ' live' : ''}" cx="${f(t.head.x)}" cy="${f(t.head.y)}" r="${t.live ? 4 : 2.8}"/>`;
-      return `<path class="pt-line${on ? ' on' : ''}" d="${arcPath(L.cx, L.cy, t)}"/>${head}`;
+      return `<path class="pt-line${on ? ' on' : ''}" pathLength="1" d="${arcPath(L.cx, L.cy, t)}"/>${head}`;
     })
     .join('');
   return `<defs><radialGradient id="pt-halo-g"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#9fb4ff" stop-opacity="0"/></radialGradient></defs>${bg}${fg}`;

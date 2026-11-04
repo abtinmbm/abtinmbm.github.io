@@ -76,6 +76,7 @@ test('the Andon replay plays when motion is allowed and can be paused', async ({
 });
 
 test('the stitcher map grows with the slider and the keyboard', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/projects/image-stitcher/');
   const range = page.locator('#grow-range');
   const on = page.locator('.grow-frame.on');
@@ -132,4 +133,12 @@ test('the photo viewer moves with the buttons, the keyboard and the film strip',
   await expect(page).toHaveURL(/#p10$/);
   await page.keyboard.press('ArrowLeft');
   await expect(count).toHaveText('9');
+});
+
+test('the stitcher map builds itself once when it comes into view', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/projects/image-stitcher/');
+  await page.locator('.grow-stack').scrollIntoViewIfNeeded();
+  await expect(page.locator('.grow-frame.on')).toHaveAttribute('data-n', '91', { timeout: 6000 });
+  await expect(page.locator('#grow-range')).toHaveAttribute('aria-valuetext', '91 photos');
 });
