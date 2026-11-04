@@ -48,7 +48,7 @@ const num = (s: string) => Number(s.replace('%', ''));
         <li><p><b>Listen.</b> Each 10-second clip becomes a log-mel spectrogram: how loud each of 128 frequency bands is, every 32 ms.</p></li>
         <li><p><b>Recognise.</b> One small CNN per machine type learns to tell that type’s machines apart, from normal recordings only.</p></li>
         <li><p><b>Score.</b> If the CNN can’t recognise the machine it’s hearing, the score rises. Each 2-second window gets a score, every second.</p></li>
-        <li><p><b>Set limits.</b> Normal audio sets a warning limit and a control limit for each machine, like a factory control chart. They’re the two dashed lines in the replay.</p></li>
+        <li><p><b>Set limits.</b> Normal audio sets a warning limit and a control limit for each machine, like a factory control chart (mean + 2σ and mean + 3σ of normal scores). They’re the two dashed lines in the replay.</p></li>
         <li><p><b>Light.</b> Two windows in a row over the warning limit turn it yellow. Three in a row over the control limit turn it red, and it stays red until someone resets it.</p></li>
       </ol>
     </section>
@@ -61,7 +61,7 @@ const num = (s: string) => Number(s.replace('%', ''));
       <div class="main">
         <AucChart />
         <div class="two-col">
-          <p><b class="num">{andon.meanAuc}</b> mean AUC on the held-out DCASE 2020 evaluation set, against {andon.baselineAuc} for the reference autoencoder.</p>
+          <p><b class="num">{andon.meanAucSpread}</b> mean AUC (3 seeds) on the held-out DCASE 2020 evaluation set, against {andon.baselineAucSpread} for the reference autoencoder.</p>
           <p>Before changing anything I reproduced the published reference on the development set, to within <b class="num">{andon.reproductionGap}</b> AUC points on all six machine types.</p>
           <p>Played back as a continuous stream of test audio, the light caught <b class="num">{andon.faultsCaught}</b> of 30-second faults, on average {andon.secondsToRed} after they started, with {andon.falseAlarmsPerHour} false alarms per hour.</p>
           <p>It has {andon.weights} weights. As int8 it’s <b class="num">{andon.int8Size}</b>, down from {andon.floatSize}, and still scores {andon.int8Auc} AUC.</p>
@@ -75,7 +75,7 @@ const num = (s: string) => Number(s.replace('%', ''));
       <section class="sec wrap grid" aria-labelledby="hard-1">
         <div class="side"><h3 id="hard-1">There were no faults to train on</h3></div>
         <div class="main pair">
-          <p>Instead of learning what a fault sounds like, the CNN learns to name which machine it hears. Low confidence in the right name becomes the anomaly score. Valve went from {andon.valveAe} AUC with the reference to {andon.valveCnn}.</p>
+          <p>Instead of learning what a fault sounds like, the CNN learns to name which machine it hears. Low confidence in the right name becomes the anomaly score. On the evaluation set, valve went from {andon.valveAe} AUC with the reference to {andon.valveCnn}.</p>
           <figure class="ev specs">
             <div class="spec"><Picture src={specNormal} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a normal clip: steady bright bands in the low frequencies." /><span class="small">Normal</span></div>
             <div class="spec"><Picture src={specFault} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a faulty clip from the same fan: the bands look almost the same." /><span class="small">Faulty</span></div>
@@ -111,7 +111,7 @@ const num = (s: string) => Number(s.replace('%', ''));
     <section class="sec wrap grid" aria-labelledby="next-h">
       <div class="side"><h2 id="next-h">Next, a Raspberry Pi Pico 2 that cuts power to a real fan the moment it hears a fault</h2></div>
       <div class="main">
-        <p>The first firmware exists: the light’s state machine in C, tested on a host and cross-compiled in CI. The model doesn’t run on the device yet. Next come the fan switch, a microphone, a dataset of the real fan, and the model in C.</p>
+        <p>The first firmware exists: the andon LEDs and a debounced button in C, tested on the PC and cross-compiled in CI. The light’s full logic is still in Python, and the model doesn’t run on the device yet. Next come the fan switch, a microphone, a dataset of the real fan, and the model in C.</p>
         <p class="small built">Built with Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.</p>
       </div>
     </section>

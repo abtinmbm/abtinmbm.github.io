@@ -7,6 +7,9 @@ export const andon = {
   // README "At a glance" and results/phase3_comparison.md: evaluation set, mean of 3 seeds.
   meanAuc: '92.13%',
   baselineAuc: '79.70%',
+  // README "At a glance": mean ± std over the 3 seeds.
+  meanAucSpread: '92.13 ± 0.16%',
+  baselineAucSpread: '79.70 ± 0.39%',
   // README: PyTorch reproduction of the DCASE 2020 baseline, dev set, vs the published 73.51.
   reproducedBaselineDev: '73.80',
   publishedBaselineDev: '73.51',
@@ -50,12 +53,21 @@ export const stitcher = {
   missions: '10 of 10',
   photos: '91',
   alignment: '4.2–6.9 cm',
+  // Rerun of portfolio/tools/eval_179_stitcher.py on 2026-11-04 (after the Nov 3 changes) matches.
   refineBefore: '13–41 cm',
   refineAfter: '4–7 cm',
-  mapError: '0.16–0.94 m',
+  // Map position vs truth, split by simulated GPS error (README Accuracy table).
+  mapError1: '0.16–0.31 m',
+  mapError3: '0.47–0.94 m',
+  // README: no photo rejected in the evaluation (10 × 91). Blur limit check: 2,730 photos × 9 cases.
+  rejectedGood: '0 of 910',
+  blurWrong: '0 of 2,730 photos × 9 blur cases',
   speed: '0.42–0.75 s',
   tests: '80',
-  rowMatches: '6 to 13 of 600',
+  // portfolio/tools/guide_worked_example_179.py, one pair across a row turn (rerun 2026-11-04).
+  rowCandidates: 612,
+  rowKept: 10,
+  rowKeptTurned: 317,
 };
 
 export const awards = {
