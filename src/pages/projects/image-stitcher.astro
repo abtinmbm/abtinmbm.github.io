@@ -51,7 +51,7 @@ const first = 0;
         <div class="grow-stack">
           {stages.map(([n, img], k) => (
             <div class:list={['grow-frame', { on: k === last }]} data-n={n} aria-hidden={k === last ? undefined : 'true'}>
-              <Picture src={img} fallbackFormat="webp" formats={['avif', 'webp']} widths={[700, 1100, 1664]} sizes="(max-width: 899px) 92vw, 62vw"
+              <Picture src={img} fallbackFormat="webp" formats={['avif', 'webp']} widths={[700, 1100, 1664]} sizes="(max-width: 899px) 92vw, 620px"
                 loading={k === last ? 'eager' : 'lazy'} alt={k === last ? 'The finished map after all 91 photos' : `The map after ${n} photos`} />
             </div>
           ))}
@@ -166,7 +166,7 @@ const first = 0;
   .dots { display: block; width: 100%; height: auto; }
   .dots circle { fill: var(--dim); opacity: 0.35; }
   .dots circle.on { fill: var(--white); opacity: 1; }
-  .stages { margin: 0; gap: var(--s4); }
+  .stages { margin: 0; gap: var(--s4); width: min(100%, 620px, calc((100svh - 200px) * 1.15)); }
   .dots { max-width: 420px; }
   .grow-stack { display: grid; }
   .grow-frame { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0s 0.25s; }
