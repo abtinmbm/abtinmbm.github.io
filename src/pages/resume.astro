@@ -7,73 +7,64 @@ interface Entry { title: string; href?: string; meta: string; when: string; poin
 const education: Entry[] = [{
   title: 'University of Waterloo',
   meta: 'Waterloo, ON. Candidate for BASc in Computer Engineering, Co-op Program.',
-  when: 'Expected April 2031',
-  text: 'Coursework: Fundamentals of Programming (C++), Linear Algebra, Calculus, Mechanics, Engineering Design',
+  when: 'September 2026 to April 2031',
 }];
 const projectEntries: Entry[] = [
   {
     title: 'Andon: machine-sound anomaly detection', href: '/projects/andon/',
-    meta: 'Python, PyTorch, C, Pico 2', when: 'October 2026 to now',
+    meta: 'Python, C, Raspberry Pi Pico 2', when: 'October 2026 to now',
     points: [
-      'Built an anomaly detector trained only on healthy machine audio: a 98k-weight CNN reached 92.13% mean AUC on held-out DCASE 2020 data, against 79.70% for the reference autoencoder, winning 5 of 6 machine types (3 seeds).',
-      'Reproduced the published DCASE baseline in PyTorch within 0.88 AUC points on all 6 machine types, and released checkpoints so two commands re-check the held-out CNN results from a fresh clone.',
-      'Turned scores into an andon light with SPC limits (mean + 2σ and 3σ), hysteresis, a latching stop and a dashboard. On held-out evaluation clips it caught 65.57% of 30 s faults, a mean 10.57 s after onset, at 5.53 false alarms per hour.',
-      'Quantized the CNN to int8 for a Cortex-M33 with a custom fixed-point reference: 98.7 KB (from 383.0 KB) at 92.08% held-out AUC, with C headers and bit-exact test vectors (export verified in CI). Now porting to a Pico 2.',
-    ],
-  },
-  {
-    title: 'Image Stitcher, Waterloo Aerial Robotics', href: '/projects/image-stitcher/',
-    meta: 'PyTorch, OpenCV. Pull request #215 (in review)', when: 'October 2026 to now',
-    points: [
-      'Developed a groundside orthomosaic stitcher on the autonomy subteam, merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map using XFeat learned features and RANSAC.',
-      'Fused images with GPS to recover heading, aligning photos to 4.3–6.9 cm on average at 3 m of simulated GPS error.',
-      'Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13–41 cm to 4–7 cm.',
-      'Handled 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated 91-photo missions.',
-      'Added lens undistortion and blur, exposure and tilt checks, and built a ground-truth mission simulator and 80 tests.',
+      'Built a system that detects failing machines by sound, training a PyTorch CNN only on healthy audio. It reached 92.13% mean AUC on held-out DCASE 2020 data, against 79.70% for the reference model (3 seeds).',
+      'Validated the evaluation by reproducing the DCASE baseline within 0.88 AUC points on all 6 machine types.',
+      'Developed a streaming green, yellow and red alert using control-chart (SPC) limits, catching 65.57% of 30 s faults with a 10.57 s mean delay at 5.53 false alarms per hour on held-out clips.',
+      'Quantized the CNN to int8 for a Cortex-M33 microcontroller with a custom NumPy fixed-point reference, shrinking it to 98.7 KB (from 383.0 KB) at 92.08% AUC, with bit-exact C test vectors (export checked in CI).',
     ],
   },
   {
     title: 'CyberShield: full-stack discussion forum', href: 'https://github.com/abtinmbm/cybershield',
     meta: 'Python, Django, JavaScript, Tailwind CSS', when: 'March 2025',
     points: [
-      'Sole developer of a responsive forum where users post, comment and vote, with sorting, topic filtering and fuzzy search (Fuse.js), built on Django, jQuery (AJAX) and SQLite.',
-      'Secured accounts with Django authentication, CSRF protection and reCAPTCHA on login and signup, and added rich-text posts (CKEditor) and profile picture uploads.',
-      'Deployed live behind AWS CloudFront with a seeded demo dataset. Won 1st place in Coding & Programming at the Canadian National Leadership Conference 2025 (32 teams).',
+      'Built a full-stack forum as the only developer on a 3-person team using Django, jQuery (AJAX) and SQLite, winning 1st of 32 teams at CNLC 2025.',
+      'Implemented voting, sorting, filtering and fuzzy search (Fuse.js) through JSON endpoints, with no page reloads.',
+      'Secured accounts with Django auth, CSRF protection, reCAPTCHA and moderator roles, and deployed on AWS.',
     ],
   },
 ];
 const experience: Entry[] = [
   {
-    title: 'Autonomy Software Member', meta: 'Waterloo Aerial Robotics Group, Waterloo, ON', when: 'September 2026 to now',
+    title: 'Autonomy Software Member', href: '/projects/image-stitcher/', meta: 'Waterloo Aerial Robotics Group, Waterloo, ON', when: 'September 2026 to now',
     points: [
-      'Write Python for the autonomy subteam’s shared codebase, submitting all changes as reviewed pull requests.',
-      'Built the team’s groundside image stitcher (pull request #215) and worked through two rounds of review changes (lens undistortion, photo quality checks, numbered map saves), including a fix for sensor noise fooling the blur check.',
+      'Sole developer of the team’s groundside image stitcher in Python (PyTorch, OpenCV, XFeat, RANSAC), merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map, with 80 tests.',
+      'Fused images with GPS to recover heading, aligning photos to 4.3–6.9 cm on average at 3 m of simulated GPS error.',
+      'Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13⁠–⁠41 to 4⁠–⁠7 cm.',
+      'Hardened matching against 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated missions.',
+      'Added lens undistortion and photo checks over 2 rounds of review on pull request #215 (in review). A sensor-noise fix left 0 of 2,730 test photos misclassified.',
     ],
   },
   {
     title: 'Treasurer', meta: 'Bayview Secondary School, Richmond Hill, ON', when: 'September 2025 to June 2026',
     points: [
-      'Managed a $21,000 student budget across 42 clubs serving 2,000 students.',
-      'Reviewed and approved each club’s budget, calculating allocations and negotiating changes in meetings with club presidents and school administrators.',
+      'Managed a $21,000 budget for 42 clubs serving 2,000 students, approving each allocation with club leaders.',
     ],
   },
   {
     title: 'Homework Helper and Assistant Teacher', meta: 'Spirit of Math Schools Inc., Richmond Hill, ON', when: 'September 2022 to July 2025',
     points: [
-      'Homework Helper (2024–2025): ran a drop-in homework help classroom as one of two staff, triaging questions from students ranging from kindergarten to Grade 11 and diagnosing where each one was stuck.',
-      'Assistant Teacher (2022–2024): supported classes of 16 students, teaching lessons and contest-style algebra.',
+      'Ran a drop-in homework classroom as one of two staff (2024–2025), helping about 30 students per session.',
+      'Taught 1–2 classes a week of up to 16 students (2022–2024), covering lessons and contest-style algebra.',
     ],
   },
 ];
 const awards = [
-  '1st place (2025, CNLC) and 4th place (2024, FBLA), Coding & Programming, national competitions',
-  'Euclid (86) and Hypatia (33) Honour Roll, and Fermat and CSMC Distinction, University of Waterloo, 2025–2026',
-  'Excellence in Mathematics, Bayview Secondary School Mathematics Department: Advanced Functions (MHF4U), 2025, and Data Management (MDM4U), 2026',
+  '1st place (2025) and 4th place (2024): Coding & Programming, Canadian National Leadership Conference',
+  'Euclid (86/100), Hypatia (33/40) Honour Roll; Fermat, CSMC Distinction: Waterloo Math Contests, 2025–26',
+  'Excellence in Mathematics: Bayview Secondary School Mathematics Department (2025, 2026)',
 ];
 const skills = [
   ['Languages', 'Python, C/C++, Java, JavaScript, SQL, HTML/CSS'],
-  ['Frameworks and libraries', 'PyTorch, NumPy, OpenCV, scikit-learn, Django, Streamlit, jQuery'],
-  ['Tools and platforms', 'Git, GitHub Actions (CI), pytest, uv, CMake, SQLite, AWS (EC2, CloudFront)'],
+  ['Frameworks and libraries', 'PyTorch, NumPy, OpenCV, scikit-learn, Django, jQuery'],
+  ['Tools and platforms', 'Git, GitHub Actions (CI), pytest, CMake, SQLite, AWS (EC2, CloudFront)'],
+  ['Concepts', 'Machine Learning, Computer Vision, Embedded Systems, Unit Testing, Web Development'],
 ];
 ---
 <Base
@@ -85,7 +76,7 @@ const skills = [
     <header class="cv-side">
       <h1 class="display">Resume</h1>
       <p class="who">Abtin Aryanpour<br /><span class="dim">Computer Engineering, University of Waterloo</span></p>
-      <a class="get" href={pdf} download><Icon name="file" /><span>Download the PDF<span class="small dim">One page, 126&nbsp;KB</span></span></a>
+      <a class="get" href={pdf} download><Icon name="file" /><span>Download the PDF<span class="small dim">One page, 120&nbsp;KB</span></span></a>
       <ul class="reach">
         <li><a href="mailto:aaryanpo@uwaterloo.ca"><Icon name="mail" />aaryanpo@uwaterloo.ca</a></li>
         <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><Icon name="linkedin" />linkedin.com/in/abtin-aryanpour</a></li>
@@ -100,7 +91,7 @@ const skills = [
           <div class="entry">
             <div class="e-head"><h3>{e.title}</h3><p class="when">{e.when}</p></div>
             <p class="meta">{e.meta}</p>
-            <p>{e.text}</p>
+            {e.text && <p>{e.text}</p>}
           </div>
         ))}
       </section>
@@ -127,7 +118,7 @@ const skills = [
         <h2 id="exp">Experience</h2>
         {experience.map((e) => (
           <div class="entry">
-            <div class="e-head"><h3>{e.title}</h3><p class="when">{e.when}</p></div>
+            <div class="e-head"><h3>{e.href ? <a href={e.href}>{e.title}</a> : e.title}</h3><p class="when">{e.when}</p></div>
             <p class="meta">{e.meta}</p>
             <ul>{e.points!.map((pt) => <li>{pt}</li>)}</ul>
           </div>
