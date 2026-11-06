@@ -30,7 +30,7 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
         <p class="lead">A machine-sound anomaly detector that learns only from healthy recordings, and turns a green, yellow or red light when a machine starts to sound wrong.</p>
         <dl class="summary">
           <div><dt>Problem</dt><dd>Machine faults are rare and costly to record, so the detector has to learn from healthy sound alone.</dd></div>
-          <div><dt>Result</dt><dd>{andon.meanAuc} AUC on held-out test clips, against {andon.baselineAuc} for the DCASE 2020 baseline, an autoencoder. The model fits in {andon.int8Size}.</dd></div>
+          <div><dt>Result</dt><dd>Played a faulty recording and a healthy one it has never heard, Andon picks the faulty one {andon.meanAuc} of the time ({andon.meanAuc} AUC; 50% is a coin flip). The DCASE 2020 challenge’s own baseline model scores {andon.baselineAuc} on the same test. Shrunk to {andon.int8Size}, it’s small enough to fit on a microcontroller.</dd></div>
           <div><dt>Stack</dt><dd>{stack}</dd></div>
         </dl>
         <p class="status">Solo project: I designed and built all of it. Started in October 2026 and still in progress. The software stage is done and the hardware stage has started.</p>

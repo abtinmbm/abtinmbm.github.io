@@ -68,7 +68,7 @@ const person = {
         <h3 id="andon-h" class="head">Andon</h3>
         <p class="lead">Hears when a machine starts to sound wrong, after learning only from healthy recordings.</p>
         <p class="status"><b>In progress.</b> A solo project. The software works. Now it’s moving onto a Raspberry Pi Pico 2.</p>
-        <p>On held-out test clips, it tells faulty sound from normal with {andon.meanAuc} AUC (50% would be guessing), against {andon.baselineAuc} for the benchmark’s baseline model. Shrunk to 8-bit integers, it fits in {andon.int8Size}.</p>
+        <p>Played a faulty recording and a healthy one it has never heard, it picks the faulty one {andon.meanAuc} of the time ({andon.meanAuc} AUC), against {andon.baselineAuc} for the challenge’s own baseline model. Shrunk to {andon.int8Size}, it fits on a microcontroller.</p>
         <p class="p-links"><a href="/projects/andon/">Read about Andon</a><a href={repo('andon')}>Code on GitHub<span class="visually-hidden"> for Andon</span></a></p>
       </div>
       <div class="p-media">
