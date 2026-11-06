@@ -17,7 +17,7 @@ const projectEntries: Entry[] = [
       'Built a system that detects failing machines by sound, training a PyTorch CNN only on healthy audio. It reached 92.13% mean AUC on held-out DCASE 2020 data, against 79.70% for the DCASE autoencoder baseline (3 seeds).',
       'Validated the evaluation by reproducing the DCASE baseline within 0.88 AUC points on all 6 machine types.',
       'Developed a streaming green, yellow and red alert using control-chart (SPC) limits, catching 65.57% of 30 s faults with a 10.57 s mean delay at 5.53 false alarms per hour on held-out clips.',
-      'Quantized the CNN to int8 for a Cortex-M33 microcontroller with a NumPy fixed-point reference, shrinking it to 98.7 KB (from 383.0 KB) at 92.08% AUC. Exported C headers and test vectors to check the C port bit for bit in CI.',
+      'Quantized the CNN to int8 for a Cortex-M33 (98.7 KB from 383.0 KB, at 92.08% AUC) and ported the log-mel front end and int8 inference to C, matching a NumPy fixed-point reference bit for bit in CI.',
     ],
   },
   {
