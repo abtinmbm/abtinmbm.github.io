@@ -14,6 +14,12 @@
   .top .status { max-width: 46em; color: var(--dim); }
   .top .status a { color: var(--white); margin-left: 0.3em; }
   .lead { font-size: var(--t-lead); line-height: 1.4; }
+  .code-link a, .code-end { display: inline-flex; align-items: center; gap: 0.5em; font-weight: 500; }
+  /* problem, result and stack, for a reader with ten seconds */
+  .summary { margin: 0; max-width: 46em; display: grid; gap: var(--s2); }
+  .summary div { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: var(--s4); }
+  .summary dt { color: var(--dim); }
+  .summary dd { margin: 0; }
 
   /* Every section below the header has the same two columns: what it is on the left
      (a heading, or a short framing paragraph), the substance on the right. */
@@ -39,14 +45,14 @@
   .ev { margin: 0; }
   .ev figcaption { margin-top: var(--s4); color: var(--dim); }
   .specs { display: grid; gap: var(--s3); }
-  .spec { display: grid; gap: 4px; }
+  .spec { display: grid; gap: 8px; }
   .spec img { display: block; width: 100%; height: auto; }
-  .spec span { color: var(--dim); }
+  .spec > span, .spec-bar > .small { color: var(--dim); }
   .two-col { columns: 2; column-gap: var(--s7); }
   .two-col > p { break-inside: avoid; margin-bottom: var(--s5); }
   .built { color: var(--dim); }
 
-  .onward { padding-block: var(--s8) var(--s4); border-top: 1px solid var(--line); }
+  .onward { padding-block: var(--s8) var(--s4); border-top: 1px solid var(--line); display: grid; gap: var(--s6); justify-items: start; }
   .onward a { font-weight: 500; font-size: var(--t-h3); line-height: 1.2; text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
 
   @media (max-width: 899px) {
@@ -56,6 +62,7 @@
     .pair { grid-template-columns: 1fr; gap: var(--s5); }
     .two-col { columns: 1; }
   }
+  @media (max-width: 399px) { .summary div { grid-template-columns: 1fr; gap: 0; } }
   @media (max-width: 599px) {
     .steps { grid-template-columns: 1fr; gap: var(--s5); }
     .top { min-height: 0; }

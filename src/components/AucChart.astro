@@ -7,8 +7,8 @@ const pct = (v: number) => ((v - min) / (100 - min)) * 100;
 <figure class="auc">
   <figcaption id="auc-cap">
     <span class="key"><i class="sw cnn"></i>Andon’s CNN</span>
-    <span class="key"><i class="sw ae"></i>Reference autoencoder</span>
-    <span class="dim">Evaluation AUC by machine type, mean of 3 seeds. 50% is guessing.</span>
+    <span class="key"><i class="sw ae"></i>DCASE baseline (an autoencoder)</span>
+    <span class="dim">Evaluation AUC by machine type, mean of 3 training runs. 50% is guessing.</span>
   </figcaption>
   <div class="rows" aria-hidden="true">
     {rows.map((r) => (
@@ -26,7 +26,7 @@ const pct = (v: number) => ((v - min) / (100 - min)) * 100;
   <summary class="small">Show as a table</summary>
   <table class="small">
     <caption>Evaluation AUC (%) by machine type</caption>
-    <thead><tr><th scope="col">Machine type</th><th scope="col">Andon’s CNN</th><th scope="col">Reference autoencoder</th></tr></thead>
+    <thead><tr><th scope="col">Machine type</th><th scope="col">Andon’s CNN</th><th scope="col">DCASE baseline</th></tr></thead>
     <tbody>
       {rows.map((r) => (<tr><th scope="row">{r.type}</th><td class="num">{r.cnn.toFixed(2)}</td><td class="num">{r.ae.toFixed(2)}</td></tr>))}
       <tr class="mean"><th scope="row">Mean of six</th><td class="num">{andon.meanAuc.replace('%', '')}</td><td class="num">{andon.baselineAuc.replace('%', '')}</td></tr>

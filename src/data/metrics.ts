@@ -59,20 +59,24 @@ export const stitcher = {
   // Map position vs truth, split by simulated GPS error (README Accuracy table).
   mapError1: '0.16–0.31 m',
   mapError3: '0.47–0.94 m',
-  // README: no photo rejected in the evaluation (10 × 91). Blur limit check: 2,730 photos × 9 cases.
+  // README: no photo rejected in the evaluation (10 × 91). Blur limit check (resume PDF): 2,730 photos × 9 conditions,
+  // 5 sharp (clean, JPEG 75, noise σ2 and σ4, dim) and 4 blurred (Gaussian 0.7 px, 5 px motion at 0/45/90°).
   rejectedGood: '0 of 910',
-  blurWrong: '0 of 2,730 photos × 9 blur cases',
-  // portfolio/eval_179_results_2026-11-04_site.txt: refinement-on runs, current code.
-  speed: '0.43–0.71 s',
+  blurWrong: '0 of 2,730 photos under 9 conditions (5 sharp, 4 slightly blurred; none combine noise and blur)',
+  // PR #215 image_stitcher/README.md (public), same as docs/02.
+  speed: '0.42–0.75 s',
   tests: '80',
   // portfolio/tools/guide_worked_example_179.py, one pair across a row turn (rerun 2026-11-04).
   rowCandidates: 612,
   rowKept: 10,
   rowKeptTurned: 317,
+  // candidates at the 180° turn (rerun 2026-11-06)
+  rowCandidatesTurned: 714,
 };
 
 export const awards = {
-  // CNLC is the competition; FBLC Canada (2025) and FBLA Canada (2024) ran it. Abtin, 2026-11-04.
-  fblc2025: '1st of 32 teams, Coding & Programming, CNLC 2025 (FBLC Canada)',
-  fbla2024: '4th of 32 teams, Coding & Programming, FBLA Canada 2024',
+  // CNLC (Canadian National Leadership Conference) is the competition. FBLA Canada ran it in 2024;
+  // in 2025 it was run by FBLC (Future Business Leaders of Canada), which branched off FBLA. Abtin, 2026-11-06.
+  fblc2025: '1st of 32 teams, Coding & Programming, CNLC 2025 (run by FBLC, Future Business Leaders of Canada)',
+  fbla2024: '4th of 32 teams, Coding & Programming, CNLC 2024 (run by FBLA Canada)',
 };

@@ -142,3 +142,46 @@ test('the stitcher map builds itself once when it comes into view', async ({ pag
   await expect(page.locator('.grow-frame.on')).toHaveAttribute('data-n', '91', { timeout: 6000 });
   await expect(page.locator('#grow-range')).toHaveAttribute('aria-valuetext', '91 photos');
 });
+
+test('the match pair switches between before and after with the keyboard', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/projects/image-stitcher/');
+  const fig = page.locator('[data-mp]');
+  const after = page.locator('.mp-tabs button[data-k="2"]');
+  await expect(page.locator('path.mp-l.k0')).toBeVisible();
+  await expect(page.locator('path.mp-l.k2')).toBeHidden();
+  await after.focus();
+  await page.keyboard.press('Enter');
+  await expect(fig).toHaveAttribute('data-k', '2');
+  await expect(after).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('path.mp-l.k2')).toBeVisible();
+  await expect(page.locator('path.mp-l.k0')).toBeHidden();
+});
+
+test('the arrival map shows every footprint when motion is reduced, and replays when allowed', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/projects/image-stitcher/');
+  await expect(page.locator('.arr-p')).toHaveCount(91);
+  await expect(page.locator('.arr-p.off')).toHaveCount(0);
+  await expect(page.locator('.arr-play')).toBeHidden();
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.reload();
+  await page.locator('.arr').scrollIntoViewIfNeeded();
+  await expect(page.locator('.arr-now')).toContainText('All 91 photos in', { timeout: 15000 });
+  await expect(page.locator('.arr-p.off')).toHaveCount(0);
+});
+
+test('each spectrogram clip plays and stops from its button', async ({ page }) => {
+  await page.goto('/projects/andon/');
+  const [normal, fault] = await page.locator('[data-listen]').all();
+  const btn = normal.locator('.spec-play');
+  await btn.focus();
+  await page.keyboard.press('Enter');
+  await expect(normal).toHaveClass(/playing/);
+  await expect(btn).toHaveAttribute('aria-label', /Stop/);
+  await fault.locator('.spec-play').click();
+  await expect(fault).toHaveClass(/playing/);
+  await expect(normal).not.toHaveClass(/playing/);
+  await fault.locator('.spec-play').click();
+  await expect(fault).not.toHaveClass(/playing/);
+});

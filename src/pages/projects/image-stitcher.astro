@@ -2,6 +2,13 @@
 import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import ProjectTrail from '../../components/ProjectTrail.astro';
+import Icon from '../../components/Icon.astro';
+import MatchPair from '../../components/MatchPair.astro';
+import ArrivalMap from '../../components/ArrivalMap.astro';
+import blur from '../../data/stitcher-blur.json';
+import blurSharp from '../../assets/stitcher/extra/blur-sharp.webp';
+import blurGauss from '../../assets/stitcher/extra/blur-gauss07.webp';
+import blurMotion from '../../assets/stitcher/extra/blur-motion5.webp';
 import Bars from '../../components/Bars.astro';
 import { stitcher } from '../../data/metrics';
 import { projects } from '../../data/projects';
@@ -19,11 +26,12 @@ const last = stages.length - 1;
 // 612 candidate matches, 34 by 18; 10 survived RANSAC without the turn.
 const total = stitcher.rowCandidates;
 const kept = stitcher.rowKept;
-// Which dots are bright is arbitrary (a fixed seed), so they scatter instead of forming a pattern.
-let seed = 11;
-const lit = new Set<number>();
-while (lit.size < kept) lit.add((seed = (seed * 16807) % 2147483647) % total);
-const dots = Array.from({ length: total }, (_, i) => ({ x: (i % 34) * 10 + 5, y: Math.floor(i / 34) * 10 + 5, on: lit.has(i) }));
+// One patch of one simulated photo, sharp and with the two smallest blurs the check must catch.
+const blurs = [
+  { img: blurSharp, name: 'Sharp', score: blur.sharp },
+  { img: blurGauss, name: 'Slightly out of focus', score: blur.gauss07 },
+  { img: blurMotion, name: 'Moved 5 px while shooting', score: blur.motion5 },
+];
 // Without JavaScript the finished map shows. With it, the slider opens on the first stage
 // (the section is below the first screen, so the switch is never seen), and visitors grow it.
 const first = 0;
@@ -38,15 +46,21 @@ const first = 0;
       <div class="top-sky"><ProjectTrail slug="image-stitcher" /></div>
       <div class="top-text wrap">
         <h1 class="display">Image Stitcher</h1>
-        <p class="lead">Merges out-of-order, GPS-tagged photos from several drones into one top-down map that sits in the right place on the Earth.</p>
-        <p class="status">In review. I built the stitcher as a member of the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026, and the subteam is reviewing it. The pull request is open, with changes requested. <a href="https://github.com/UWARG/autonomy-monorepo/pull/215">Pull request #215 on GitHub</a></p>
+        <p class="lead">Merges out-of-order photos from several drones, each tagged with a GPS (Global Positioning System) position, into one top-down map that sits in the right place on the Earth.</p>
+        <dl class="summary">
+          <div><dt>Problem</dt><dd>Photos arrive shuffled, from several drones, with GPS that’s metres off and no compass heading.</dd></div>
+          <div><dt>Result</dt><dd>One connected map in {stitcher.missions} simulated missions, with photos lined up to {stitcher.alignment} on average. Tested in simulation only.</dd></div>
+          <div><dt>Stack</dt><dd>Python, PyTorch, OpenCV, NumPy and pytest.</dd></div>
+        </dl>
+        <p class="status">Built for the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026. I wrote the whole pull request: the stitcher, the simulator that makes test missions with known true positions, the {stitcher.tests} tests and the evaluation script. In review: the second round of revisions was pushed on November 3, 2026.</p>
+        <p class="code-link"><a href={p.repo}><Icon name="github" /> Code on GitHub (pull request #215)</a></p>
       </div>
     </header>
 
     <section class="sec first wrap grid" aria-labelledby="why-h">
       <div class="side">
         <h2 id="why-h" class="visually-hidden">Why it exists</h2>
-        <p class="lede">Drones fly back and forth over a field taking photos. The photos reach the ground laptop out of order, from several drones, with GPS that’s metres off and no compass heading.</p>
+        <p class="lede">Drones fly back and forth over a field taking photos, and each one reaches the ground laptop whenever its drone sends it.</p>
         <p class="lede-more">GPS finds which photos should overlap, image matching lines them up, and all the GPS readings together place the finished map on the Earth.</p>
       </div>
       <figure class="main stages grow" data-grow>
@@ -75,13 +89,13 @@ const first = 0;
     </section>
 
     <section class="sec wrap grid" aria-labelledby="how-h">
-      <div class="side"><h2 id="how-h">From shuffled photos to one map</h2></div>
+      <div class="side"><h2 id="how-h">From shuffled photos to one map</h2><ArrivalMap /></div>
       <ol class="main steps">
         <li><p><b>Check.</b> Each photo is checked for blur, exposure and tilt. The ones that pass are undistorted for the lens.</p></li>
         <li><p><b>Find neighbours.</b> GPS says which photos should overlap, even when they arrive out of order from different drones.</p></li>
-        <li><p><b>Match.</b> XFeat learned features and RANSAC line each pair up and throw out wrong matches.</p></li>
+        <li><p><b>Match.</b> XFeat, a learned feature detector, finds the same ground points in both photos. RANSAC (random sample consensus) keeps only the matches that agree with each other and throws out the rest.</p></li>
         <li><p><b>Recover heading.</b> There’s no compass, so the matches and the noisy GPS together work out which way each photo faces.</p></li>
-        <li><p><b>Refine.</b> A least-squares solver, in the style of bundle adjustment, adjusts every photo at once so the whole map agrees.</p></li>
+        <li><p><b>Refine.</b> A least-squares solver nudges every photo at once until the total mismatch between overlaps is as small as it can be. It works like bundle adjustment, the standard way mapping software corrects many photos together.</p></li>
         <li><p><b>Place.</b> All the GPS readings together put the finished map in the right place on the Earth.</p></li>
       </ol>
     </section>
@@ -91,7 +105,7 @@ const first = 0;
         <h2 id="results-h">One connected map in {stitcher.missions} simulated missions</h2>
         <p class="note">The simulator knows where every photo really was, so each run can be scored against the truth instead of by eye.</p>
         <p class="note">Alignment is how far photos sit from their true positions relative to each other, averaged over each mission. Map position is how far the whole map sits from where it should be on the Earth.</p>
-        <p class="note">Anyone on the team can rerun this table with one command from the pull request.</p>
+        <p class="note">The connected-map, alignment, map-position and speed rows rerun with one command from the pull request.</p>
       </div>
       <div class="main">
         <table class="facts-table">
@@ -103,6 +117,7 @@ const first = 0;
             <tr><th scope="row">Map position against the truth</th><td><span class="num">{stitcher.mapError1}</span> at 1 m of GPS error, <span class="num">{stitcher.mapError3}</span> at 3 m. Closer than the GPS error itself</td></tr>
             <tr><th scope="row">Quality checks</th><td>{stitcher.rejectedGood} evaluation photos wrongly rejected. Blur check wrong on {stitcher.blurWrong}</td></tr>
             <tr><th scope="row">Speed</th><td><span class="num">{stitcher.speed}</span> per photo on a laptop CPU</td></tr>
+            <tr><th scope="row">Bad input</th><td>A broken message or failed map save is logged and skipped. A photo with a GPS glitch is rejected instead of stretching the map</td></tr>
             <tr><th scope="row">Tests</th><td>{stitcher.tests} stitcher tests, plus a ground-truth mission simulator</td></tr>
           </tbody>
         </table>
@@ -113,20 +128,15 @@ const first = 0;
       <h2 class="visually-hidden">What was hard</h2>
       <section class="sec wrap grid" aria-labelledby="hard-1">
         <div class="side"><h3 id="hard-1">Rows wouldn’t connect</h3></div>
-        <div class="main pair">
-          <p>The drones turn 180 degrees at the end of each row, and XFeat isn’t rotation invariant. In one simulated pair of photos across a row turn, only {kept} of {total} candidate matches survived RANSAC. With the photo turned 180°, {stitcher.rowKeptTurned} did. So features are now extracted at four quarter turns.</p>
-          <figure class="ev">
-            <svg class="dots" viewBox="0 0 340 180" role="img" aria-label={`${total} dots for the candidate matches, ${kept} of them bright`}>
-              {dots.map((d) => <circle cx={d.x} cy={d.y} r={d.on ? 3.2 : 1.6} class:list={{ on: d.on }} />)}
-            </svg>
-            <figcaption class="small">Before the fix: {kept} of {total} candidate matches survived between two neighbouring rows, in simulation.</figcaption>
-          </figure>
+        <div class="main">
+          <p>The drones turn 180 degrees at the end of each row, and XFeat isn’t rotation invariant: it can’t match a photo against one that’s upside down. In one simulated pair of photos across a row turn, only {kept} of {total} candidate matches survived RANSAC. With the photo turned 180°, {stitcher.rowKeptTurned} of {stitcher.rowCandidatesTurned} did. So features are now extracted at four quarter turns.</p>
+          <div class="ev"><MatchPair total={total} /></div>
         </div>
       </section>
       <section class="sec wrap grid" aria-labelledby="hard-2">
         <div class="side"><h3 id="hard-2">Refinement made the map worse</h3></div>
         <div class="main pair">
-          <p>The first version made errors worse, not better, because a huge penalty weight on the pinned photo made the solver unstable. Removing that photo’s unknowns from the system fixed it.</p>
+          <p>The first version made errors worse, not better, because a huge penalty weight on the pinned photo (the one held still so the map can’t drift) made the solver unstable. Taking that photo out of the values the solver adjusts fixed it.</p>
           <div class="ev">
             <Bars min={0} max={45} ticks={[0, 15, 30, 45]} unit="cm" caption="After the fix: average misalignment of photos relative to each other, across simulated missions."
               rows={[{ label: 'Without it', from: 13, to: 41, text: stitcher.refineBefore }, { label: 'With it', from: 4, to: 7, text: stitcher.refineAfter, strong: true }]} />
@@ -136,13 +146,25 @@ const first = 0;
       <section class="sec wrap grid" aria-labelledby="hard-3">
         <div class="side"><h3 id="hard-3">Good matches split the map</h3></div>
         <div class="main">
-          <p>Small clusters with noisy GPS rejected good matches. Now a cluster’s GPS check only counts once the cluster spans four times the GPS error, and a repeating-ground test proves wrong matches stay blocked.</p>
+          <p>The stitcher builds clusters, groups of photos that line up with each other, and merges two when a new photo bridges them. Small clusters with noisy GPS rejected good matches. Now a cluster’s GPS check only counts once the cluster spans four times the GPS error, and a simulated repeating-ground test checks that wrong matches stay blocked.</p>
         </div>
       </section>
       <section class="sec wrap grid" aria-labelledby="hard-4">
         <div class="side"><h3 id="hard-4">The blur check rejected good photos</h3></div>
-        <div class="main">
+        <div class="main pair">
           <p>Sharp and blurred scores overlapped, so no limit could work. The new score compares a photo with itself at half resolution, in each direction. My own review before pushing showed sensor noise could fool it, so a 3×3 median filter runs first. Even mild noise can still let a motion-blurred photo through in simulation, and the limits are tuned on synthetic photos.</p>
+          <figure class="ev blurs">
+            <div class="blur-row">
+              {blurs.map((b) => (
+                <div class:list={['blur-c', { pass: b.score >= blur.limit }]}>
+                  <Picture src={b.img} formats={['avif', 'webp']} fallbackFormat="webp" widths={[240, 480]} sizes="(max-width: 899px) 30vw, 13vw" alt={`${b.name}: sharpness ${b.score.toFixed(2)}`} />
+                  <span class="small">{b.name}</span>
+                  <span class="small num"><b>{b.score.toFixed(2)}</b> {b.score >= blur.limit ? 'kept' : 'rejected'}</span>
+                </div>
+              ))}
+            </div>
+            <figcaption class="small">The same patch of one simulated photo, enlarged 8×, with its sharpness score. The limit is {blur.limit.toFixed(2)}. The two blurs are the smallest the check has to catch.</figcaption>
+          </figure>
         </div>
       </section>
     </div>
@@ -150,33 +172,27 @@ const first = 0;
     <section class="sec wrap grid" aria-labelledby="short-h">
       <div class="side"><h2 id="short-h">Where it still falls short</h2></div>
       <div class="main">
-        <p>Every result is from simulation. There are no real flight photos yet: the drone camera doesn’t log roll and pitch yet, so its photo runs are rejected for now, and the flight camera’s resolution isn’t confirmed. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms. The pull request hasn’t merged.</p>
+        <p>Every result is from simulation. There are no real flight photos yet: the drone’s camera software doesn’t log roll and pitch yet, so its photos are rejected for now, and the lens calibration still has to be checked against the camera actually flown. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms. The pull request hasn’t merged.</p>
       </div>
     </section>
 
-    <section class="sec wrap grid" aria-labelledby="next-h">
-      <div class="side"><h2 id="next-h">Where it stands</h2></div>
-      <div class="main">
-        <p>The stitcher is a pull request to the team’s autonomy code, reviewed by the autonomy subteam. The second round of review changes was pushed on November 3, 2026.</p>
-        <p>It keeps running through bad input: a broken message or a failed map save is logged and skipped, and a photo with a GPS glitch is rejected instead of stretching the map.</p>
-        <p class="small built">Built with Python, PyTorch, OpenCV, NumPy and pytest.</p>
-      </div>
-    </section>
-
-    <nav class="onward wrap" aria-label="Next project">
+    <nav class="onward wrap" aria-label="Code and next project">
+      <a class="code-end" href={p.repo}><Icon name="github" /> The stitcher’s code on GitHub (pull request #215)</a>
       <a href="/projects/andon/">Next project: Andon</a>
     </nav>
   </article>
 </Base>
 
 <style>
-  .dots { display: block; width: 100%; height: auto; }
-  .dots circle { fill: var(--dim); opacity: 0.35; }
-  .dots circle.on { fill: var(--white); opacity: 1; }
+  .blur-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
+  .blur-c { display: grid; gap: 4px; align-content: start; }
+  .blur-c :global(img) { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+  .blur-c span { color: var(--dim); }
+  .blur-c b { font-weight: 500; color: var(--white); }
+  .blur-c:not(.pass) :global(img) { opacity: 0.75; }
   /* Map on the left, the slider and caption beside it, level with the map's foot. */
   .stages { margin: 0; display: grid; grid-template-columns: minmax(0, min(600px, calc((100svh - 220px) * 1.34))) minmax(15rem, 1fr); column-gap: var(--s7); align-items: end; }
   .grow-side { display: grid; gap: var(--s5); padding-bottom: var(--s3); max-width: 22rem; }
-  .dots { max-width: 420px; }
   .grow-stack { display: grid; }
   .grow-frame { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0s 0.25s; }
   .grow-frame.on { opacity: 1; visibility: visible; transition: opacity 0.25s ease; }

@@ -6,6 +6,7 @@ import Icon from '../components/Icon.astro';
 import AndonReplay from '../components/AndonReplay.astro';
 import { projects } from '../data/projects';
 import { andon, stitcher, awards } from '../data/metrics';
+const repo = (slug: string) => projects.find((x) => x.slug === slug)!.repo;
 import portrait from '../assets/photos/abtin-portrait.jpg';
 import mapStage from '../assets/stitcher/stages/stage-20.webp';
 
@@ -67,8 +68,8 @@ const person = {
         <h3 id="andon-h" class="head">Andon</h3>
         <p class="lead">Hears when a machine starts to sound wrong, after learning only from healthy recordings.</p>
         <p class="status"><b>In progress.</b> A solo project. The software works. Now it’s moving onto a Raspberry Pi Pico 2.</p>
-        <p>On the held-out evaluation set, it tells faulty sound from normal with {andon.meanAuc} AUC, against {andon.baselineAuc} for the reference autoencoder. As int8 it fits in {andon.int8Size}.</p>
-        <p><a href="/projects/andon/">Read about Andon</a></p>
+        <p>On held-out test clips, it tells faulty sound from normal with {andon.meanAuc} AUC (50% would be guessing), against {andon.baselineAuc} for the benchmark’s baseline model. Shrunk to 8-bit integers, it fits in {andon.int8Size}.</p>
+        <p class="p-links"><a href="/projects/andon/">Read about Andon</a><a href={repo('andon')}>Code on GitHub<span class="visually-hidden"> for Andon</span></a></p>
       </div>
       <div class="p-media">
         <AndonReplay captionId="andon-cap">
@@ -87,7 +88,7 @@ const person = {
         <p class="lead">Merges out-of-order, GPS-tagged photos from several drones into one top-down map, for the Waterloo Aerial Robotics Group.</p>
         <p class="status"><b>In review.</b> I built it on the autonomy software team, and the subteam is reviewing pull request #215.</p>
         <p>In {stitcher.missions} simulated missions it built one connected map, with photos lined up to {stitcher.alignment} on average.</p>
-        <p><a href="/projects/image-stitcher/">Read about the stitcher</a></p>
+        <p class="p-links"><a href="/projects/image-stitcher/">Read about the stitcher</a><a href={repo('image-stitcher')}>Code on GitHub (PR #215)<span class="visually-hidden"> for the Image Stitcher</span></a></p>
       </div>
     </article>
 
@@ -185,6 +186,7 @@ const person = {
   .status b { font-weight: 500; }
   .status { color: var(--dim); }
   .status b { color: var(--white); }
+  .p-links { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
 
   .p-andon { align-items: center; }
   .p-andon .p-text { grid-column: 1 / 6; }

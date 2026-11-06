@@ -1,0 +1,79 @@
+---
+// Where each photo of the demo mission landed, in the order they reached the ground laptop.
+// Exported from the PR code: synthetic.lawn_mower_mission, then shuffled as demo.py does (seed 0),
+// so this is the same simulated mission as the growing map above. Footprints are the true ones.
+import data from '../data/stitcher-arrival.json';
+
+const { w, h, photos } = data;
+const pts = (q: number[][]) => q.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+const drones = [1, 2, 3];
+---
+<figure class="arr" data-arr>
+  <svg class="arr-svg" viewBox={`-1 -1 ${w + 2} ${h + 2}`} role="img"
+    aria-label={`A ${w} by ${h} metre field covered by ${photos.length} photo footprints from 3 drones. Each drone flew its own band of rows, but the photos arrived mixed together and out of order.`}>
+    <rect class="arr-field" x="0" y="0" width={w} height={h} />
+    {photos.map((p, i) => <polygon class={`arr-p d${p.d}`} data-i={i} points={pts(p.q)} />)}
+  </svg>
+  <div class="arr-bar">
+    <ul class="arr-key small" aria-hidden="true">
+      {drones.map((d) => <li><i class={`d${d}`}></i>Drone {d}</li>)}
+    </ul>
+    <button type="button" class="arr-play small" hidden>Replay arrivals</button>
+  </div>
+  <p class="arr-now small num" aria-hidden="true"></p>
+  <figcaption class="small">One simulated mission: where each of the {photos.length} photos really landed, shown in the order they reached the ground laptop.</figcaption>
+</figure>
+
+<style>
+  .arr { margin: 0; display: grid; gap: var(--s3); }
+  .arr-svg { display: block; width: 100%; height: auto; }
+  .arr-field { fill: rgb(6 16 49 / 0.6); stroke: var(--line); stroke-width: 0.3; }
+  .arr-p { fill: none; vector-effect: non-scaling-stroke; stroke-width: 1; transition: fill 400ms ease; }
+  .arr-p.d1 { stroke: #f3f5ff; }
+  .arr-p.d2 { stroke: #8296dc; stroke-dasharray: 5 3; }
+  .arr-p.d3 { stroke: #5574d4; stroke-dasharray: 1.5 2.5; }
+  .arr-p.off { visibility: hidden; }
+  .arr-p.new { fill: rgb(243 245 255 / 0.28); }
+  .arr-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2) var(--s4); }
+  .arr-key { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--s4); color: var(--dim); }
+  .arr-key li { display: inline-flex; align-items: center; gap: 6px; }
+  .arr-key i { width: 18px; border-top: 2px solid; }
+  .arr-key i.d1 { border-color: #f3f5ff; }
+  .arr-key i.d2 { border-color: #8296dc; border-top-style: dashed; }
+  .arr-key i.d3 { border-color: #5574d4; border-top-style: dotted; }
+  .arr-play { font: inherit; font-size: 14px; color: var(--white); background: none; border: 0; padding: 4px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.3em; }
+  .arr-play:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+  .arr-now { margin: 0; min-height: 1.5em; color: var(--dim); }
+  .arr figcaption { color: var(--dim); }
+</style>
+
+<script>
+  // Plays once when it first scrolls into view, if motion is allowed. Otherwise every footprint shows.
+  for (const fig of document.querySelectorAll<HTMLElement>('[data-arr]')) {
+    const polys = [...fig.querySelectorAll<SVGPolygonElement>('.arr-p')];
+    const now = fig.querySelector<HTMLElement>('.arr-now')!;
+    const btn = fig.querySelector<HTMLButtonElement>('.arr-play')!;
+    const drone = (p: Element) => p.getAttribute('class')!.match(/d(\d)/)![1];
+    let timer = 0;
+    const play = () => {
+      clearInterval(timer);
+      polys.forEach((p) => p.classList.add('off'));
+      let i = 0;
+      timer = window.setInterval(() => {
+        polys[i - 1]?.classList.remove('new');
+        if (i === polys.length) { clearInterval(timer); now.textContent = `All ${polys.length} photos in`; return; }
+        polys[i].classList.remove('off'); polys[i].classList.add('new');
+        now.textContent = `Photo ${i + 1} of ${polys.length} arrives, from drone ${drone(polys[i])}`;
+        i++;
+      }, 110);
+    };
+    btn.addEventListener('click', play);
+    if (matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+      btn.hidden = false;
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) { io.disconnect(); play(); }
+      }, { threshold: 0.5 });
+      io.observe(fig);
+    }
+  }
+</script>

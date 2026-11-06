@@ -1,8 +1,8 @@
 // Every project on the site, oldest first. The star trails are drawn from this list,
 // so adding a project here adds a trail.
 //
-// Dates: first and last commit on GitHub, in UTC.
-// - School Partner Directory and CyberShield end dates skip a later README tidy-up (2026-10-16).
+// Dates: first commit on GitHub, in UTC. End dates are the last-commit day, padded to 23:59 UTC.
+// - School Partner Directory and CyberShield end dates skip later README tidy-ups (2026-10-16, 2026-11-04).
 // - Image Stitcher starts at the first commit of UWARG/autonomy-monorepo PR #215.
 // Checked with `gh` on 2026-11-04.
 

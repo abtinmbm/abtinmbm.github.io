@@ -1,0 +1,65 @@
+---
+// The five steps as one strip, each drawn from real data where there is data:
+// the waveform is the first 2 s of the normal clip, the spectrogram is that clip,
+// and the score is the replay's trace with its two limits. The CNN cell is a schematic.
+import { Picture } from 'astro:assets';
+import wave from '../data/andon-wave.json';
+import trace from '../data/andon-replay.json';
+import specNormal from '../assets/andon/spec-normal.webp';
+
+const W = 160, H = 64;
+const wavePath = wave.peak.map((v, i) => {
+  const x = (i / (wave.peak.length - 1)) * W;
+  return `M${x.toFixed(1)} ${(H / 2 - v * (H / 2 - 4)).toFixed(1)}V${(H / 2 + v * (H / 2 - 4)).toFixed(1)}`;
+}).join('');
+const lo = Math.log10(0.005), hi = Math.log10(15);
+const y = (v: number) => (H - 4 - ((Math.log10(Math.max(v, 0.005)) - lo) / (hi - lo)) * (H - 8)).toFixed(1);
+const n = trace.s.length;
+const scorePath = trace.s.map((v, i) => `${i ? 'L' : 'M'}${((i / (n - 1)) * W).toFixed(1)} ${y(v)}`).join('');
+const layers = [[0, 56], [30, 44], [56, 32], [78, 20], [96, 10]] as const;
+---
+<figure class="pipe" aria-label="The five steps, from left to right: a sound wave and its spectrogram, a CNN, a score over time, the same score with its two limits, and the light.">
+  <ol class="pipe-row" aria-hidden="true">
+    <li><div class="pipe-listen"><svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"><path class="pw" d={wavePath} /></svg><div class="pipe-spec"><Picture src={specNormal} formats={['avif', 'webp']} fallbackFormat="webp" widths={[320]} sizes="160px" alt="" /></div></div><span>1 Listen</span></li>
+    <li><svg viewBox={`0 0 ${W} ${H}`}>
+      {layers.map(([x, h]) => <rect class="pl" x={x + 24} y={(H - h) / 2} width="12" height={h} />)}
+      <text class="pt" x="148" y={H / 2 + 4} text-anchor="middle">fan?</text>
+    </svg><span>2 Recognize</span></li>
+    <li><svg viewBox={`0 0 ${W} ${H}`}><path class="ps" d={scorePath} /></svg><span>3 Score</span></li>
+    <li><svg viewBox={`0 0 ${W} ${H}`}>
+      <path class="ps faint" d={scorePath} />
+      <line class="pc" x1="0" x2={W} y1={y(trace.control)} y2={y(trace.control)} />
+      <line class="pk" x1="0" x2={W} y1={y(trace.warn)} y2={y(trace.warn)} />
+    </svg><span>4 Set limits</span></li>
+    <li><span class="pipe-lamps"><i class="r"></i><i></i><i></i></span><span>5 Light</span></li>
+  </ol>
+</figure>
+
+<style>
+  .pipe { margin: 0 0 var(--s4); }
+  .pipe-row { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--s5); }
+  .pipe-row li { position: relative; display: grid; grid-template-rows: 64px auto; gap: var(--s3); align-items: center; min-width: 0; }
+  .pipe-row li + li::before { content: ""; position: absolute; left: calc(-1 * var(--s5) + 5px); top: 31px; width: calc(var(--s5) - 10px); border-top: 1px solid var(--dim); opacity: 0.6; }
+  .pipe-row li > span:last-child { font-size: 13px; color: var(--dim); }
+  .pipe-row svg { width: 100%; height: 64px; display: block; overflow: visible; }
+  .pw { stroke: var(--white); stroke-width: 1; opacity: 0.85; }
+  .pipe-listen { display: grid; grid-template-rows: 26px 34px; gap: 4px; height: 64px; }
+  .pipe-listen svg { height: 26px; }
+  .pipe-spec { height: 34px; overflow: hidden; }
+  .pipe-spec :global(img) { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pl { fill: none; stroke: var(--white); stroke-width: 1.2; }
+  .pt { fill: var(--dim); font-size: 13px; }
+  .pc { stroke: #d62828; stroke-width: 1.2; stroke-dasharray: 4 3; }
+  .pk { stroke: #f2b705; stroke-width: 1.2; stroke-dasharray: 4 3; }
+  .ps { fill: none; stroke: var(--white); stroke-width: 1.1; stroke-linejoin: round; }
+  .ps.faint { opacity: 0.3; }
+  .pipe-lamps { display: inline-grid; gap: 5px; padding: 6px; border: 1px solid var(--line); border-radius: 20px; justify-self: start; }
+  .pipe-lamps i { width: 12px; height: 12px; border-radius: 50%; background: rgb(243 245 255 / 0.07); }
+  .pipe-lamps i.r { background: #d62828; }
+  @media (max-width: 599px) {
+    .pipe-row { gap: var(--s2); }
+    .pipe-row li > span:last-child { white-space: nowrap; }
+    .pipe-row li + li::before { display: none; }
+    .pipe-row li > span:last-child { font-size: 11.5px; }
+  }
+</style>

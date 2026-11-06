@@ -1,0 +1,71 @@
+---
+// Two simulated photos from neighbouring rows, joined by the matches RANSAC kept.
+// Exported from the PR code (features.py + cv2.estimateAffinePartial2D), mission seed 1,
+// the same pair as portfolio/tools/guide_worked_example_179.py. Without JavaScript, "before" shows.
+import { getImage } from 'astro:assets';
+import pair from '../data/stitcher-pair.json';
+import imgA from '../assets/stitcher/extra/pair-a.webp';
+import imgC from '../assets/stitcher/extra/pair-c.webp';
+
+interface Props { total: number }
+const { total } = Astro.props;
+const { w, h } = pair;
+const gap = 28;
+const vw = w * 2 + gap;
+const [a, c] = await Promise.all([getImage({ src: imgA, width: 960 }), getImage({ src: imgC, width: 960 })]);
+// Photo C sits on the left (it's the photo being placed), photo A on the right.
+// In the "after" view the left photo is drawn turned 180°, so its points turn with it.
+const lines = (k: 'turn0' | 'turn2') =>
+  pair[k].c.map(([x1, y1], i) => {
+    const [x2, y2] = pair[k].a[i];
+    const [cx, cy] = k === 'turn2' ? [w - x1, h - y1] : [x1, y1];
+    return `M${cx} ${cy}L${x2 + w + gap} ${y2}`;
+  }).join('');
+const before = pair.turn0.inliers, after = pair.turn2.inliers;
+---
+<figure class="mp" data-mp>
+  <div class="mp-tabs" role="group" aria-label="Show matches" hidden>
+    <button type="button" aria-pressed="true" data-k="0">As photographed: {before} kept</button>
+    <button type="button" aria-pressed="false" data-k="2">Turned 180°: {after} kept</button>
+  </div>
+  <svg class="mp-svg" viewBox={`0 0 ${vw} ${h}`} role="img"
+    aria-label={`Two overlapping simulated photos from neighbouring rows. Matching them as photographed, only ${before} matches survive. With one photo turned 180 degrees, ${after} matches survive.`}>
+    <image class="mp-c" href={c.src} x="0" y="0" width={w} height={h} />
+    <image href={a.src} x={w + gap} y="0" width={w} height={h} />
+    <path class="mp-l k0" d={lines('turn0')} />
+    <path class="mp-l k2" d={lines('turn2')} />
+  </svg>
+  <figcaption class="small"><span class="mp-cap k0">Before the fix: of {total} candidate matches between these two photos, only the {before} joined by lines survived RANSAC.</span><span class="mp-cap k2">After the fix: the same photos, with the left one turned 180° before matching. {after} of {pair.turn2.raw} candidate matches survive.</span> Simulated photos, ground markers only.</figcaption>
+</figure>
+
+<style>
+  .mp { margin: 0; display: grid; gap: var(--s4); }
+  .mp-tabs { display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .mp-tabs button { font: inherit; font-size: 14px; color: var(--dim); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  .mp-tabs button[aria-pressed="true"] { color: var(--ink); background: var(--white); border-color: var(--white); }
+  .mp-tabs button:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+  .mp-svg { display: block; width: 100%; height: auto; }
+  .mp-l { fill: none; stroke: var(--white); stroke-width: 1.2; opacity: 0.75; }
+  .mp-l.k2 { stroke-width: 0.8; opacity: 0.4; }
+  .mp figcaption { color: var(--dim); }
+  .mp .k2 { display: none; }
+  .mp-c { transform-origin: 50% 50%; transform-box: fill-box; transition: transform 500ms ease; }
+  .mp[data-k="2"] .mp-c { transform: rotate(180deg); }
+  @media (prefers-reduced-motion: reduce) { .mp-c { transition: none; } }
+  .mp[data-k="2"] .k0 { display: none; }
+  .mp[data-k="2"] .k2 { display: inline; }
+  .mp[data-k="2"] path.k2 { display: block; }
+</style>
+
+<script>
+  for (const fig of document.querySelectorAll<HTMLElement>('[data-mp]')) {
+    const tabs = fig.querySelector<HTMLElement>('.mp-tabs')!;
+    tabs.hidden = false;
+    tabs.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest('button');
+      if (!b) return;
+      fig.dataset.k = b.dataset.k;
+      tabs.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    });
+  }
+</script>

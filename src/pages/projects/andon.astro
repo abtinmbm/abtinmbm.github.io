@@ -7,12 +7,15 @@ import specFault from '../../assets/andon/spec-fault.webp';
 import AucChart from '../../components/AucChart.astro';
 import AndonReplay from '../../components/AndonReplay.astro';
 import ProjectTrail from '../../components/ProjectTrail.astro';
+import Icon from '../../components/Icon.astro';
+import AndonPipeline from '../../components/AndonPipeline.astro';
 import { andon } from '../../data/metrics';
 import { projects } from '../../data/projects';
 import '../../styles/project.css';
 
 const p = projects.find((x) => x.slug === 'andon')!;
 const num = (s: string) => Number(s.replace('%', ''));
+const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
 ---
 <Base
   title="Andon: hearing when a machine sounds wrong | Abtin Aryanpour"
@@ -25,7 +28,13 @@ const num = (s: string) => Number(s.replace('%', ''));
       <div class="top-text wrap">
         <h1 class="display">Andon</h1>
         <p class="lead">A machine-sound anomaly detector that learns only from healthy recordings, and turns a green, yellow or red light when a machine starts to sound wrong.</p>
-        <p class="status">Solo project: I designed and built all of it. Started in October 2026 and still in progress. The software stage is done and the hardware stage has started. <a href="https://github.com/abtinmbm/andon">Code on GitHub</a></p>
+        <dl class="summary">
+          <div><dt>Problem</dt><dd>Machine faults are rare and costly to record, so the detector has to learn from healthy sound alone.</dd></div>
+          <div><dt>Result</dt><dd>{andon.meanAuc} AUC on held-out test clips, against {andon.baselineAuc} for the DCASE 2020 baseline, an autoencoder. The model fits in {andon.int8Size}.</dd></div>
+          <div><dt>Stack</dt><dd>{stack}</dd></div>
+        </dl>
+        <p class="status">Solo project: I designed and built all of it. Started in October 2026 and still in progress. The software stage is done and the hardware stage has started.</p>
+        <p class="code-link"><a href={p.repo}><Icon name="github" /> Code on GitHub</a></p>
       </div>
     </header>
 
@@ -33,39 +42,44 @@ const num = (s: string) => Number(s.replace('%', ''));
       <div class="side">
         <h2 id="why-h" class="visually-hidden">Why it exists</h2>
         <p class="lede">Factories use andon lights to flag a problem on the line. But a fault is rare and expensive to record, so the system has to learn from normal sound alone.</p>
-        <p class="lede-more">A small CNN learns to recognise each individual machine by its sound. When it can no longer tell which machine it’s hearing, something has changed.</p>
+        <p class="lede-more">A small convolutional neural network (CNN), a common kind of model for images and sound, learns to recognize each individual machine by its sound. When it can no longer tell which machine it’s hearing, something has changed.</p>
       </div>
       <div class="main">
         <AndonReplay captionId="replay-cap">
-          <figcaption id="replay-cap" class="small">The real scores from one fan (machine id_06, development test clips, model seed 0), replayed at 8× speed: about two minutes of normal running, then a fault. The yellow light partway through is a real warning that clears by itself without stopping the line. This machine was picked to show how the light works. Typical rates are below.</figcaption>
+          <figcaption id="replay-cap" class="small">The real scores from one fan (machine id_06, development test clips, first training run), replayed at 8× speed: about two minutes of normal running, then a fault. The yellow light partway through is a real warning that clears by itself without stopping the line. This machine was picked to show how the light works.</figcaption>
         </AndonReplay>
       </div>
     </section>
 
     <section class="sec wrap grid" aria-labelledby="how-h">
       <div class="side"><h2 id="how-h">From a sound to a light</h2></div>
-      <ol class="main steps">
+      <div class="main">
+      <AndonPipeline />
+      <ol class="steps">
         <li><p><b>Listen.</b> Each 10-second clip becomes a log-mel spectrogram: how loud each of 128 frequency bands is, every 32 ms.</p></li>
-        <li><p><b>Recognise.</b> One small CNN per machine type learns to tell that type’s machines apart, from normal recordings only.</p></li>
-        <li><p><b>Score.</b> If the CNN can’t recognise the machine it’s hearing, the score rises. Each 2-second window gets a score, every second.</p></li>
-        <li><p><b>Set limits.</b> Normal audio sets a warning limit and a control limit for each machine, like a factory control chart (mean + 2σ and mean + 3σ of normal scores). They’re the two dashed lines in the replay.</p></li>
+        <li><p><b>Recognize.</b> One small CNN per machine type learns to tell that type’s machines apart, from normal recordings only.</p></li>
+        <li><p><b>Score.</b> If the CNN can’t recognize the machine it’s hearing, the score rises. Each 2-second window gets a score, every second.</p></li>
+        <li><p><b>Set limits.</b> Normal audio sets a warning limit and a control limit for each machine, like a factory control chart (the mean of normal scores plus 2 and 3 standard deviations). They’re the two dashed lines in the replay.</p></li>
         <li><p><b>Light.</b> Two windows in a row over the warning limit turn it yellow. Three in a row over the control limit turn it red, and it stays red until someone resets it.</p></li>
       </ol>
+      </div>
     </section>
 
     <section class="sec wrap grid" aria-labelledby="results-h">
       <div class="side">
-        <h2 id="results-h">Better than the reference on five of six machine types</h2>
+        <h2 id="results-h">Better than the DCASE baseline on five of six machine types</h2>
         <p class="note">AUC is the chance a random faulty clip scores as more abnormal than a random normal one. 50% is guessing.</p>
+        <p class="note">The data is from DCASE 2020 Task 2, the machine-sound part of a public audio challenge (Detection and Classification of Acoustic Scenes and Events). Its development set is for building and tuning. Its evaluation set is separate held-out data from other machines of the same types, so it’s the fairer test.</p>
+        <p class="note">The baseline is the official model released with the challenge, an autoencoder: it learns to rebuild normal sound and flags sound it can’t rebuild well. I re-implemented it and scored it the same way as my model.</p>
       </div>
       <div class="main">
         <AucChart />
         <div class="two-col">
-          <p><b class="num">{andon.meanAucSpread}</b> mean AUC (3 seeds) on the held-out DCASE 2020 evaluation set, against {andon.baselineAucSpread} for the reference autoencoder.</p>
-          <p>Before changing anything I reproduced the published reference on the development set, to within <b class="num">{andon.reproductionGap}</b> AUC points on all six machine types.</p>
+          <p><b class="num">{andon.meanAucSpread}</b> mean AUC on the held-out evaluation set, against {andon.baselineAucSpread} for the DCASE baseline, scored the same way. The mean is over 3 training runs, each started from a different random seed.</p>
+          <p>Before changing anything I reproduced the published baseline on the development set, to within <b class="num">{andon.reproductionGap}</b> AUC points on all six machine types.</p>
           <p>Played back as a continuous stream of test audio, the light caught <b class="num">{andon.faultsCaught}</b> of 30-second faults, on average {andon.secondsToRed} after they started, with {andon.falseAlarmsPerHour} false alarms per hour.</p>
-          <p>It has {andon.weights} weights. As int8 it’s <b class="num">{andon.int8Size}</b>, down from {andon.floatSize}, and still scores {andon.int8Auc} AUC.</p>
-          <p>The checkpoints are public, and two commands re-check the held-out CNN AUC results from a fresh clone.</p>
+          <p>It has {andon.weights} weights. Stored as 8-bit integers (int8), it’s <b class="num">{andon.int8Size}</b>, down from {andon.floatSize}, and still scores {andon.int8Auc} AUC.</p>
+          <p>The <a href="https://github.com/abtinmbm/andon/releases/tag/checkpoints-v1">trained checkpoints are public</a>, and <a href="https://github.com/abtinmbm/andon#reproduce-the-headline-number">two commands in the README</a> re-check the held-out CNN AUC results from a fresh clone.</p>
         </div>
       </div>
     </section>
@@ -75,11 +89,25 @@ const num = (s: string) => Number(s.replace('%', ''));
       <section class="sec wrap grid" aria-labelledby="hard-1">
         <div class="side"><h3 id="hard-1">There were no faults to train on</h3></div>
         <div class="main pair">
-          <p>Instead of learning what a fault sounds like, the CNN learns to name which machine it hears. Low confidence in the right name becomes the anomaly score. On the evaluation set, valve went from {andon.valveAe} AUC with the reference to {andon.valveCnn}.</p>
+          <p>Instead of learning what a fault sounds like, the CNN learns to name which machine it hears. Low confidence in the right name becomes the anomaly score. On the evaluation set, valve went from {andon.valveAe} AUC with the baseline to {andon.valveCnn}.</p>
           <figure class="ev specs">
-            <div class="spec"><Picture src={specNormal} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a normal clip: steady bright bands in the low frequencies." /><span class="small">Normal</span></div>
-            <div class="spec"><Picture src={specFault} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt="Spectrogram of a faulty clip from the same fan: the bands look almost the same." /><span class="small">Faulty</span></div>
-            <figcaption class="small">Two 10&nbsp;s clips from the replay fan (id_06), as the model hears them: 128 frequency bands, low pitches at the bottom. The fault is hard to see, and training only ever hears the first kind.</figcaption>
+            {[
+              { img: specNormal, name: 'Normal', audio: '/audio/fan-normal.mp3', alt: 'Spectrogram of a normal clip: steady bright bands in the low frequencies.' },
+              { img: specFault, name: 'Faulty', audio: '/audio/fan-fault.mp3', alt: 'Spectrogram of a faulty clip from the same fan: the bands look almost the same.' },
+            ].map((c) => (
+              <div class="spec" data-listen>
+                <div class="spec-img">
+                  <Picture src={c.img} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt={c.alt} />
+                  <i class="spec-head" aria-hidden="true"></i>
+                </div>
+                <div class="spec-bar">
+                  <span class="small">{c.name}</span>
+                  <button type="button" class="spec-play" hidden aria-label={`Listen to the ${c.name.toLowerCase()} clip, 10 seconds`}><span class="spec-ico" aria-hidden="true"></span><span class="spec-word">Listen</span></button>
+                </div>
+                <audio preload="none" src={c.audio}></audio>
+              </div>
+            ))}
+            <figcaption class="small">Two 10&nbsp;s clips from the replay fan (id_06), as the model hears them: 128 frequency bands, low pitches at the bottom. The fault is hard to see and hard to hear, and training only ever hears the first kind. Audio: <a href="https://zenodo.org/records/3678171">DCASE 2020 Task 2 development data</a> (MIMII), CC BY-NC-SA 4.0, converted to MP3.</figcaption>
           </figure>
         </div>
       </section>
@@ -104,21 +132,59 @@ const num = (s: string) => Number(s.replace('%', ''));
     <section class="sec wrap grid" aria-labelledby="short-h">
       <div class="side"><h2 id="short-h">Where it still falls short</h2></div>
       <div class="main">
-        <p>AUC isn’t real-world performance. {andon.meanAuc} AUC still caught only {andon.faultsCaught} of faults on a continuous stream of test audio, and {andon.valveCaught} for valve. {andon.falseAlarmsPerHour} false alarms per hour is too many for a real line. A much simpler Gaussian mixture beats the CNN on {andon.gmmWins} machine types. And the compute figure for the Pico ({andon.estComputeMs} per 32 ms of audio) is an estimate until it runs on the device.</p>
+        <p>AUC isn’t real-world performance. {andon.meanAuc} AUC still caught only {andon.faultsCaught} of faults on a continuous stream of test audio, and {andon.valveCaught} for valve. {andon.falseAlarmsPerHour} false alarms per hour is too many for a real line. A much simpler Gaussian mixture model, a classic statistical method, beats the CNN on {andon.gmmWins} machine types. And the compute figure for the Pico ({andon.estComputeMs} per 32 ms of audio) is an estimate until it runs on the device.</p>
       </div>
     </section>
 
     <section class="sec wrap grid" aria-labelledby="next-h">
       <div class="side"><h2 id="next-h">Next, a Raspberry Pi Pico 2 that cuts power to a real fan the moment it hears a fault</h2></div>
       <div class="main">
-        <p>The first firmware exists: the andon LEDs and a debounced button in C, tested on the PC and cross-compiled in CI. The light’s full logic is still in Python, and the model doesn’t run on the device yet. Next come the fan switch, a microphone, a dataset of three real fans, and the model in C.</p>
-        <p class="small built">Built with Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.</p>
+        <p>The first firmware exists: the andon LEDs and a debounced button in C, tested on the PC and cross-compiled automatically in continuous integration (CI). The log-mel front end and the int8 CNN are now in C too, matching Python bit for bit on the PC in CI, but they haven’t run on the board yet. The light’s full logic is still in Python. Next come the fan switch, a microphone, a dataset of three real fans, and timing the model on the Pico.</p>
       </div>
     </section>
 
-    <nav class="onward wrap" aria-label="Next project">
+    <nav class="onward wrap" aria-label="Code and next project">
+      <a class="code-end" href={p.repo}><Icon name="github" /> Andon’s code on GitHub</a>
       <a href="/projects/image-stitcher/">Next project: Image Stitcher</a>
     </nav>
   </article>
 </Base>
+
+<script>
+  // Plays one clip at a time, with a line moving across its spectrogram.
+  const specs = [...document.querySelectorAll<HTMLElement>('[data-listen]')];
+  const stopAll = (except?: HTMLElement) => specs.forEach((s) => { if (s !== except) { const a = s.querySelector('audio')!; a.pause(); a.currentTime = 0; } });
+  for (const spec of specs) {
+    const btn = spec.querySelector<HTMLButtonElement>('.spec-play')!;
+    const audio = spec.querySelector('audio')!;
+    const head = spec.querySelector<HTMLElement>('.spec-head')!;
+    const word = spec.querySelector<HTMLElement>('.spec-word')!;
+    const name = spec.querySelector('.spec-bar .small')!.textContent!.toLowerCase();
+    btn.hidden = false;
+    let raf = 0;
+    const tick = () => { head.style.left = `${(audio.currentTime / (audio.duration || 10)) * 100}%`; raf = requestAnimationFrame(tick); };
+    const set = (on: boolean) => {
+      spec.classList.toggle('playing', on); word.textContent = on ? 'Stop' : 'Listen';
+      btn.setAttribute('aria-label', on ? `Stop the ${name} clip` : `Listen to the ${name} clip, 10 seconds`);
+      if (on) tick(); else { cancelAnimationFrame(raf); head.style.left = '0%'; }
+    };
+    btn.addEventListener('click', () => { if (audio.paused) { stopAll(spec); audio.play(); } else { audio.pause(); audio.currentTime = 0; } });
+    audio.addEventListener('play', () => set(true));
+    audio.addEventListener('pause', () => set(false));
+    audio.addEventListener('ended', () => { audio.currentTime = 0; set(false); });
+  }
+</script>
+
+<style>
+  .spec-img { position: relative; }
+  .spec-head { position: absolute; top: 0; bottom: 0; left: 0; width: 2px; margin-left: -1px; background: var(--white); opacity: 0; pointer-events: none; }
+  .spec.playing .spec-head { opacity: 0.9; }
+  .spec-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); }
+  .spec-play { font: inherit; font-size: 14px; color: var(--white); background: none; border: 1px solid var(--line); border-radius: 999px;
+    padding: 5px 14px 5px 10px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  .spec-play:hover { border-color: rgb(243 245 255 / 0.5); }
+  .spec-play:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+  .spec-ico { width: 0; height: 0; border-left: 8px solid currentColor; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+  .spec.playing .spec-ico { width: 8px; height: 8px; border: 0; background: currentColor; }
+</style>
 
