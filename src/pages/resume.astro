@@ -3,7 +3,8 @@ import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 const pdf = '/resume/Abtin-Aryanpour-Resume.pdf';
 
-interface Entry { title: string; href?: string; meta: string; when: string; points?: string[]; text?: string }
+interface Task { title: string; href: string; repo: string; pr: string; points: string[] }
+interface Entry { title: string; href?: string; meta: string; when: string; points?: string[]; text?: string; tasks?: Task[] }
 const education: Entry[] = [{
   title: 'University of Waterloo',
   meta: 'Waterloo, ON. Candidate for BASc in Computer Engineering, Co-op Program.',
@@ -32,20 +33,22 @@ const projectEntries: Entry[] = [
 ];
 const experience: Entry[] = [
   {
-    title: 'Autonomy Software Member', href: '/projects/image-stitcher/', meta: 'Waterloo Aerial Robotics Group, Waterloo, ON', when: 'September 2026 to now',
+    title: 'Autonomy Software Member', meta: 'Waterloo Aerial Robotics Group, Waterloo, ON', when: 'September 2026 to now',
+    tasks: [{
+    title: 'Groundside image stitcher', href: '/projects/image-stitcher/', repo: 'https://github.com/UWARG/autonomy-monorepo/pull/215', pr: 'Pull request #215 (in review)',
     points: [
-      'Sole developer of the team’s groundside image stitcher in Python (PyTorch, OpenCV, XFeat, RANSAC), merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map, with 80 tests.',
+      'Built it as sole developer in Python (PyTorch, OpenCV, XFeat, RANSAC), merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map, with 80 tests.',
       'Fused image matches with GPS for heading, aligning photos to 4.3–6.9 cm on average at 3 m of simulated GPS error.',
       'Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13⁠–⁠41 to 4⁠–⁠7 cm.',
       'Hardened matching against 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated runs.',
-      'Added lens undistortion and blur, exposure and tilt checks through 2 review rounds on pull request #215 (in review). The blur check sorted 2,730 simulated photos under 9 noise and blur conditions with 0 errors.',
+      'Built lens undistortion and blur, exposure and tilt checks through 2 review rounds. The blur check sorted 2,730 simulated photos under 9 noise and blur conditions with 0 errors.',
     ],
-  },
-  {
-    title: 'Treasurer', meta: 'Bayview Secondary School, Richmond Hill, ON', when: 'September 2025 to June 2026',
+    }, {
+    title: 'Swarm spacing (Lloyd’s algorithm)', href: '/projects/lloyd/', repo: 'https://github.com/UWARG/autonomy-monorepo/pull/247', pr: 'Pull request #247 (in review)',
     points: [
-      'Managed a $21,000 budget for 42 clubs serving 2,000 students, approving each allocation with club leaders.',
+      'Built a module that spreads drones evenly over any GPS-bounded region using Voronoi cells, handling concave areas and stray drones. It reduced spacing unevenness from 0.46 to 0.06 in simulation.',
     ],
+    }],
   },
   {
     title: 'Homework Helper and Assistant Teacher', meta: 'Spirit of Math Schools Inc., Richmond Hill, ON', when: 'September 2022 to July 2025',
@@ -62,9 +65,9 @@ const awards = [
 ];
 const skills = [
   ['Languages', 'Python, C/C++, Java, JavaScript, SQL, HTML/CSS'],
-  ['Frameworks and libraries', 'PyTorch, NumPy, OpenCV, scikit-learn, Django, jQuery'],
-  ['Tools and platforms', 'Git, GitHub Actions (CI), pytest, CMake, SQLite, AWS (EC2, CloudFront)'],
-  ['Concepts', 'Machine Learning, Computer Vision, Embedded Systems, Unit Testing, Web Development'],
+  ['Frameworks', 'PyTorch, Django, Streamlit, Tailwind CSS'],
+  ['Libraries', 'NumPy, OpenCV, scikit-learn, shapely, jQuery'],
+  ['Tools and platforms', 'Git, GitHub Actions (CI), pytest, uv, CMake, SQLite, AWS (EC2, CloudFront)'],
 ];
 ---
 <Base
@@ -120,7 +123,13 @@ const skills = [
           <div class="entry">
             <div class="e-head"><h3>{e.href ? <a href={e.href}>{e.title}</a> : e.title}</h3><p class="when">{e.when}</p></div>
             <p class="meta">{e.meta}</p>
-            <ul>{e.points!.map((pt) => <li>{pt}</li>)}</ul>
+            {e.points && <ul>{e.points.map((pt) => <li>{pt}</li>)}</ul>}
+            {e.tasks?.map((t) => (
+              <div class="task">
+                <div class="e-head"><h4><a href={t.href}>{t.title}</a></h4><a class="pr" href={t.repo}><Icon name="github" />{t.pr}</a></div>
+                <ul>{t.points.map((pt) => <li>{pt}</li>)}</ul>
+              </div>
+            ))}
           </div>
         ))}
       </section>
@@ -160,6 +169,10 @@ const skills = [
   h3 { font-size: 18px; font-weight: 500; }
   .when { color: var(--dim); font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .meta { color: var(--dim); font-size: 15px; }
+  .task { margin-top: var(--s4); padding-left: var(--s4); border-left: 1px solid var(--line); }
+  h4 { font-size: 16px; font-weight: 500; }
+  .pr { display: inline-flex; align-items: center; gap: var(--s2); color: var(--dim); font-size: 15px; }
+  .pr :global(.icon) { width: 15px; height: 15px; }
   ul { margin: var(--s2) 0 0; padding-left: 1.1em; display: grid; gap: var(--s2); max-width: 46em; }
   li::marker { color: var(--dim); }
   .skills { margin: 0; display: grid; gap: var(--s3); }
