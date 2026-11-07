@@ -3,12 +3,14 @@
 // geometry as the homepage, drawn faint, with this page's project drawn bright.
 // With no slug (the 404) only the background exposure shows.
 import { layout, pageSkyMarkup, PAGE_SKY, type TrailProject } from '../lib/trails';
-import { projects } from '../data/projects';
+import { skyEntries } from '../data/projects';
 
 interface Props { slug?: string; }
 const { slug } = Astro.props;
-const sky: TrailProject[] = projects.map((p) => ({ name: p.name, line: p.line, link: p.href ?? '', start: p.start, end: p.end }));
-const cur = slug ? projects.findIndex((p) => p.slug === slug) : -1;
+const entries = skyEntries();
+const sky: TrailProject[] = entries.map(({ name, line, link, start, end, subs }) => ({ name, line, link, start, end, subs }));
+// A team task lights its team's trail.
+const cur = slug ? entries.findIndex((e) => e.slugs.includes(slug)) : -1;
 const initial = pageSkyMarkup(layout(sky, 1440, 760, new Date(), PAGE_SKY), cur);
 ---
 <svg class="ptrail" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMin slice" aria-hidden="true"

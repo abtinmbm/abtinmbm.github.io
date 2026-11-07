@@ -32,14 +32,25 @@ const L0 = layout(projects, 1440, 900, new Date());
   /* a soft dark patch behind each label, so trails never strike through its text */
   .sky-labels li::before { content: ""; position: absolute; inset: -4px -12px; z-index: -1; background: var(--black); opacity: 0.9; filter: blur(9px); border-radius: 12px; }
   .sky-labels li.left { transform: translate(calc(-100% - 16px), -50%); text-align: right; }
+  /* a team's name sits level with its head, and its tasks hang below */
+  .sky-labels li.team { transform: translate(16px, -17px); }
+  .sky-labels li.team.left { transform: translate(calc(-100% - 16px), -17px); }
   .sky-labels a { display: block; text-decoration: none; padding: 4px 0; }
   .sky-labels .n { font-weight: 500; font-size: 16px;
     text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
   .sky-labels a:hover .n, .sky-labels a:focus-visible .n { text-decoration-thickness: 2px; }
   .sky-labels .l { display: block; margin-top: 5px; font-size: 14px; color: var(--dim); }
+  /* a team's tasks hang under its name, on a short branch line */
+  .sky-labels .subs { list-style: none; margin: 6px 0 0; padding: 0 0 0 14px; border-left: 1px solid rgb(243 245 255 / 0.35); display: grid; gap: 2px; }
+  .sky-labels .subs li { position: static; transform: none; text-shadow: none; }
+  .sky-labels .subs li::before { content: none; }
+  .sky-labels .subs .n { font-size: 15px; }
+  .sky-labels .subs .l { margin-top: 3px; font-size: 13px; }
+  .sky-labels li.left .subs { padding: 0 14px 0 0; border-left: 0; border-right: 1px solid rgb(243 245 255 / 0.35); }
   @media (max-width: 759px) {
     .sky-labels .l { display: none; }
-    .sky-labels .n { font-size: 14px; }
+    .sky-labels .n, .sky-labels .subs .n { font-size: 14px; }
+    .sky-labels .subs { margin-top: 2px; }
   }
   .sky-bg { overflow: visible; }
   @media (prefers-reduced-motion: no-preference) {
@@ -88,11 +99,16 @@ const L0 = layout(projects, 1440, 900, new Date());
         li.style.left = `${t.head.x}px`;
         li.style.top = `${t.head.y}px`;
         li.style.setProperty('--d2', `${(trailArrives(t.i) - 0.15).toFixed(2)}s`);
-        const a = document.createElement('a');
-        a.href = p.link;
-        a.innerHTML = `<span class="n"></span><span class="l"></span>`;
-        a.querySelector('.n')!.textContent = p.name;
-        a.querySelector('.l')!.textContent = p.line;
+        const link = (href: string, name: string, line: string) => {
+          const a = document.createElement('a');
+          a.href = href;
+          a.innerHTML = `<span class="n"></span><span class="l"></span>`;
+          a.querySelector('.n')!.textContent = name;
+          a.querySelector('.l')!.textContent = line;
+          return a;
+        };
+        const a = link(p.link, p.name, p.line);
+        const subs = (p.subs ?? []).map((s) => link(s.link, s.name, s.line));
         const group = () => svg.querySelector(`.t-proj[data-i="${t.i}"]`);
         // Pointing at a name lights its trail and traces it again from the start.
         const on = () => {
@@ -104,20 +120,29 @@ const L0 = layout(projects, 1440, 900, new Date());
           g.classList.add('retrace');
         };
         const off = () => group()?.classList.remove('on');
-        a.addEventListener('pointerenter', on);
-        a.addEventListener('pointerleave', off);
-        a.addEventListener('focus', on);
-        a.addEventListener('blur', off);
+        for (const el of [a, ...subs]) {
+          el.addEventListener('pointerenter', on);
+          el.addEventListener('pointerleave', off);
+          el.addEventListener('focus', on);
+          el.addEventListener('blur', off);
+        }
         li.append(a);
+        if (subs.length) {
+          li.classList.add('team');
+          const ul = document.createElement('ul');
+          ul.className = 'subs';
+          for (const s of subs) { const sli = document.createElement('li'); sli.append(s); ul.append(sli); }
+          li.append(ul);
+        }
         list.append(li);
         // On phones every label sits left of its head; flip only one that would leave the screen.
         if (W < 760) {
-          li.className = 'left';
+          li.classList.replace('right', 'left');
           if (li.getBoundingClientRect().left < 12) {
             // Too long for the space left of its head: wrap onto two lines instead of leaving the screen.
             const room = t.head.x - 28;
             if (room >= 96) { li.style.whiteSpace = 'normal'; li.style.width = room + 'px'; }
-            else li.className = 'right';
+            else li.classList.replace('left', 'right');
           }
         }
       }

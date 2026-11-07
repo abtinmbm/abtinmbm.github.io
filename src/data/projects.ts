@@ -22,8 +22,8 @@ export interface Project {
   href?: string;
   repo: string;
   earlier?: boolean;
-  /** Design-team work, grouped on the homepage under the team. */
-  team?: 'warg';
+  /** Work shown as one star trail with others: a design team's tasks, or older projects. */
+  team?: 'warg' | 'earlier';
 }
 
 export const projects: Project[] = [
@@ -36,6 +36,7 @@ export const projects: Project[] = [
     end: '2024-02-25T23:59:00Z',
     repo: 'https://github.com/abtinmbm/FBLA2024',
     earlier: true,
+    team: 'earlier',
   },
   {
     slug: 'cybershield',
@@ -46,6 +47,7 @@ export const projects: Project[] = [
     end: '2025-03-02T23:59:00Z',
     repo: 'https://github.com/abtinmbm/cybershield',
     earlier: true,
+    team: 'earlier',
   },
   {
     slug: 'image-stitcher',
@@ -78,6 +80,47 @@ export const projects: Project[] = [
     repo: 'https://github.com/abtinmbm/andon',
   },
 ];
+
+/** Teams draw one star trail, with their tasks listed under its label. */
+export const teams = {
+  earlier: { name: 'Before Waterloo', line: 'CyberShield and School Partner Directory', link: '/#earlier' },
+  warg: { name: 'WARG', line: 'Drone software for the Waterloo Aerial Robotics Group', link: '/#warg' },
+};
+
+export interface SkyEntry {
+  name: string;
+  line: string;
+  link: string;
+  start: string;
+  end?: string;
+  /** The projects this trail stands for (one, or a team's tasks). */
+  slugs: string[];
+  subs?: { name: string; line: string; link: string }[];
+}
+
+/** The star trails, oldest first: one per project, and one per team for all its tasks. */
+export function skyEntries(): SkyEntry[] {
+  const out: SkyEntry[] = [];
+  for (const p of projects) {
+    const link = p.href ?? `/#${p.slug}`;
+    if (!p.team) { out.push({ name: p.name, line: p.line, link, start: p.start, end: p.end, slugs: [p.slug] }); continue; }
+    let g = out.find((e) => e.slugs.length && projects.find((x) => x.slug === e.slugs[0])?.team === p.team);
+    if (!g) { g = { ...teams[p.team], start: p.start, slugs: [], subs: [] }; out.push(g); }
+    g.slugs.push(p.slug);
+    g.subs!.push({ name: p.name, line: p.line, link });
+    if (p.start < g.start) g.start = p.start;
+  }
+  // A team's trail is still going while any of its tasks is.
+  for (const g of out.filter((e) => e.subs)) {
+    const members = g.slugs.map((s) => projects.find((x) => x.slug === s)!);
+    if (!members.every((m) => m.end)) continue;
+    // Finished groups: the trail is as long as the time worked on them, not the gap between them.
+    const worked = members.reduce((t, m) => t + (Date.parse(m.end!) - Date.parse(m.start)), 0);
+    g.end = members.map((m) => m.end!).sort().at(-1);
+    g.start = new Date(Date.parse(g.end!) - worked).toISOString();
+  }
+  return out.sort((a, b) => a.start.localeCompare(b.start));
+}
 
 export const statusText: Record<Status, string> = {
   finished: 'Finished',

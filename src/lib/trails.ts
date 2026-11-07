@@ -8,6 +8,8 @@ export interface TrailProject {
   link: string;
   start: string;
   end?: string;
+  /** A team's tasks, listed under its label. */
+  subs?: { name: string; line: string; link: string }[];
 }
 
 export interface Arc { r: number; a0: number; a1: number; }
@@ -61,15 +63,23 @@ export function layout(projects: TrailProject[], W: number, H: number, now: Date
   const n = projects.length;
   const rMin = S * (mobile ? 0.3 : 0.3);
   const rMax = S * (mobile ? 0.95 : 1.0);
-  const yTop = H * (opts.yTop ?? 0.2);
-  const yBottom = H * (opts.yBottom ?? (mobile ? 0.7 : 0.48));
-  const labelled = mobile ? 4 : 6;
+  const yTop = H * (opts.yTop ?? (mobile ? 0.2 : 0.16));
+  const yBottom = H * (opts.yBottom ?? (mobile ? 0.7 : 0.56));
+  const labelled = 3;
+
+  // Room each label needs above and below its head, in label heights. A plain label is centred
+  // on its head; a team's label starts level with its head and its tasks hang below.
+  const above = (p: TrailProject) => (p.subs ? 0.3 : 0.5);
+  const below = (p: TrailProject) => (p.subs ? (mobile ? 1.1 : 0.8) + p.subs.length * (mobile ? 0.45 : 0.9) : 0.5);
+  const cum = [0];
+  for (let i = 1; i < n; i++) cum.push(cum[i - 1] + below(projects[i - 1]) + above(projects[i]));
+  const span = cum[n - 1] || 1;
 
   const trails: ProjectTrail[] = projects.map((p, i) => {
     const t = n === 1 ? 0.5 : i / (n - 1);
     const r = rMin + (rMax - rMin) * t;
     // Put each head at its own height, on the left of the pole, so labels never stack.
-    const targetY = yTop + (yBottom - yTop) * t;
+    const targetY = yTop + (yBottom - yTop) * (n === 1 ? 0.5 : cum[i] / span);
     const s = Math.max(-0.97, Math.min(0.97, (targetY - cy) / r));
     const a1 = 180 - (Math.asin(s) * 180) / Math.PI;
     const end = p.end ? new Date(p.end) : now;

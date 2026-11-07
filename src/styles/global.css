@@ -45,7 +45,7 @@ body {
 
 ::selection { background: var(--white); color: var(--black); }
 
-h1, h2, h3 { margin: 0; text-wrap: balance; font-weight: 500; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; font-weight: 500; }
 p { margin: 0; text-wrap: pretty; }
 img, video, svg { display: block; max-width: 100%; }
 img, video { height: auto; }

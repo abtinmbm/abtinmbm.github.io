@@ -4,7 +4,7 @@ import Base from '../layouts/Base.astro';
 import StarTrails from '../components/StarTrails.astro';
 import Icon from '../components/Icon.astro';
 import AndonReplay from '../components/AndonReplay.astro';
-import { projects } from '../data/projects';
+import { projects, skyEntries } from '../data/projects';
 import { andon, stitcher, lloyd, awards } from '../data/metrics';
 import StatusBadge from '../components/StatusBadge.astro';
 import lloydRun from '../data/lloyd-run.json';
@@ -14,12 +14,10 @@ const repo = (slug: string) => projects.find((x) => x.slug === slug)!.repo;
 import portrait from '../assets/photos/abtin-portrait.jpg';
 import mapStage from '../assets/stitcher/stages/stage-20.webp';
 
-const trailProjects = projects.map((p) => ({
-  name: p.name,
-  line: p.line,
-  link: p.href ?? `#${p.slug}`,
-  start: p.start,
-  end: p.end,
+// On the homepage, links to sections here stay on the page.
+const local = (l: string) => l.replace(/^\/#/, '#');
+const trailProjects = skyEntries().map(({ name, line, link, start, end }) => ({
+  name, line, link: local(link), start, end,
 }));
 const person = {
   '@context': 'https://schema.org',
@@ -82,39 +80,44 @@ const person = {
       </div>
     </article>
 
-    <div class="team" role="group" aria-labelledby="warg-h">
-    <p id="warg-h" class="team-head wrap"><span>Waterloo Aerial Robotics Group</span><span class="dim">Autonomy Software Member, since September 2026</span></p>
-    <article id="image-stitcher" class="p-stitch" aria-labelledby="stitch-h">
-      <figure class="p-map wrap">
-        <Picture pictureAttributes={{ class: "p-bleed" }} src={mapStage} fallbackFormat="webp" alt="A map stitched from the first 20 of 91 simulated drone photos. Its stepped outline shows where the photos landed, with gaps where photos haven’t arrived yet." widths={[800, 1200, 1664]} sizes="(max-width: 759px) 100vw, 56vw" formats={['avif', 'webp']} />
-        <figcaption class="cap small">One simulated mission, after 20 of its {stitcher.photos} photos. The stepped outline is the edge of the stitched photos, the gaps are ground no photo has covered yet, and only the painted ground markers are kept inside.</figcaption>
-      </figure>
-      <div class="p-text wrap">
-        <h3 id="stitch-h" class="head">Image Stitcher</h3>
-        <p class="lead">Merges out-of-order, GPS-tagged photos from several drones into one top-down map, for the Waterloo Aerial Robotics Group.</p>
-        <p class="status"><StatusBadge slug="image-stitcher" /> I built it on the autonomy software team, and the subteam is reviewing pull request #215.</p>
-        <p>In {stitcher.missions} simulated missions it built one connected map, with photos lined up to {stitcher.alignment} on average.</p>
-        <p class="p-links"><a href="/projects/image-stitcher/">Read about the stitcher</a><a href={repo('image-stitcher')}>Code on GitHub (PR #215)<span class="visually-hidden"> for the Image Stitcher</span></a></p>
+    <section id="warg" class="team wrap" aria-labelledby="warg-h">
+      <div class="team-head">
+        <h3 id="warg-h" class="head">Waterloo Aerial Robotics Group</h3>
+        <p class="lead">Autonomy Software Member since September 2026. Two tasks for the team’s drones so far.</p>
       </div>
-    </article>
-
-    <ul class="tasks wrap" aria-label="More tasks at the Waterloo Aerial Robotics Group">
-      <li id="lloyd" class="task">
-        <svg class="task-fig" viewBox={lloydBox} role="img" aria-label="Ten simulated drones spread evenly over an L-shaped field, each in its own cell, with the paths they flew from a bunched start." set:html={stepMarkup(lloydRun as LloydRun, (lloydRun as LloydRun).frames.length - 1)} />
-        <div class="task-text">
-          <h3 class="head">Lloyd’s algorithm</h3>
-          <p>Spreads a drone swarm evenly over any field with a GPS boundary.</p>
-          <p class="status"><StatusBadge slug="lloyd" /> Pull request #247.</p>
-          <p class="small">In {lloyd.runs} simulated runs, spacing unevenness fell from {lloyd.cvStart} to {lloyd.cvEnd} (0 is perfectly even).</p>
-          <p class="p-links"><a href="/projects/lloyd/">Read about it</a><a href={repo('lloyd')}>Code on GitHub (PR #247)<span class="visually-hidden"> for Lloyd’s algorithm</span></a></p>
-        </div>
-      </li>
-    </ul>
-    </div>
+      <div class="tasks">
+        <article id="image-stitcher" class="task" aria-labelledby="stitch-h">
+          <figure class="task-fig">
+            <Picture pictureAttributes={{ class: "fig-box" }} src={mapStage} fallbackFormat="webp" alt="A map stitched from the first 20 of 91 simulated drone photos. Its stepped outline shows where the photos landed, with gaps where photos haven’t arrived yet." widths={[600, 900, 1200]} sizes="(max-width: 759px) 100vw, 46vw" formats={['avif', 'webp']} />
+            <figcaption class="small">One simulated mission, after 20 of its {stitcher.photos} photos. Only the painted ground markers are kept inside.</figcaption>
+          </figure>
+          <div class="task-text">
+            <h4 id="stitch-h" class="head">Image Stitcher</h4>
+            <p>Merges out-of-order, GPS-tagged photos from several drones into one top-down map.</p>
+            <p class="status"><StatusBadge slug="image-stitcher" /> The subteam is reviewing pull request #215.</p>
+            <p>In {stitcher.missions} simulated missions it built one connected map, with photos lined up to {stitcher.alignment} on average.</p>
+            <p class="p-links"><a href="/projects/image-stitcher/">Read about the stitcher</a><a href={repo('image-stitcher')}>Code on GitHub (PR #215)<span class="visually-hidden"> for the Image Stitcher</span></a></p>
+          </div>
+        </article>
+        <article id="lloyd" class="task" aria-labelledby="lloyd-h">
+          <figure class="task-fig">
+            <svg class="fig-box" viewBox={lloydBox} role="img" aria-label="Ten simulated drones spread evenly over an L-shaped field, each in its own cell, with the paths they flew from a bunched start." set:html={stepMarkup(lloydRun as LloydRun, (lloydRun as LloydRun).frames.length - 1)} />
+            <figcaption class="small">One simulated run: 10 drones spread out from a bunched start. Each shaded area is one drone’s cell.</figcaption>
+          </figure>
+          <div class="task-text">
+            <h4 id="lloyd-h" class="head">Lloyd’s algorithm</h4>
+            <p>Spreads a drone swarm evenly over any field with a GPS boundary.</p>
+            <p class="status"><StatusBadge slug="lloyd" /> Waiting for review on pull request #247.</p>
+            <p>In {lloyd.runs} simulated runs, spacing unevenness fell from {lloyd.cvStart} to {lloyd.cvEnd} (0 is perfectly even).</p>
+            <p class="p-links"><a href="/projects/lloyd/">Read about it</a><a href={repo('lloyd')}>Code on GitHub (PR #247)<span class="visually-hidden"> for Lloyd’s algorithm</span></a></p>
+          </div>
+        </article>
+      </div>
+    </section>
 
   </section>
 
-  <section class="earlier wrap" aria-labelledby="earlier-h">
+  <section id="earlier" class="earlier wrap" aria-labelledby="earlier-h">
     <h2 id="earlier-h" class="head">Before Waterloo</h2>
     <ul>
       <li id="cybershield">
@@ -212,29 +215,20 @@ const person = {
   .p-andon .p-text { grid-column: 1 / 6; }
   .p-media { grid-column: 7 / 13; }
 
-  .p-stitch { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); padding-inline: var(--edge); align-items: center; }
-  .p-stitch > .wrap { padding-inline: 0; }
-  .p-stitch .p-map { grid-column: 1 / 8; }
-  .p-stitch .p-text { grid-column: 8 / 13; }
-  :global(.p-bleed) { display: block; }
-  .p-map { margin: 0; }
-  :global(.p-bleed img) { width: 100%; height: auto; }
-  .p-map .cap { margin-top: var(--s3); color: var(--dim); max-width: 64ch; }
-  .p-stitch .p-text { margin-top: 0; max-width: 36em; }
-
-
-  /* design-team work: the team named once, its tasks under it */
+  /* design-team work: the team as one project, its tasks side by side under it at the same size */
   .team { display: grid; gap: var(--s7); }
-  .team-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2) var(--s4); margin: 0; padding-top: var(--s5); border-top: 1px solid var(--line);
-    font-size: 15px; font-weight: 500; }
-  .team-head .dim { font-weight: 400; color: var(--dim); }
+  .team-head { display: grid; gap: var(--s4); max-width: 46em; }
+  .team-head h3 { font-size: var(--t-h2); line-height: 1.05; }
   .status :global(.badge) { margin-right: 8px; }
-  .tasks { list-style: none; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s7) var(--gap); }
-  .task { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); gap: var(--s5); align-items: start; }
-  .task-fig { display: block; width: 100%; height: auto; }
-  .task-text { display: grid; gap: var(--s3); align-content: start; }
-  .task-text h3 { font-size: var(--t-h3); line-height: 1.15; }
-  .task-text .small { color: var(--dim); }
+  .tasks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s8) var(--gap); }
+  .task { display: grid; grid-template-rows: auto 1fr; gap: var(--s5); align-content: start; }
+  .task-fig { margin: 0; display: grid; gap: var(--s3); }
+  /* both pictures sit in the same frame, so the two tasks line up */
+  .task-fig :global(.fig-box) { display: block; width: 100%; aspect-ratio: 4 / 3; }
+  .task-fig :global(.fig-box img) { width: 100%; height: 100%; object-fit: contain; }
+  .task-fig figcaption { color: var(--dim); max-width: 56ch; }
+  .task-text { display: grid; gap: var(--s4); align-content: start; max-width: 36em; }
+  .task-text h4 { font-size: var(--t-h3); line-height: 1.15; }
 
   /* earlier work */
   .earlier { padding-block: var(--s9); border-top: 1px solid var(--line); }
@@ -288,13 +282,8 @@ const person = {
     .earlier h2 { margin-bottom: var(--s5); }
     .p-andon .p-text, .p-media { grid-column: 1 / 13; }
     .p-media { margin-top: var(--s5); }
-    .p-stitch .p-map, .p-stitch .p-text { grid-column: 1 / -1; }
-    /* phones: show a third of the mission larger, so the markers read as shapes */
-    .p-stitch .p-text { margin-top: var(--s5); }
     .earlier ul { grid-template-columns: 1fr; }
     .tasks { grid-template-columns: 1fr; }
-    .task { grid-template-columns: 1fr; }
-    .task-fig { max-width: 240px; }
     .c-inner { padding-block: var(--s8); row-gap: var(--s5); }
     .c-side, .c-main { grid-column: 1 / -1; }
     .c-addr { font-size: clamp(17px, 5.2vw, 28px); white-space: normal; overflow-wrap: anywhere; }
