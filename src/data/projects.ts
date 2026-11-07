@@ -83,7 +83,7 @@ export const projects: Project[] = [
 
 /** Teams draw one star trail, with their tasks listed under its label. */
 export const teams = {
-  earlier: { name: 'Before Waterloo', line: 'CyberShield and School Partner Directory', link: '/#earlier' },
+  earlier: { name: 'High School Projects', line: 'CyberShield and School Partner Directory', link: '/#earlier' },
   warg: { name: 'WARG', line: 'Drone software for the Waterloo Aerial Robotics Group', link: '/#warg' },
 };
 

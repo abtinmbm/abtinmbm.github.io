@@ -53,7 +53,7 @@ test('star trails draw one labelled trail per recent project', async ({ page }) 
   await expect(page.locator('.sky-labels a', { hasText: 'Andon' })).toHaveAttribute('href', '/projects/andon/');
   // WARG is one trail, pointing to its section.
   await expect(page.locator('.sky-labels a', { hasText: 'WARG' })).toHaveAttribute('href', '#warg');
-  await expect(page.locator('.sky-labels a', { hasText: 'Before Waterloo' })).toHaveAttribute('href', '#earlier');
+  await expect(page.locator('.sky-labels a', { hasText: 'High School Projects' })).toHaveAttribute('href', '#earlier');
   await expect(page.locator('.t-proj')).toHaveCount(sky.length);
 });
 
