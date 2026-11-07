@@ -74,6 +74,21 @@ export const stitcher = {
   rowCandidatesTurned: 714,
 };
 
+export const lloyd = {
+  // All simulated. C:/warg/portfolio/eval_219_results_2026-11-06.txt (lloyd_219_eval.py): 3 regions
+  // (200 m square, 200 m L-shape, made-up irregular field) x 4/6/10 drones x seeds 0-9, starting
+  // bunched within 15 m of a launch point. Published with Abtin's OK, 2026-11-06.
+  runs: '90 of 90',
+  cvStart: '0.46',
+  cvEnd: '0.06',
+  // PR #247 README: cells can still differ in area, largest up to about 1.8x the smallest.
+  areaRatio: 'about 1.8×',
+  // PR #247 description: 27 new tests in tests/test_lloyd.py.
+  tests: '27',
+  // portfolio/219-lloyds-algorithm.md: fuzz of random starts, drones up to 20 m outside the region.
+  fuzzStarts: '600',
+};
+
 export const awards = {
   // CNLC (Canadian National Leadership Conference) is the competition. FBLA Canada ran it in 2024;
   // in 2025 it was run by FBLC (Future Business Leaders of Canada), which branched off FBLA. Abtin, 2026-11-06.

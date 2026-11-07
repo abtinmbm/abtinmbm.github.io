@@ -1,7 +1,7 @@
 // The sitemap, listing every page except the 404.
 import type { APIRoute } from 'astro';
 
-const paths = ['/', '/projects/andon/', '/projects/image-stitcher/', '/about/', '/resume/', '/photography/'];
+const paths = ['/', '/projects/andon/', '/projects/image-stitcher/', '/projects/lloyd/', '/about/', '/resume/', '/photography/'];
 
 export const GET: APIRoute = ({ site }) => {
   const urls = paths.map((p) => `  <url><loc>${new URL(p, site)}</loc></url>`).join('\n');

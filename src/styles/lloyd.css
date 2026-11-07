@@ -1,0 +1,7 @@
+/* How one step of the Lloyd's algorithm run is drawn (src/lib/lloyd.ts), wherever it appears. */
+.ly-cell { stroke: rgb(243 245 255 / 0.22); stroke-width: 0.6; vector-effect: non-scaling-stroke; }
+.ly-cell.c0 { fill: #0b1c4d; } .ly-cell.c1 { fill: #102660; } .ly-cell.c2 { fill: #0d2257; } .ly-cell.c3 { fill: #142c6b; } .ly-cell.c4 { fill: #091841; }
+.ly-region { fill: none; stroke: var(--white); stroke-width: 1.2; stroke-opacity: 0.7; vector-effect: non-scaling-stroke; }
+.ly-trail { fill: none; stroke: var(--white); stroke-opacity: 0.4; stroke-width: 1; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.ly-ghost { fill: var(--dim); opacity: 0.6; }
+.ly-dot { fill: var(--white); }

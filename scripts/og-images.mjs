@@ -40,6 +40,22 @@ const pages = {
       });
     },
   },
+  lloyd: {
+    path: '/projects/lloyd/',
+    css: projectHero + `
+      .top-text { max-width: 54%; margin-left: 0; }
+      .top h1 { font-size: 104px !important; }
+      .top .status, .top .summary, .top .code-link { display: none !important; }
+      .og-map { position: absolute; z-index: 2; right: 64px; top: 50%; width: 34%; transform: translateY(-50%); }`,
+    // The finished swarm on the right.
+    async prepare(page) {
+      await page.evaluate(() => {
+        const svg = document.querySelector('.ly-map').cloneNode(true);
+        svg.classList.add('og-map');
+        document.querySelector('.top').append(svg);
+      });
+    },
+  },
   about: {
     path: '/about/',
     css: `
@@ -57,7 +73,10 @@ const pages = {
 
 const browser = await chromium.launch({ channel: 'chrome' });
 const ctx = await browser.newContext({ viewport: { width: W, height: H }, reducedMotion: 'reduce' });
+// Pass page names after the base URL (e.g. `node scripts/og-images.mjs http://localhost:4322 lloyd home`) to make only those.
+const only = process.argv.slice(3);
 for (const [name, { path, css, prepare }] of Object.entries(pages)) {
+  if (only.length && !only.includes(name)) continue;
   const page = await ctx.newPage();
   await page.goto(base + path, { waitUntil: 'networkidle' });
   await page.addStyleTag({ content: common + css });

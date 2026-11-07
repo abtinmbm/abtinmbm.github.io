@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { projects } from '../src/data/projects';
 
-const pages = ['/', '/projects/andon/', '/projects/image-stitcher/', '/about/', '/resume/', '/photography/', '/404'];
+const pages = ['/', '/projects/andon/', '/projects/image-stitcher/', '/projects/lloyd/', '/about/', '/resume/', '/photography/', '/404'];
 const widths = [320, 390, 768, 1280, 1920];
 
 for (const path of pages) {
@@ -46,16 +47,16 @@ for (const path of pages) {
 test('star trails draw one labelled trail per recent project', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  await expect(page.locator('.sky-labels a')).toHaveCount(4);
+  await expect(page.locator('.sky-labels a')).toHaveCount(projects.length);
   await expect(page.locator('.sky-labels a', { hasText: 'Andon' })).toHaveAttribute('href', '/projects/andon/');
-  await expect(page.locator('.t-proj')).toHaveCount(4);
+  await expect(page.locator('.t-proj')).toHaveCount(projects.length);
 });
 
 test('star trails still show a sky without JavaScript', async ({ browser }) => {
   const ctx = await browser.newContext({ javaScriptEnabled: false });
   const page = await ctx.newPage();
   await page.goto('/');
-  await expect(page.locator('.t-proj')).toHaveCount(4);
+  await expect(page.locator('.t-proj')).toHaveCount(projects.length);
   await expect(page.locator('#work a[href="/projects/andon/"]')).toBeVisible();
   await ctx.close();
 });
@@ -184,4 +185,26 @@ test('each spectrogram clip plays and stops from its button', async ({ page }) =
   await expect(normal).not.toHaveClass(/playing/);
   await fault.locator('.spec-play').click();
   await expect(fault).not.toHaveClass(/playing/);
+});
+
+test('the Lloyd run shows the finished swarm when motion is reduced, and replays when allowed', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/projects/lloyd/');
+  await expect(page.locator('.ly-step')).toHaveText('Step 32 of 32');
+  await expect(page.locator('.ly-map .ly-dot')).toHaveCount(10);
+  await expect(page.locator('.ly-play')).toBeHidden();
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.reload();
+  const play = page.locator('.ly-play');
+  await play.scrollIntoViewIfNeeded();
+  await expect(page.locator('.ly-step')).toHaveText('Step 32 of 32', { timeout: 20000 });
+  await play.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.ly-step')).not.toHaveText('Step 32 of 32');
+});
+
+test('status badges read from the project list', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#image-stitcher .badge')).toHaveText('In review');
+  await expect(page.locator('#lloyd .badge')).toHaveText('In review');
 });

@@ -14,6 +14,7 @@ const is404 = Astro.url.pathname.startsWith('/404');
 // One sharing image per page, made by scripts/og-images.mjs. Pages without one use the homepage's.
 const ogNames: Record<string, string> = {
   '/': 'home', '/projects/andon/': 'andon', '/projects/image-stitcher/': 'image-stitcher',
+  '/projects/lloyd/': 'lloyd',
   '/about/': 'about', '/resume/': 'resume', '/photography/': 'photography',
 };
 const ogImage = new URL(`/og/${ogNames[Astro.url.pathname] ?? 'home'}.jpg`, Astro.site);

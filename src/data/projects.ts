@@ -6,7 +6,8 @@
 // - Image Stitcher starts at the first commit of UWARG/autonomy-monorepo PR #215.
 // Checked with `gh` on 2026-11-04.
 
-export type Status = 'finished' | 'in review' | 'in progress';
+// To mark a pull request as merged, change its status to 'merged' (and add `end`).
+export type Status = 'finished' | 'in review' | 'merged' | 'in progress';
 
 export interface Project {
   slug: string;
@@ -21,6 +22,8 @@ export interface Project {
   href?: string;
   repo: string;
   earlier?: boolean;
+  /** Design-team work, grouped on the homepage under the team. */
+  team?: 'warg';
 }
 
 export const projects: Project[] = [
@@ -52,6 +55,18 @@ export const projects: Project[] = [
     start: '2026-10-16T03:04:43Z',
     href: '/projects/image-stitcher/',
     repo: 'https://github.com/UWARG/autonomy-monorepo/pull/215',
+    team: 'warg',
+  },
+  {
+    slug: 'lloyd',
+    name: 'Lloyd’s algorithm',
+    line: 'Spreads a drone swarm evenly',
+    status: 'in review',
+    // first commit of UWARG/autonomy-monorepo PR #247
+    start: '2026-11-06T23:39:57Z',
+    href: '/projects/lloyd/',
+    repo: 'https://github.com/UWARG/autonomy-monorepo/pull/247',
+    team: 'warg',
   },
   {
     slug: 'andon',
@@ -67,5 +82,6 @@ export const projects: Project[] = [
 export const statusText: Record<Status, string> = {
   finished: 'Finished',
   'in review': 'In review',
+  merged: 'Merged',
   'in progress': 'In progress',
 };

@@ -5,7 +5,11 @@ import StarTrails from '../components/StarTrails.astro';
 import Icon from '../components/Icon.astro';
 import AndonReplay from '../components/AndonReplay.astro';
 import { projects } from '../data/projects';
-import { andon, stitcher, awards } from '../data/metrics';
+import { andon, stitcher, lloyd, awards } from '../data/metrics';
+import StatusBadge from '../components/StatusBadge.astro';
+import lloydRun from '../data/lloyd-run.json';
+import { stepMarkup, viewBox as lloydBox, type LloydRun } from '../lib/lloyd';
+import '../styles/lloyd.css';
 const repo = (slug: string) => projects.find((x) => x.slug === slug)!.repo;
 import portrait from '../assets/photos/abtin-portrait.jpg';
 import mapStage from '../assets/stitcher/stages/stage-20.webp';
@@ -78,6 +82,8 @@ const person = {
       </div>
     </article>
 
+    <div class="team" role="group" aria-labelledby="warg-h">
+    <p id="warg-h" class="team-head wrap"><span>Waterloo Aerial Robotics Group</span><span class="dim">Autonomy Software Member, since September 2026</span></p>
     <article id="image-stitcher" class="p-stitch" aria-labelledby="stitch-h">
       <figure class="p-map wrap">
         <Picture pictureAttributes={{ class: "p-bleed" }} src={mapStage} fallbackFormat="webp" alt="A map stitched from the first 20 of 91 simulated drone photos. Its stepped outline shows where the photos landed, with gaps where photos haven’t arrived yet." widths={[800, 1200, 1664]} sizes="(max-width: 759px) 100vw, 56vw" formats={['avif', 'webp']} />
@@ -86,11 +92,25 @@ const person = {
       <div class="p-text wrap">
         <h3 id="stitch-h" class="head">Image Stitcher</h3>
         <p class="lead">Merges out-of-order, GPS-tagged photos from several drones into one top-down map, for the Waterloo Aerial Robotics Group.</p>
-        <p class="status"><b>In review.</b> I built it on the autonomy software team, and the subteam is reviewing pull request #215.</p>
+        <p class="status"><StatusBadge slug="image-stitcher" /> I built it on the autonomy software team, and the subteam is reviewing pull request #215.</p>
         <p>In {stitcher.missions} simulated missions it built one connected map, with photos lined up to {stitcher.alignment} on average.</p>
         <p class="p-links"><a href="/projects/image-stitcher/">Read about the stitcher</a><a href={repo('image-stitcher')}>Code on GitHub (PR #215)<span class="visually-hidden"> for the Image Stitcher</span></a></p>
       </div>
     </article>
+
+    <ul class="tasks wrap" aria-label="More tasks at the Waterloo Aerial Robotics Group">
+      <li id="lloyd" class="task">
+        <svg class="task-fig" viewBox={lloydBox} role="img" aria-label="Ten simulated drones spread evenly over an L-shaped field, each in its own cell, with the paths they flew from a bunched start." set:html={stepMarkup(lloydRun as LloydRun, (lloydRun as LloydRun).frames.length - 1)} />
+        <div class="task-text">
+          <h3 class="head">Lloyd’s algorithm</h3>
+          <p>Spreads a drone swarm evenly over any field with a GPS boundary.</p>
+          <p class="status"><StatusBadge slug="lloyd" /> Pull request #247.</p>
+          <p class="small">In {lloyd.runs} simulated runs, spacing unevenness fell from {lloyd.cvStart} to {lloyd.cvEnd} (0 is perfectly even).</p>
+          <p class="p-links"><a href="/projects/lloyd/">Read about it</a><a href={repo('lloyd')}>Code on GitHub (PR #247)<span class="visually-hidden"> for Lloyd’s algorithm</span></a></p>
+        </div>
+      </li>
+    </ul>
+    </div>
 
   </section>
 
@@ -203,6 +223,19 @@ const person = {
   .p-stitch .p-text { margin-top: 0; max-width: 36em; }
 
 
+  /* design-team work: the team named once, its tasks under it */
+  .team { display: grid; gap: var(--s7); }
+  .team-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2) var(--s4); margin: 0; padding-top: var(--s5); border-top: 1px solid var(--line);
+    font-size: 15px; font-weight: 500; }
+  .team-head .dim { font-weight: 400; color: var(--dim); }
+  .status :global(.badge) { margin-right: 8px; }
+  .tasks { list-style: none; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s7) var(--gap); }
+  .task { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); gap: var(--s5); align-items: start; }
+  .task-fig { display: block; width: 100%; height: auto; }
+  .task-text { display: grid; gap: var(--s3); align-content: start; }
+  .task-text h3 { font-size: var(--t-h3); line-height: 1.15; }
+  .task-text .small { color: var(--dim); }
+
   /* earlier work */
   .earlier { padding-block: var(--s9); border-top: 1px solid var(--line); }
   .earlier h2 { font-size: var(--t-h3); margin-bottom: var(--s7); }
@@ -259,6 +292,9 @@ const person = {
     /* phones: show a third of the mission larger, so the markers read as shapes */
     .p-stitch .p-text { margin-top: var(--s5); }
     .earlier ul { grid-template-columns: 1fr; }
+    .tasks { grid-template-columns: 1fr; }
+    .task { grid-template-columns: 1fr; }
+    .task-fig { max-width: 240px; }
     .c-inner { padding-block: var(--s8); row-gap: var(--s5); }
     .c-side, .c-main { grid-column: 1 / -1; }
     .c-addr { font-size: clamp(17px, 5.2vw, 28px); white-space: normal; overflow-wrap: anywhere; }

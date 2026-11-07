@@ -1,0 +1,91 @@
+---
+// The showcase run, played step by step: Voronoi cells, each drone's path, and the coverage
+// cost per step. Without JavaScript, or with reduced motion, the finished run shows.
+import run from '../data/lloyd-run.json';
+import { stepMarkup, viewBox, costPath, type LloydRun } from '../lib/lloyd';
+import '../styles/lloyd.css';
+
+interface Props { captionId: string }
+const { captionId } = Astro.props;
+const r = run as LloydRun;
+const last = r.frames.length - 1;
+const W = 300, H = 70;
+const cost = costPath(r, W, H);
+const fmt = (v: number) => v.toLocaleString('en-CA');
+const [ex, ey] = cost.at(last);
+---
+<figure class="ly" data-lloyd aria-describedby={captionId}>
+  <div class="ly-stage">
+    <svg class="ly-map" viewBox={viewBox} role="img"
+      aria-label={`An L-shaped field 200 metres across. Ten drones start bunched together near one launch point and spread out over ${last} steps until each sits in the middle of its own cell, evenly spaced across the field.`}
+      set:html={stepMarkup(r, last)} />
+    <div class="ly-side">
+      <p class="ly-now num"><span class="ly-step">Step {last} of {last}</span><span class="ly-cost small">Coverage cost {fmt(r.frames[last].cost)} m²</span></p>
+      <svg class="ly-chart" viewBox={`-2 -6 ${W + 4} ${H + 12}`} aria-hidden="true">
+        <line class="ly-axis" x1="0" x2={W} y1={H} y2={H} />
+        <path class="ly-cline" d={cost.d} />
+        <circle class="ly-cdot" cx={ex} cy={ey} r="3.5" />
+      </svg>
+      <p class="small dim ly-clabel">Coverage cost at each step, log scale. It never goes up.</p>
+      <button type="button" class="ly-play" hidden>Replay the run</button>
+    </div>
+  </div>
+  <slot />
+</figure>
+
+<style is:global>
+  .ly { margin: 0; }
+  .ly-stage { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--s6); align-items: end; }
+  .ly-map { display: block; width: 100%; height: auto; }
+  .ly-side { display: grid; gap: var(--s3); padding-bottom: var(--s2); }
+  .ly-now { margin: 0; display: grid; gap: 2px; }
+  .ly-step { font-size: var(--t-h3); line-height: 1.1; }
+  .ly-cost { color: var(--dim); }
+  .ly-chart { width: 100%; height: auto; overflow: visible; }
+  .ly-axis { stroke: var(--line); }
+  .ly-cline { fill: none; stroke: var(--white); stroke-width: 1.4; stroke-linejoin: round; }
+  .ly-cdot { fill: var(--white); }
+  .ly-clabel { margin: 0; color: var(--dim); }
+  .ly-play { justify-self: start; font: inherit; font-size: 15px; color: var(--white); background: none; border: 0; padding: 4px 0; cursor: pointer;
+    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
+  .ly-play:hover, .ly-play:focus-visible { text-decoration-thickness: 2px; }
+  .ly figcaption { margin-top: var(--s4); color: var(--dim); max-width: 64ch; }
+  @media (max-width: 599px) {
+    .ly-stage { grid-template-columns: 1fr; gap: var(--s4); }
+  }
+</style>
+
+<script>
+  import run from '../data/lloyd-run.json';
+  import { stepMarkup, costPath, type LloydRun } from '../lib/lloyd';
+
+  // Plays once when it first comes into view, if motion is allowed. The replay button runs it again.
+  const r = run as LloydRun;
+  const last = r.frames.length - 1;
+  for (const fig of document.querySelectorAll<HTMLElement>('[data-lloyd]')) {
+    const map = fig.querySelector<SVGSVGElement>('.ly-map')!;
+    const step = fig.querySelector<HTMLElement>('.ly-step')!;
+    const costEl = fig.querySelector<HTMLElement>('.ly-cost')!;
+    const dot = fig.querySelector<SVGCircleElement>('.ly-cdot')!;
+    const btn = fig.querySelector<HTMLButtonElement>('.ly-play')!;
+    const { at } = costPath(r, 300, 70);
+    let timer = 0;
+    const show = (k: number) => {
+      map.innerHTML = stepMarkup(r, k);
+      step.textContent = `Step ${k} of ${last}`;
+      costEl.textContent = `Coverage cost ${r.frames[k].cost.toLocaleString('en-CA')} m²`;
+      const [x, y] = at(k); dot.setAttribute('cx', String(x)); dot.setAttribute('cy', String(y));
+    };
+    const play = () => {
+      clearInterval(timer);
+      let k = 0; show(0);
+      timer = window.setInterval(() => { k++; show(k); if (k >= last) clearInterval(timer); }, 320);
+    };
+    btn.addEventListener('click', play);
+    if (matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+      btn.hidden = false;
+      const io = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { io.disconnect(); play(); } }, { threshold: 0.5 });
+      io.observe(fig);
+    }
+  }
+</script>

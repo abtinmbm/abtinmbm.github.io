@@ -1,0 +1,92 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProjectTrail from '../../components/ProjectTrail.astro';
+import Icon from '../../components/Icon.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import LloydSpread from '../../components/LloydSpread.astro';
+import { lloyd } from '../../data/metrics';
+import { projects } from '../../data/projects';
+import '../../styles/project.css';
+
+const p = projects.find((x) => x.slug === 'lloyd')!;
+---
+<Base
+  title="Lloyd’s algorithm: spreading a drone swarm evenly | Abtin Aryanpour"
+  description="A Python module that spreads a drone swarm evenly over any GPS-bounded field, for the Waterloo Aerial Robotics Group. Tested in simulation; in review."
+  current="work"
+>
+  <article class="proj">
+    <header class="top">
+      <div class="top-sky"><ProjectTrail slug="lloyd" /></div>
+      <div class="top-text wrap">
+        <h1 class="display">Lloyd’s algorithm</h1>
+        <p class="lead">Spreads a drone swarm evenly over any field with a GPS boundary, for the Waterloo Aerial Robotics Group.</p>
+        <dl class="summary">
+          <div><dt>Problem</dt><dd>After take-off the drones are bunched together. To cover a field they have to spread out evenly, whatever its shape.</dd></div>
+          <div><dt>Result</dt><dd>The swarm settled into even spacing in {lloyd.runs} simulated runs. Spacing unevenness fell from {lloyd.cvStart} to {lloyd.cvEnd} (median; 0 is perfectly even). Tested in simulation only.</dd></div>
+          <div><dt>Stack</dt><dd>Python, shapely (GEOS) for Voronoi diagrams, and pytest.</dd></div>
+        </dl>
+        <p class="status"><StatusBadge slug="lloyd" /> Built for the autonomy software team, in November 2026, as my second task there. I wrote the whole pull request: the module and its {lloyd.tests} tests. It’s open and waiting for review.</p>
+        <p class="code-link"><a href={p.repo}><Icon name="github" /> Code on GitHub (pull request #247)</a></p>
+      </div>
+    </header>
+
+    <section class="sec first wrap grid" aria-labelledby="why-h">
+      <div class="side">
+        <h2 id="why-h" class="visually-hidden">What it does</h2>
+        <p class="lede">Give it each drone’s GPS position and the field’s boundary, and it says where each drone should fly next.</p>
+        <p class="lede-more">Each step splits the field into Voronoi cells, the area closest to each drone, and moves every drone to the middle (the centroid) of its cell. Repeating this spreads the swarm out evenly.</p>
+      </div>
+      <div class="main">
+        <LloydSpread captionId="ly-cap">
+          <figcaption id="ly-cap" class="small">One simulated run: 10 drones on a 200&nbsp;m L-shaped field, starting bunched within 15&nbsp;m of a launch point. Each shaded area is one drone’s cell, the lines are the paths flown, and the grey dots are where they started. Coverage cost is the mean squared distance from a point in the field to its nearest drone.</figcaption>
+        </LloydSpread>
+      </div>
+    </section>
+
+    <section class="sec wrap grid" aria-labelledby="results-h">
+      <div class="side">
+        <h2 id="results-h">Even spacing in {lloyd.runs} simulated runs</h2>
+        <p class="note">Spacing unevenness is how much each drone’s distance to its nearest neighbour varies (standard deviation divided by mean). 0 is perfectly even.</p>
+      </div>
+      <div class="main">
+        <table class="facts-table">
+          <caption class="small">All simulated: 3 fields (a 200 m square, a 200 m L-shape and an irregular field) × 4, 6 and 10 drones × 10 starts, each bunched near a launch point.</caption>
+          <tbody>
+            <tr><th scope="row">Settled into even spacing</th><td>{lloyd.runs} runs</td></tr>
+            <tr><th scope="row">Spacing unevenness</th><td><span class="num">{lloyd.cvStart}</span> at the start, <span class="num">{lloyd.cvEnd}</span> at the end (medians)</td></tr>
+            <tr><th scope="row">Drones starting outside the field</th><td>0 crashes and 0 drones left outside, in {lloyd.fuzzStarts} random starts</td></tr>
+            <tr><th scope="row">Tests</th><td>{lloyd.tests} unit and property tests</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="sec wrap grid" aria-labelledby="hard-h">
+      <div class="side"><h2 id="hard-h">What was hard</h2></div>
+      <div class="main">
+        <ol class="steps">
+          <li><p><b>Concave fields.</b> In an L-shaped field, a cell’s centroid can fall outside the cell. Then the drone goes to the nearest point of its own cell instead, so it stays inside and the coverage cost still never goes up.</p></li>
+          <li><p><b>Stray drones.</b> Drones that start outside the field are pulled back in and kept apart. Testing random starts found a crash: two stray drones snapped to the same corner. Now they’re placed one at a time on free points.</p></li>
+          <li><p><b>Proving the cost never rises.</b> The coverage cost is computed exactly from each cell’s polygon, not estimated by sampling, so a test can check it never goes up. I broke each key fix on purpose to make sure a test catches it.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="sec wrap grid" aria-labelledby="short-h">
+      <div class="side"><h2 id="short-h">Where it still falls short</h2></div>
+      <div class="main">
+        <p>It evens out spacing, not area: cells can still differ in size, the largest up to {lloyd.areaRatio} the smallest. Every result is from simulation, it hasn’t flown, and the pull request hasn’t merged.</p>
+      </div>
+    </section>
+
+    <nav class="onward wrap" aria-label="Code and next project">
+      <a class="code-end" href={p.repo}><Icon name="github" /> The module’s code on GitHub (pull request #247)</a>
+      <a href="/projects/andon/">Next project: Andon</a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .status :global(.badge) { margin-right: 8px; }
+</style>

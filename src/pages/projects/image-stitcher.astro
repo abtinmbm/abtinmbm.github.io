@@ -3,6 +3,7 @@ import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import ProjectTrail from '../../components/ProjectTrail.astro';
 import Icon from '../../components/Icon.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
 import MatchPair from '../../components/MatchPair.astro';
 import ArrivalMap from '../../components/ArrivalMap.astro';
 import blur from '../../data/stitcher-blur.json';
@@ -52,7 +53,7 @@ const first = 0;
           <div><dt>Result</dt><dd>One connected map in {stitcher.missions} simulated missions, with photos lined up to {stitcher.alignment} on average. Tested in simulation only.</dd></div>
           <div><dt>Stack</dt><dd>Python, PyTorch, OpenCV, NumPy and pytest.</dd></div>
         </dl>
-        <p class="status">Built for the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026. I wrote the whole pull request: the stitcher, the simulator that makes test missions with known true positions, the {stitcher.tests} tests and the evaluation script. In review: the second round of revisions was pushed on November 3, 2026.</p>
+        <p class="status"><StatusBadge slug="image-stitcher" /> Built for the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026. I wrote the whole pull request: the stitcher, the simulator that makes test missions with known true positions, the {stitcher.tests} tests and the evaluation script. The second round of revisions was pushed on November 3, 2026.</p>
         <p class="code-link"><a href={p.repo}><Icon name="github" /> Code on GitHub (pull request #215)</a></p>
       </div>
     </header>
@@ -178,12 +179,13 @@ const first = 0;
 
     <nav class="onward wrap" aria-label="Code and next project">
       <a class="code-end" href={p.repo}><Icon name="github" /> The stitcher’s code on GitHub (pull request #215)</a>
-      <a href="/projects/andon/">Next project: Andon</a>
+      <a href="/projects/lloyd/">Next project: Lloyd’s algorithm</a>
     </nav>
   </article>
 </Base>
 
 <style>
+  .status :global(.badge) { margin-right: 8px; }
   .blur-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
   .blur-c { display: grid; gap: 4px; align-content: start; }
   .blur-c :global(img) { display: block; width: 100%; height: auto; image-rendering: pixelated; }
