@@ -49,7 +49,7 @@ const first = 0;
         <h1 class="display">Image Stitcher</h1>
         <p class="lead">Merges out-of-order photos from several drones, each tagged with a GPS (Global Positioning System) position, into one top-down map that sits in the right place on the Earth.</p>
         <dl class="summary">
-          <div><dt>Problem</dt><dd>Photos arrive shuffled, from several drones, with GPS that’s metres off and compass headings that carry their own error.</dd></div>
+          <div><dt>Problem</dt><dd>Photos arrive shuffled, from several drones, with GPS that’s metres off.</dd></div>
           <div><dt>Result</dt><dd>One connected map in {stitcher.missions} simulated missions, with photos lined up to {stitcher.alignment} on average. Tested in simulation only.</dd></div>
           <div><dt>Stack</dt><dd>Python, PyTorch, OpenCV, NumPy and pytest.</dd></div>
         </dl>
@@ -94,10 +94,10 @@ const first = 0;
       <ol class="main steps">
         <li><p><b>Check.</b> Each photo is checked for blur, exposure and tilt. The ones that pass are undistorted for the lens.</p></li>
         <li><p><b>Find neighbours.</b> GPS says which photos should overlap, even when they arrive out of order from different drones.</p></li>
-        <li><p><b>Turn.</b> Each photo is turned north-up using the drone’s yaw, its compass heading. Yaw only lines photos up for matching. Their final positions come from the matches and GPS.</p></li>
+        <li><p><b>Turn north-up.</b> Each photo comes with the drone’s yaw, so it’s turned north-up before matching. If yaw is close to a quarter turn it just gets that quarter turn, which loses no detail.</p></li>
         <li><p><b>Match.</b> XFeat, a learned feature detector, finds the same ground points in both photos. RANSAC (random sample consensus) keeps only the matches that agree with each other and throws out the rest.</p></li>
         <li><p><b>Refine.</b> A least-squares solver nudges every photo at once until the total mismatch between overlaps is as small as it can be. It works like bundle adjustment, the standard way mapping software corrects many photos together.</p></li>
-        <li><p><b>Place.</b> All the GPS readings together put the finished map in the right place on the Earth.</p></li>
+        <li><p><b>Place.</b> All the GPS readings together put the finished map in the right place on the Earth. A cluster is only fitted to GPS once both GPS and the images show its photos are spread out.</p></li>
       </ol>
     </section>
 
@@ -110,7 +110,7 @@ const first = 0;
       </div>
       <div class="main">
         <table class="facts-table">
-          <caption class="small">All simulated: 10 missions of 91 photos from 3 drones, arriving shuffled, flown east-west, with 5° of simulated yaw error.</caption>
+          <caption class="small">All simulated: 10 missions of 91 photos from 3 drones, arriving shuffled, flown east-west, with 5° of simulated compass error.</caption>
           <tbody>
             <tr><th scope="row">One connected map</th><td>{stitcher.missions} missions, at 1 m and 3 m of GPS error</td></tr>
             <tr><th scope="row">Photo-to-photo alignment</th><td><span class="num">{stitcher.alignment}</span> on average, about 1 to 2 pixels</td></tr>
@@ -131,7 +131,7 @@ const first = 0;
         <div class="side"><h3 id="hard-1">Rows wouldn’t connect</h3></div>
         <div class="main">
           <div class="pair">
-            <p>The drones turn 180 degrees at the end of each row, and XFeat isn’t rotation invariant: it can’t match a photo against one that’s upside down. In one simulated pair of photos across a row turn, only {kept} of {total} candidate matches survived RANSAC. With the photo turned 180°, {stitcher.rowKeptTurned} of {stitcher.rowCandidatesTurned} did. The first fix extracted features at four quarter turns. Now that every photo comes with yaw, each one is turned north-up and features are extracted once, which took processing from {stitcher.speedBefore} to {stitcher.speed} per photo in simulation.</p>
+            <p>The drones turn 180 degrees at the end of each row, and XFeat isn’t rotation invariant: it can’t match a photo against one that’s upside down. In one simulated pair of photos across a row turn, only {kept} of {total} candidate matches survived RANSAC. With the photo turned 180°, {stitcher.rowKeptTurned} of {stitcher.rowCandidatesTurned} did. The first fix extracted features at four quarter turns. When review confirmed every photo would come with yaw, that became one north-up extraction per photo, which is where the speedup came from.</p>
             <div class="ev">
               <Bars min={0} max={1} ticks={[0, 0.5, 1]} unit="s" caption="Seconds per photo, simulated missions, on a laptop CPU."
                 rows={[{ label: 'Before yaw', from: 0.42, to: 0.75, text: stitcher.speedBefore }, { label: 'Now', from: 0.12, to: 0.19, text: stitcher.speed, strong: true }]} />
