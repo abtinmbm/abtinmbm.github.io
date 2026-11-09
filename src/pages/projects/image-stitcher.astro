@@ -23,7 +23,7 @@ import s91 from '../../assets/stitcher/stages/stage-91.webp';
 const p = projects.find((x) => x.slug === 'image-stitcher')!;
 const stages = [[20, s20], [40, s40], [60, s60], [80, s80], [91, s91]] as const;
 const last = stages.length - 1;
-// One simulated pair across a row turn (portfolio/tools/guide_worked_example_179.py):
+// One simulated pair across a row turn:
 // 612 candidate matches, 34 by 18; 10 survived RANSAC without the turn.
 const total = stitcher.rowCandidates;
 const kept = stitcher.rowKept;
@@ -49,11 +49,11 @@ const first = 0;
         <h1 class="display">Image Stitcher</h1>
         <p class="lead">Merges out-of-order photos from several drones, each tagged with a GPS (Global Positioning System) position, into one top-down map that sits in the right place on the Earth.</p>
         <dl class="summary">
-          <div><dt>Problem</dt><dd>Photos arrive shuffled, from several drones, with GPS that’s metres off and no compass heading.</dd></div>
+          <div><dt>Problem</dt><dd>Photos arrive shuffled, from several drones, with GPS that’s metres off and compass headings that carry their own error.</dd></div>
           <div><dt>Result</dt><dd>One connected map in {stitcher.missions} simulated missions, with photos lined up to {stitcher.alignment} on average. Tested in simulation only.</dd></div>
           <div><dt>Stack</dt><dd>Python, PyTorch, OpenCV, NumPy and pytest.</dd></div>
         </dl>
-        <p class="status"><StatusBadge slug="image-stitcher" /> Built for the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026. I wrote the whole pull request: the stitcher, the simulator that makes test missions with known true positions, the {stitcher.tests} tests and the evaluation script. The second round of revisions was pushed on November 3, 2026.</p>
+        <p class="status"><StatusBadge slug="image-stitcher" /> Built for the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026. I wrote the whole pull request: the stitcher, the simulator that makes test missions with known true positions, the {stitcher.tests} tests and the evaluation script. The third round of revisions was pushed on November 9, 2026.</p>
         <p class="code-link"><a href={p.repo}><Icon name="github" /> Code on GitHub (pull request #215)</a></p>
       </div>
     </header>
@@ -94,8 +94,8 @@ const first = 0;
       <ol class="main steps">
         <li><p><b>Check.</b> Each photo is checked for blur, exposure and tilt. The ones that pass are undistorted for the lens.</p></li>
         <li><p><b>Find neighbours.</b> GPS says which photos should overlap, even when they arrive out of order from different drones.</p></li>
+        <li><p><b>Turn.</b> Each photo is turned north-up using the drone’s yaw, its compass heading. Yaw only lines photos up for matching. Their final positions come from the matches and GPS.</p></li>
         <li><p><b>Match.</b> XFeat, a learned feature detector, finds the same ground points in both photos. RANSAC (random sample consensus) keeps only the matches that agree with each other and throws out the rest.</p></li>
-        <li><p><b>Recover heading.</b> There’s no compass, so the matches and the noisy GPS together work out which way each photo faces.</p></li>
         <li><p><b>Refine.</b> A least-squares solver nudges every photo at once until the total mismatch between overlaps is as small as it can be. It works like bundle adjustment, the standard way mapping software corrects many photos together.</p></li>
         <li><p><b>Place.</b> All the GPS readings together put the finished map in the right place on the Earth.</p></li>
       </ol>
@@ -110,14 +110,14 @@ const first = 0;
       </div>
       <div class="main">
         <table class="facts-table">
-          <caption class="small">All simulated: 10 missions of 91 photos from 3 drones, arriving shuffled, with the heading unknown.</caption>
+          <caption class="small">All simulated: 10 missions of 91 photos from 3 drones, arriving shuffled, flown east-west, with 5° of simulated yaw error.</caption>
           <tbody>
             <tr><th scope="row">One connected map</th><td>{stitcher.missions} missions, at 1 m and 3 m of GPS error</td></tr>
-            <tr><th scope="row">Photo-to-photo alignment</th><td><span class="num">{stitcher.alignment}</span> on average, about 1 to 1.5 pixels</td></tr>
+            <tr><th scope="row">Photo-to-photo alignment</th><td><span class="num">{stitcher.alignment}</span> on average, about 1 to 2 pixels</td></tr>
             <tr><th scope="row">Least-squares refinement</th><td>Misalignment of <span class="num">{stitcher.refineBefore}</span> without it, <span class="num">{stitcher.refineAfter}</span> with it</td></tr>
             <tr><th scope="row">Map position against the truth</th><td><span class="num">{stitcher.mapError1}</span> at 1 m of GPS error, <span class="num">{stitcher.mapError3}</span> at 3 m. Closer than the GPS error itself</td></tr>
             <tr><th scope="row">Quality checks</th><td>{stitcher.rejectedGood} evaluation photos wrongly rejected. Blur check wrong on {stitcher.blurWrong}</td></tr>
-            <tr><th scope="row">Speed</th><td><span class="num">{stitcher.speed}</span> per photo on a laptop CPU</td></tr>
+            <tr><th scope="row">Speed</th><td><span class="num">{stitcher.speed}</span> per photo on a laptop CPU, down from <span class="num">{stitcher.speedBefore}</span> before yaw</td></tr>
             <tr><th scope="row">Bad input</th><td>A broken message or failed map save is logged and skipped. A photo with a GPS glitch is rejected instead of stretching the map</td></tr>
             <tr><th scope="row">Tests</th><td>{stitcher.tests} stitcher tests, plus a ground-truth mission simulator</td></tr>
           </tbody>
@@ -130,8 +130,43 @@ const first = 0;
       <section class="sec wrap grid" aria-labelledby="hard-1">
         <div class="side"><h3 id="hard-1">Rows wouldn’t connect</h3></div>
         <div class="main">
-          <p>The drones turn 180 degrees at the end of each row, and XFeat isn’t rotation invariant: it can’t match a photo against one that’s upside down. In one simulated pair of photos across a row turn, only {kept} of {total} candidate matches survived RANSAC. With the photo turned 180°, {stitcher.rowKeptTurned} of {stitcher.rowCandidatesTurned} did. So features are now extracted at four quarter turns.</p>
+          <div class="pair">
+            <p>The drones turn 180 degrees at the end of each row, and XFeat isn’t rotation invariant: it can’t match a photo against one that’s upside down. In one simulated pair of photos across a row turn, only {kept} of {total} candidate matches survived RANSAC. With the photo turned 180°, {stitcher.rowKeptTurned} of {stitcher.rowCandidatesTurned} did. The first fix extracted features at four quarter turns. Now that every photo comes with yaw, each one is turned north-up and features are extracted once, which took processing from {stitcher.speedBefore} to {stitcher.speed} per photo in simulation.</p>
+            <div class="ev">
+              <Bars min={0} max={1} ticks={[0, 0.5, 1]} unit="s" caption="Seconds per photo, simulated missions, on a laptop CPU."
+                rows={[{ label: 'Before yaw', from: 0.42, to: 0.75, text: stitcher.speedBefore }, { label: 'Now', from: 0.12, to: 0.19, text: stitcher.speed, strong: true }]} />
+            </div>
+          </div>
           <div class="ev"><MatchPair total={total} /></div>
+        </div>
+      </section>
+      <section class="sec wrap grid" aria-labelledby="hard-yaw">
+        <div class="side"><h3 id="hard-yaw">A compass can’t be trusted to place photos</h3></div>
+        <div class="main pair">
+          <div class="prose yaw-text">
+            <p>Yaw has two jobs. It lines photos up for matching, and it orients clusters too small to fit to GPS. Final positions still come from the matches and GPS.</p>
+            <p>A reviewer caught a worse problem. GPS noise alone could pass the old spread check and blow up the map’s scale. Now the images have to show the photos are apart too.</p>
+            <p>A later version of a safety check depended on yaw, and a 180° yaw offset split one simulated map. It now compares distances, which needs no rotation. With constant yaw offsets of 0, 90 and 180°, {stitcher.yawOffsetRuns} simulated runs formed one map.</p>
+          </div>
+          <figure class="ev sep">
+            <div class="sep-row">
+              <div>
+                <svg viewBox="0 0 200 150" role="img" aria-label="Diagram: five photos almost on top of each other, with their GPS dots scattered far around them.">
+                  <rect class="sep-p" x="86" y="60" width="26" height="20" /><rect class="sep-p" x="90" y="64" width="26" height="20" /><rect class="sep-p" x="84" y="67" width="26" height="20" /><rect class="sep-p" x="92" y="58" width="26" height="20" /><rect class="sep-p" x="88" y="70" width="26" height="20" />
+                  <circle class="sep-g" cx="28" cy="34" r="4" /><circle class="sep-g" cx="168" cy="22" r="4" /><circle class="sep-g" cx="178" cy="118" r="4" /><circle class="sep-g" cx="46" cy="128" r="4" /><circle class="sep-g" cx="112" cy="14" r="4" />
+                </svg>
+                <span class="small">Photos almost in one spot, GPS scattered by noise. Fitting to those dots would blow up the scale.</span>
+              </div>
+              <div>
+                <svg viewBox="0 0 200 150" role="img" aria-label="Diagram: six photos spread across the area, each with its GPS dot close by.">
+                  <rect class="sep-p" x="16" y="22" width="44" height="33" /><rect class="sep-p" x="78" y="22" width="44" height="33" /><rect class="sep-p" x="140" y="22" width="44" height="33" /><rect class="sep-p" x="16" y="95" width="44" height="33" /><rect class="sep-p" x="78" y="95" width="44" height="33" /><rect class="sep-p" x="140" y="95" width="44" height="33" />
+                  <circle class="sep-g" cx="43" cy="33" r="4" /><circle class="sep-g" cx="96" cy="46" r="4" /><circle class="sep-g" cx="166" cy="34" r="4" /><circle class="sep-g" cx="33" cy="118" r="4" /><circle class="sep-g" cx="104" cy="106" r="4" /><circle class="sep-g" cx="158" cy="116" r="4" />
+                </svg>
+                <span class="small">Photos really spread out, GPS close by. The fit is safe.</span>
+              </div>
+            </div>
+            <figcaption class="small">A diagram, not data. Squares are photos as the images place them, and dots are their GPS readings.</figcaption>
+          </figure>
         </div>
       </section>
       <section class="sec wrap grid" aria-labelledby="hard-2">
@@ -139,8 +174,8 @@ const first = 0;
         <div class="main pair">
           <p>The first version made errors worse, not better, because a huge penalty weight on the pinned photo (the one held still so the map can’t drift) made the solver unstable. Taking that photo out of the values the solver adjusts fixed it.</p>
           <div class="ev">
-            <Bars min={0} max={45} ticks={[0, 15, 30, 45]} unit="cm" caption="After the fix: average misalignment of photos relative to each other, across simulated missions."
-              rows={[{ label: 'Without it', from: 13, to: 41, text: stitcher.refineBefore }, { label: 'With it', from: 4, to: 7, text: stitcher.refineAfter, strong: true }]} />
+            <Bars min={0} max={75} ticks={[0, 25, 50, 75]} unit="cm" caption="After the fix: average misalignment of photos relative to each other, across simulated missions."
+              rows={[{ label: 'Without it', from: 13.6, to: 69.8, text: stitcher.refineBefore }, { label: 'With it', from: 4.0, to: 8.3, text: stitcher.refineAfter, strong: true }]} />
           </div>
         </div>
       </section>
@@ -173,7 +208,7 @@ const first = 0;
     <section class="sec wrap grid" aria-labelledby="short-h">
       <div class="side"><h2 id="short-h">Where it still falls short</h2></div>
       <div class="main">
-        <p>Every result is from simulation. There are no real flight photos yet: the drone’s camera software doesn’t log roll and pitch yet, so its photos are rejected for now, and the lens calibration still has to be checked against the camera actually flown. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms. The pull request hasn’t merged.</p>
+        <p>Every result is from simulation. There are no real flight photos yet: the drone’s camera software doesn’t log roll, pitch or yaw yet, so its photos are rejected for now, and the lens calibration still has to be checked against the camera actually flown. Yaw is defined as degrees clockwise from north for the top of the image, and neither that nor the camera mounting has been confirmed against real drone output. The accuracy figures come from simulated east-west flights. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms. The pull request hasn’t merged.</p>
       </div>
     </section>
 
@@ -186,6 +221,13 @@ const first = 0;
 
 <style>
   .status :global(.badge) { margin-right: 8px; }
+  .yaw-text { display: grid; gap: var(--s4); }
+  .sep-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4); }
+  .sep-row > div { display: grid; gap: var(--s2); align-content: start; }
+  .sep-row svg { display: block; width: 100%; height: auto; border: 1px solid var(--line); }
+  .sep-row span { color: var(--dim); }
+  .sep-p { fill: rgb(59 79 143 / 0.45); stroke: var(--white); stroke-width: 1; }
+  .sep-g { fill: var(--dim); }
   .blur-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
   .blur-c { display: grid; gap: 4px; align-content: start; }
   .blur-c :global(img) { display: block; width: 100%; height: auto; image-rendering: pixelated; }

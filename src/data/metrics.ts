@@ -25,8 +25,51 @@ export const andon = {
   floatSize: '383.0 KB',
   int8Auc: '92.08%',
   weights: 'about 98k',
-  // Estimated, not measured: multiply-adds at 0.5 per cycle on a 150 MHz Cortex-M33.
+  // results/phase4_mcu.md: the Phase 4 estimate, since measured below. Multiply-adds at 0.5 per cycle on a 150 MHz Cortex-M33.
   estComputeMs: '3.27 ms',
+  // results/phase4_mcu.md: compute budget per 32 ms audio frame, and the estimated time per CNN score.
+  computeBudgetMs: '20 ms',
+  frameMs: '32 ms',
+  estCnnMsPerScore: '98.32 ms',
+  // results/h5_bench_pico2.md: measured on the Pico 2, one core, 150 MHz, mean of 3 runs.
+  computeMsPerFrame: '29.16 ms',
+  cnnMsPerScore: '886.44 ms',
+  cnnVsEstimate: '9.0×',
+  // results/h5_bench_pico2.md: C against Python on the exported test vectors, on the board.
+  int8InputDiffs: '0 of 24,576',
+  selfTestRuns: '3',
+  // Totals over results/h1_fan_latency.md, h1_fan_latency_50.md and h1_fan_latency_kick.md: fan-off commands, 20 + 10 + 10.
+  killSwitchTrials: '40 of 40',
+  // results/h1_fan_latency_kick.md: the worst PC round trip of the three runs, against the 100 ms limit stated there.
+  killSwitchWorstRtt: '3.35 ms',
+  killSwitchLimit: '100 ms',
+  // results/h2_mic_tone.md: 1 kHz test tone as the microphone measured it.
+  micToneHz: '1000.02 Hz',
+  // docs/recording_protocol.md: 3 sessions planned. results/h2_dataset.md: session s1 rows only.
+  sessionsRecorded: '1 of 3',
+  // configs/h2_recording.yaml and results/h2_dataset.md (s1): per fan, per session.
+  fans: '3',
+  normalMinutes: '30 min',
+  faultMinutes: '3 min',
+  faultTypes: '2',
+  // results/h2_dataset.md (s1): 9 rows summed.
+  sessionMinutes: '108 min',
+  sessionClips: '648',
+  clipSeconds: '10 s',
+  // results/h2_dataset.md (s1): stream table for breaks, missing and corrupt; clip table for clipped samples.
+  streamBreaks: '0',
+  framesMissing: '0',
+  framesCorrupt: '0',
+  clippedSamples: '0',
+  // docs/recording_protocol.md, Faults table.
+  tapeSize: '5 × 5 mm',
+  // results/h2_dataset.md (s1): largest band change of each fault take against that fan's normal clips, mean over the take.
+  bandChange: [
+    { fan: 'Sunon', imbalance: '+6.6 dB', imbalanceBand: '0–125 Hz', obstruction: '+14.0 dB', obstructionBand: '250–500 Hz' },
+    // imbalanceRange: results/h2_dataset.md (s1), per clip, biggest band. The take was uneven (Abtin, 2026-11-09).
+    { fan: 'ANVISION A', imbalance: '+5.3 dB', imbalanceBand: '0–125 Hz', imbalanceRange: '−1.0 to +8.2 dB', obstruction: '+11.4 dB', obstructionBand: '500–1000 Hz' },
+    { fan: 'ANVISION B', imbalance: '+6.2 dB', imbalanceBand: '0–125 Hz', obstruction: '+11.1 dB', obstructionBand: '500–1000 Hz' },
+  ] as { fan: string; imbalance: string; imbalanceBand: string; imbalanceRange?: string; obstruction: string; obstructionBand: string }[],
   // docs/02 "Hard problems": mean dev AUC without and with mixup.
   devAucNoMixup: '84.33%',
   devAucMixup: '86.64%',
@@ -49,28 +92,34 @@ export const andon = {
 };
 
 export const stitcher = {
-  // All simulated: 10 missions, 91 photos each, 3 drones, shuffled arrival, heading unknown.
+  // All simulated: 10 missions, 91 photos each, 3 drones, shuffled arrival, flown east-west,
+  // 5° simulated yaw error. Round 3 of PR #215, image_stitcher/README.md Accuracy table (public).
   missions: '10 of 10',
   photos: '91',
-  alignment: '4.2–6.9 cm',
-  // Rerun of portfolio/tools/eval_179_stitcher.py on 2026-11-04 (after the Nov 3 changes) matches.
-  refineBefore: '13–41 cm',
-  refineAfter: '4–7 cm',
-  // Map position vs truth, split by simulated GPS error (README Accuracy table).
+  // README Accuracy table: per-mission averages, 4.0–7.3 cm at 1 m GPS error and 4.3–8.3 cm at 3 m.
+  alignment: '4.0–8.3 cm',
+  // Same missions with refinement off and on: Abtin's rerun of 2026-11-09 on the round 3 code, published with his OK.
+  refineBefore: '13.6–69.8 cm',
+  refineAfter: '4.0–8.3 cm',
+  // Map position vs truth, split by simulated GPS error (README Accuracy table, round 3).
   mapError1: '0.16–0.31 m',
   mapError3: '0.47–0.94 m',
   // README: no photo rejected in the evaluation (10 × 91). Blur limit check (resume PDF): 2,730 photos × 9 conditions,
   // 5 sharp (clean, JPEG 75, noise σ2 and σ4, dim) and 4 blurred (Gaussian 0.7 px, 5 px motion at 0/45/90°).
   rejectedGood: '0 of 910',
   blurWrong: '0 of 2,730 photos under 9 conditions (5 sharp, 4 slightly blurred; none combine noise and blur)',
-  // PR #215 image_stitcher/README.md (public), same as docs/02.
-  speed: '0.42–0.75 s',
-  tests: '80',
-  // portfolio/tools/guide_worked_example_179.py, one pair across a row turn (rerun 2026-11-04).
+  // Per photo on a laptop CPU, simulated. Now: README Accuracy section, round 3. Before: the same README before yaw.
+  speed: '0.12–0.19 s',
+  speedBefore: '0.42–0.75 s',
+  // Stitcher tests in PR #215, round 3. Abtin, 2026-11-09.
+  tests: '112',
+  // Constant yaw offsets of 0, 90 and 180°, simulated at 3 m GPS error: Abtin's rerun of 2026-11-09, published with his OK.
+  yawOffsetRuns: '12 of 12',
+  // One simulated pair across a row turn, from the worked example run on 2026-11-04. Measured before yaw was added.
   rowCandidates: 612,
   rowKept: 10,
   rowKeptTurned: 317,
-  // candidates at the 180° turn (rerun 2026-11-06)
+  // candidates at the 180° turn (rerun 2026-11-06). Measured before yaw was added.
   rowCandidatesTurned: 714,
 };
 

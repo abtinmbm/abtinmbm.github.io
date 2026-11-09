@@ -18,7 +18,8 @@ const projectEntries: Entry[] = [
       'Built a system that detects failing machines by sound, training a PyTorch CNN only on healthy audio. It reached 92.13% mean AUC on held-out DCASE 2020 data, against 79.70% for the DCASE autoencoder baseline (3 seeds).',
       'Validated the evaluation by reproducing the DCASE baseline within 0.88 AUC points on all 6 machine types.',
       'Developed a streaming green, yellow and red alert using control-chart (SPC) limits, catching 65.57% of 30 s faults with a 10.57 s mean delay at 5.53 false alarms per hour on held-out clips.',
-      'Quantized the CNN to int8 for a Cortex-M33 (98.7 KB from 383.0 KB, at 92.08% AUC) and ported the log-mel front end and int8 inference to C, matching a NumPy fixed-point reference bit for bit in CI.',
+      'Quantized the CNN to int8 for a Cortex-M33 (98.7 KB from 383.0 KB, at 92.08% AUC) and ported the log-mel front end and int8 inference to C, running on a Pico 2 with 0 of 24,576 int8 inputs differing from Python.',
+      'Built a Pico 2 rig with a MOSFET fan kill switch (40 of 40 trials) and I2S mic, and am recording a 3-fan dataset (1 of 3 sessions done).',
     ],
   },
   {
@@ -37,9 +38,10 @@ const experience: Entry[] = [
     tasks: [{
     title: 'Groundside image stitcher', href: '/projects/image-stitcher/', repo: 'https://github.com/UWARG/autonomy-monorepo/pull/215', pr: 'Pull request #215 (in review)',
     points: [
-      'Built it as sole developer in Python (PyTorch, OpenCV, XFeat, RANSAC), merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map, with 80 tests.',
-      'Fused image matches with GPS for heading, aligning photos to 4.3–6.9 cm on average at 3 m of simulated GPS error.',
-      'Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13⁠–⁠41 to 4⁠–⁠7 cm.',
+      'Built it as sole developer in Python (PyTorch, OpenCV, XFeat, RANSAC), merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map, with 112 tests.',
+      'Fused image matches with GPS and drone yaw, aligning photos to 4.3–8.3 cm on average at 3 m of simulated GPS error.',
+      'Cut processing from 0.42–0.75 s to 0.12–0.19 s per photo by using drone yaw to replace four-way feature extraction, in simulation.',
+      'Designed a bundle-adjustment-style least-squares solver, cutting simulated misalignment from 13.6⁠–⁠69.8 to 4.0⁠–⁠8.3 cm.',
       'Hardened matching against 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated runs.',
       'Built lens undistortion and blur, exposure and tilt checks through 2 review rounds. The blur check sorted 2,730 simulated photos under 9 noise and blur conditions with 0 errors.',
     ],
@@ -67,6 +69,7 @@ const skills = [
   ['Languages', 'Python, C/C++, Java, JavaScript, SQL, HTML/CSS'],
   ['Frameworks', 'PyTorch, Django, Streamlit, Tailwind CSS'],
   ['Libraries', 'NumPy, OpenCV, scikit-learn, shapely, jQuery'],
+  ['Embedded', 'Raspberry Pi Pico SDK, Arm Cortex-M33, PIO, DMA, I2S, PWM'],
   ['Tools and platforms', 'Git, GitHub Actions (CI), pytest, uv, CMake, SQLite, AWS (EC2, CloudFront)'],
 ];
 ---
@@ -79,7 +82,7 @@ const skills = [
     <header class="cv-side">
       <h1 class="display">Resume</h1>
       <p class="who">Abtin Aryanpour<br /><span class="dim">Computer Engineering, University of Waterloo</span></p>
-      <a class="get" href={pdf} download><Icon name="file" /><span>Download the PDF<span class="small dim">One page, 120&nbsp;KB</span></span></a>
+      <a class="get" href={pdf} download><Icon name="file" /><span>Download the PDF<span class="small dim">One page, 116&nbsp;KB</span></span></a>
       <ul class="reach">
         <li><a href="mailto:aaryanpo@uwaterloo.ca"><Icon name="mail" />aaryanpo@uwaterloo.ca</a></li>
         <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><Icon name="linkedin" />linkedin.com/in/abtin-aryanpour</a></li>
