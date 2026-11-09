@@ -101,7 +101,7 @@ const person = {
         </article>
         <article id="lloyd" class="task" aria-labelledby="lloyd-h">
           <figure class="task-fig">
-            <svg class="fig-box" viewBox={lloydBox} role="img" aria-label="Ten simulated drones spread evenly over an L-shaped field, each in its own cell, with the paths they flew from a bunched start." set:html={stepMarkup(lloydRun as LloydRun, (lloydRun as LloydRun).frames.length - 1)} />
+            <svg class="fig-box" viewBox={lloydBox} preserveAspectRatio="xMinYMin meet" role="img" aria-label="Ten simulated drones spread evenly over an L-shaped field, each in its own cell, with the paths they flew from a bunched start." set:html={stepMarkup(lloydRun as LloydRun, (lloydRun as LloydRun).frames.length - 1)} />
             <figcaption class="small">One simulated run: 10 drones spread out from a bunched start. Each shaded area is one drone’s cell.</figcaption>
           </figure>
           <div class="task-text">
@@ -149,9 +149,9 @@ const person = {
         <p class="c-alt small"><a href="mailto:aaryanpo@uwaterloo.ca">Open in your mail app</a></p>
         <span class="visually-hidden" aria-live="polite" data-copy-status></span>
         <ul class="c-links">
-          <li><a href="https://github.com/abtinmbm"><Icon name="github" class="c-ico" /><span class="c-name">GitHub</span><span class="c-sub small">github.com/abtinmbm</span></a></li>
-          <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><Icon name="linkedin" class="c-ico" /><span class="c-name">LinkedIn</span><span class="c-sub small">in/abtin-aryanpour</span></a></li>
-          <li><a href="/resume/"><Icon name="file" class="c-ico" /><span class="c-name">Resume</span><span class="c-sub small">One page, with a PDF</span></a></li>
+          <li><a href="https://github.com/abtinmbm"><span class="c-name">GitHub</span><span class="c-sub small">github.com/abtinmbm</span></a></li>
+          <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><span class="c-name">LinkedIn</span><span class="c-sub small">in/abtin-aryanpour</span></a></li>
+          <li><a href="/resume/"><span class="c-name">Resume</span><span class="c-sub small">One page, with a PDF</span></a></li>
         </ul>
       </div>
     </div>
@@ -219,13 +219,13 @@ const person = {
   .team { display: grid; gap: var(--s7); }
   .team-head { display: grid; gap: var(--s4); max-width: 46em; }
   .team-head h3 { font-size: var(--t-h2); line-height: 1.05; }
-  .status :global(.badge) { margin-right: 8px; }
   .tasks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s8) var(--gap); }
   .task { display: grid; grid-template-rows: auto 1fr; gap: var(--s5); align-content: start; }
   .task-fig { margin: 0; display: grid; gap: var(--s3); }
   /* both pictures sit in the same frame, so the two tasks line up */
   .task-fig :global(.fig-box) { display: block; width: 100%; aspect-ratio: 4 / 3; }
-  .task-fig :global(.fig-box img) { width: 100%; height: 100%; object-fit: contain; }
+  .task-fig :global(.fig-box img) { width: 100%; height: 100%; object-fit: contain; object-position: left top; }
+  .task-fig :global(svg.fig-box) { overflow: visible; }
   .task-fig figcaption { color: var(--dim); max-width: 56ch; }
   .task-text { display: grid; gap: var(--s4); align-content: start; max-width: 36em; }
   .task-text h4 { font-size: var(--t-h3); line-height: 1.15; }
@@ -255,15 +255,12 @@ const person = {
   .c-mail.copied .c-hint-copy { opacity: 0; }
   .c-mail.copied .c-hint-done { opacity: 1; }
   .c-alt { color: var(--dim); }
-  .c-links { list-style: none; margin: var(--s6) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
-  .c-links a { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: var(--s4); row-gap: 2px; align-items: center;
-    padding: var(--s4) var(--s5); border: 1px solid var(--line); border-radius: 10px; text-decoration: none; background: rgb(1 3 10 / 0.35);
-    transition: border-color 160ms ease, background-color 160ms ease; }
-  .c-links a:hover { border-color: rgb(243 245 255 / 0.5); background: rgb(1 3 10 / 0.6); }
+  .c-links { list-style: none; margin: var(--s7) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--gap); }
+  .c-links a { display: grid; gap: 2px; padding-top: var(--s3); border-top: 1px solid rgb(243 245 255 / 0.4); text-decoration: none; transition: border-color 160ms ease; }
+  .c-links a:hover { border-top-color: var(--white); }
   .c-links a:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
-  .c-links a:active { background: rgb(243 245 255 / 0.08); }
-  .c-links :global(.c-ico) { grid-row: 1 / 3; width: 26px; height: 26px; }
-  .c-name { font-weight: 500; }
+  .c-name { font-weight: 500; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.22em; }
+  .c-links a:hover .c-name { text-decoration-thickness: 2px; }
   .c-sub { color: var(--dim); overflow-wrap: anywhere; }
 
   @media (max-width: 759px) {
@@ -288,5 +285,7 @@ const person = {
     .c-side, .c-main { grid-column: 1 / -1; }
     .c-addr { font-size: clamp(17px, 5.2vw, 28px); white-space: normal; overflow-wrap: anywhere; }
     .c-links { grid-template-columns: 1fr; margin-top: var(--s5); }
+    .c-links a { grid-template-columns: auto 1fr; align-items: baseline; padding-block: var(--s3); }
+    .c-sub { justify-self: end; }
   }
 </style>

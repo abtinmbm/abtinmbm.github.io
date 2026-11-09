@@ -24,7 +24,6 @@ const p = projects.find((x) => x.slug === 'lloyd')!;
         <dl class="summary">
           <div><dt>Problem</dt><dd>After take-off the drones are bunched together. To cover a field they have to spread out evenly, whatever its shape.</dd></div>
           <div><dt>Result</dt><dd>The swarm settled into even spacing in {lloyd.runs} simulated runs. Spacing unevenness fell from {lloyd.cvStart} to {lloyd.cvEnd} (median; 0 is perfectly even). Tested in simulation only.</dd></div>
-          <div><dt>Stack</dt><dd>Python, shapely (GEOS) for Voronoi diagrams, and pytest.</dd></div>
         </dl>
         <p class="status"><StatusBadge slug="lloyd" /> Built for the autonomy software team, in November 2026, as my second task there. I wrote the whole pull request: the module and its {lloyd.tests} tests. It’s open and waiting for review.</p>
         <p class="code-link"><a href={p.repo}><Icon name="github" /> Code on GitHub (pull request #247)</a></p>
@@ -81,12 +80,9 @@ const p = projects.find((x) => x.slug === 'lloyd')!;
     </section>
 
     <nav class="onward wrap" aria-label="Code and next project">
+      <p class="built">Built with Python, shapely (GEOS) for Voronoi diagrams, and pytest.</p>
       <a class="code-end" href={p.repo}><Icon name="github" /> The module’s code on GitHub (pull request #247)</a>
       <a href="/projects/andon/">Next project: Andon</a>
     </nav>
   </article>
 </Base>
-
-<style>
-  .status :global(.badge) { margin-right: 8px; }
-</style>

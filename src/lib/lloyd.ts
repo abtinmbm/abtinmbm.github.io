@@ -11,7 +11,6 @@ export interface LloydRun {
 }
 
 export const SIZE = 200;
-export const PAD = 4;
 const y = (n: number) => SIZE - n;
 const pts = (ring: number[][]) => ring.map(([e, n]) => `${e},${y(n)}`).join(' ');
 
@@ -30,7 +29,8 @@ export function stepMarkup(run: LloydRun, k: number, withTrails = true): string 
   return `<g class="ly-cells">${cells}</g><polygon class="ly-region" points="${pts(run.region)}"/><g>${trails}${ghosts}</g><g>${dots}</g>`;
 }
 
-export const viewBox = `${-PAD} ${-PAD} ${SIZE + PAD * 2} ${SIZE + PAD * 2}`;
+// Trimmed to the field itself, so the drawing lines up with the text beside and below it.
+export const viewBox = `0 0 ${SIZE} ${SIZE}`;
 
 /** Coverage cost per step on a log scale, as path data in a w x h box. */
 export function costPath(run: LloydRun, w: number, h: number) {

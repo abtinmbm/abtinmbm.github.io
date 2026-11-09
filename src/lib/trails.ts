@@ -42,9 +42,44 @@ function rng(seed: number) {
 }
 
 /** Where trail heads may sit, as fractions of the height. The homepage uses the defaults. */
-export interface LayoutOptions { yTop?: number; yBottom?: number; }
+export interface LayoutOptions {
+  yTop?: number; yBottom?: number;
+  /** On screens 600 px and wider: no project trail comes lower than this many pixels from the top. */
+  clearBelow?: number;
+}
+
+/** A sky whose pole is far above the frame, so each trail is one wide curve that starts at its
+ *  head, at the bottom of its circle, and climbs up and to the right, staying over the title. */
+function bandLayout(projects: TrailProject[], W: number, H: number, now: Date, clear: number): Layout {
+  const rMax = Math.max(W * 0.72, 560);
+  const rMin = rMax - clear * 0.75;
+  const cx = W * 0.3, cy = clear - rMax;
+  const near = -cy, far = Math.hypot(Math.max(cx, W - cx), H - cy);
+
+  const rand = rng(42);
+  const background: BgArc[] = [];
+  for (let k = 0; k < 220; k++) {
+    const r = near + Math.pow(rand(), 0.8) * (far - near);
+    // Far from the pole the same turn draws a longer line, so narrow it to keep the lengths natural.
+    const sweep = (BG_SWEEP * 520) / r;
+    const a0 = 15 + rand() * 150 - sweep / 2;
+    background.push({ r, a0, a1: a0 + sweep, w: 0.5 + rand() * 1.1, o: 0.1 + Math.pow(rand(), 2) * 0.45 });
+  }
+
+  const n = projects.length;
+  const trails: ProjectTrail[] = projects.map((p, i) => {
+    const r = n === 1 ? rMax : rMin + ((rMax - rMin) * i) / (n - 1);
+    const a1 = 92;
+    const end = p.end ? new Date(p.end) : now;
+    const a0 = a1 - sweepFor((end.getTime() - new Date(p.start).getTime()) / 864e5);
+    const head = { x: cx + r * Math.cos((a1 * Math.PI) / 180), y: cy + r * Math.sin((a1 * Math.PI) / 180) };
+    return { i, r, a0, a1, live: !p.end, head };
+  });
+  return { W, H, cx, cy, background, trails };
+}
 
 export function layout(projects: TrailProject[], W: number, H: number, now: Date, opts: LayoutOptions = {}): Layout {
+  if (opts.clearBelow && W >= 600) return bandLayout(projects, W, H, now, opts.clearBelow);
   const mobile = W < 760;
   const cx = W * (mobile ? 0.82 : 0.74);
   const cy = H * (mobile ? 0.08 : 0.16);
@@ -133,7 +168,7 @@ export function svgMarkup(L: Layout): string {
 }
 
 /** Heads on project pages sit higher than on the homepage, clear of the title. */
-export const PAGE_SKY: LayoutOptions = { yTop: 0.1, yBottom: 0.28 };
+export const PAGE_SKY: LayoutOptions = { yTop: 0.1, yBottom: 0.28, clearBelow: 140 };
 
 /** The sky behind a project page: every trail faint, the page's own trail bright.
  *  With cur = -1 (the 404) only the background exposure is drawn. */

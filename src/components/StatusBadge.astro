@@ -1,19 +1,14 @@
 ---
-// A project's status as a small badge. It reads the status from src/data/projects.ts,
-// so flipping a pull request to 'merged' there updates every badge on the site.
+// A project's status as a run-in label. It reads the status from src/data/projects.ts,
+// so flipping a pull request to 'merged' there updates every page.
 import { projects, statusText } from '../data/projects';
 
 interface Props { slug: string }
 const p = projects.find((x) => x.slug === Astro.props.slug)!;
 ---
-<span class:list={['badge', p.status.replace(' ', '-')]}>{statusText[p.status]}</span>
+<b class:list={['badge', p.status.replace(' ', '-')]}>{statusText[p.status]}</b>
 
 <style>
-  .badge { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; line-height: 1; letter-spacing: 0.01em;
-    color: var(--white); border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px 5px 9px; white-space: nowrap; vertical-align: middle; }
-  .badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid currentColor; }
-  .badge.in-review::before { border-color: #f2b705; }
-  .badge.merged { border-color: rgb(243 245 255 / 0.5); }
-  .badge.merged::before { background: #2e9d4f; border-color: #2e9d4f; }
-  .badge.in-progress::before { border-color: var(--dim); }
+  .badge { font-weight: 500; color: var(--white); }
+  .badge::after { content: "."; }
 </style>

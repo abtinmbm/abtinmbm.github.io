@@ -57,20 +57,21 @@ const total = photos.length;
 </Base>
 
 <style>
-  .ph-head { padding-block: 84px var(--s5); display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s3) var(--s6); }
-  h1 { font-size: clamp(28px, 4.4vw, 64px); line-height: 1; letter-spacing: 0; }
+  .ph-head { padding-block: var(--s6) var(--s4); display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s3) var(--s6); }
+  h1 { font-size: var(--t-h2); line-height: 1; letter-spacing: 0.01em; }
   .lead { line-height: 1.4; color: var(--dim); }
 
-  .viewer { --stage: clamp(320px, calc(100svh - 380px), 860px); padding-bottom: var(--s9); scroll-margin-top: 16px; }
+  .viewer { --stage: clamp(320px, calc(100svh - 340px), 860px); padding-bottom: var(--s7); scroll-margin-top: 16px; }
   /* One photo per screen width. Without JavaScript this still scrolls and snaps by swipe or trackpad. */
   .track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
   .track::-webkit-scrollbar { display: none; }
   .track:focus-visible { outline: 2px solid var(--white); outline-offset: 4px; }
-  .slide { flex: 0 0 100%; height: var(--stage); margin: 0; display: grid; place-items: center; scroll-snap-align: center; scroll-snap-stop: always; }
+  .slide { flex: 0 0 100%; height: var(--stage); margin: 0; display: grid; place-items: start; scroll-snap-align: center; scroll-snap-stop: always; }
   .slide :global(picture) { display: contents; }
+  .slide :global(source) { display: none; }
   .slide :global(img) { display: block; max-width: 100%; max-height: var(--stage); width: auto; height: auto; }
 
-  .controls { display: flex; justify-content: center; align-items: center; gap: var(--s5); margin-top: var(--s4); }
+  .controls { display: flex; justify-content: flex-start; align-items: center; gap: var(--s5); margin-top: var(--s4); }
   .controls[hidden] { display: none; }
   .count { min-width: 6.5em; text-align: center; color: var(--dim); }
   .count b { color: var(--white); font-weight: 500; }

@@ -82,7 +82,7 @@ const skills = [
     <header class="cv-side">
       <h1 class="display">Resume</h1>
       <p class="who">Abtin Aryanpour<br /><span class="dim">Computer Engineering, University of Waterloo</span></p>
-      <a class="get" href={pdf} download><Icon name="file" /><span>Download the PDF<span class="small dim">One page, 116&nbsp;KB</span></span></a>
+      <p class="get"><a href={pdf} download>Download the PDF</a><span class="small dim">One page, 116&nbsp;KB</span></p>
       <ul class="reach">
         <li><a href="mailto:aaryanpo@uwaterloo.ca"><Icon name="mail" />aaryanpo@uwaterloo.ca</a></li>
         <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><Icon name="linkedin" />linkedin.com/in/abtin-aryanpour</a></li>
@@ -152,13 +152,8 @@ const skills = [
   .cv-side { grid-column: 1 / 4; position: sticky; top: var(--s6); display: grid; gap: var(--s5); }
   h1 { font-size: var(--t-h2); line-height: 1; letter-spacing: 0.01em; }
   .who { line-height: 1.5; }
-  .get { display: flex; align-items: center; gap: var(--s4); padding: var(--s4) var(--s5); border: 1px solid rgb(243 245 255 / 0.4); border-radius: 10px;
-    text-decoration: none; font-weight: 500; transition: border-color 160ms ease, background-color 160ms ease; }
-  .get :global(.icon) { width: 22px; height: 22px; }
-  .get > span { display: grid; gap: 2px; }
-  .get:hover { border-color: var(--white); background: rgb(243 245 255 / 0.06); }
-  .get:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
-  .get:active { background: rgb(243 245 255 / 0.12); }
+  .get { display: grid; gap: 2px; justify-items: start; }
+  .get a { font-weight: 500; }
   .reach { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); font-size: 15px; }
   .reach a { display: inline-flex; align-items: center; gap: var(--s3); overflow-wrap: anywhere; }
   .reach :global(.icon) { color: var(--dim); width: 17px; height: 17px; }
@@ -176,7 +171,7 @@ const skills = [
   h4 { font-size: 16px; font-weight: 500; }
   .pr { display: inline-flex; align-items: center; gap: var(--s2); color: var(--dim); font-size: 15px; }
   .pr :global(.icon) { width: 15px; height: 15px; }
-  ul { margin: var(--s2) 0 0; padding-left: 1.1em; display: grid; gap: var(--s2); max-width: 46em; }
+  ul { margin: var(--s2) 0 0; padding-left: 1.1em; display: grid; gap: var(--s2); max-width: 36em; }
   li::marker { color: var(--dim); }
   .skills { margin: 0; display: grid; gap: var(--s3); }
   .skills div { display: grid; grid-template-columns: 13em 1fr; gap: var(--s4); }
@@ -187,7 +182,6 @@ const skills = [
     .cv { padding-top: var(--s6); row-gap: var(--s7); }
     .cv-side, .cv-main { grid-column: 1 / -1; }
     .cv-side { position: static; }
-    .get { width: fit-content; }
   }
   @media (max-width: 599px) {
     .skills div { grid-template-columns: 1fr; gap: 2px; }

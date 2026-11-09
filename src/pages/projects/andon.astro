@@ -35,7 +35,6 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
         <dl class="summary">
           <div><dt>Problem</dt><dd>Machine faults are rare and costly to record, so the detector has to learn from healthy sound alone.</dd></div>
           <div><dt>Result</dt><dd>Played a faulty recording and a healthy one it has never heard, Andon picks the faulty one {andon.meanAuc} of the time ({andon.meanAuc} AUC; 50% is a coin flip). The DCASE 2020 challenge’s own baseline model scores {andon.baselineAuc} on the same test. Shrunk to {andon.int8Size}, it’s small enough to fit on a microcontroller.</dd></div>
-          <div><dt>Stack</dt><dd>{stack}</dd></div>
         </dl>
         <p class="status">Solo project: I designed and built all of it. Started in October 2026 and still in progress. The software stage is done and the hardware stage has started.</p>
         <p class="code-link"><a href={p.repo}><Icon name="github" /> Code on GitHub</a></p>
@@ -133,40 +132,38 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
       </section>
     </div>
 
-    <section class="sec wrap grid" aria-labelledby="hw-h">
-      <div class="side">
-        <h2 id="hw-h">The hardware so far</h2>
-        <p class="note">This is in progress. Session {andon.sessionsRecorded} of the real-fan recordings is done. Sessions 2 and 3 are planned, and my listening sign-off on the recordings is still open.</p>
-        <p class="note">No model has been trained on this audio yet, so nothing here is a detection result. The fan has only ever been stopped by a serial command or the button.</p>
-      </div>
+    <section class="sec hw wrap grid" aria-labelledby="hw-h">
+      <div class="side"><h2 id="hw-h">The hardware so far</h2></div>
       <div class="main">
-        <figure class="ev hw-fig">
-          <Picture src={rigTop} formats={['avif', 'webp']} fallbackFormat="webp" widths={[800, 1400, 1800]} sizes="(max-width: 899px) 92vw, 62vw" alt="A wooden plank seen from above, holding a breadboard. A green Raspberry Pi Pico 2 is at the left, green, yellow and red LEDs run along the top, a push button sits in the middle, a MOSFET and a small microphone board are near the right, and a black 40 mm fan stands at the far right end." />
-          <figcaption class="small">The whole rig on one plank: Pico 2, LEDs, button, MOSFET, microphone and fan.</figcaption>
-        </figure>
-        <div class="hw-along">
-          <figure class="ev hw-fig">
-            <Picture src={rigAlong} formats={['avif', 'webp']} fallbackFormat="webp" widths={[400, 800]} sizes="(max-width: 599px) 60vw, (max-width: 899px) 34vw, 18vw" alt="A view along the breadboard from its USB end. The Pico 2 is in focus in front, then the three LEDs, the resistors and the push button, with the microphone board and the fan out of focus at the far end." />
-            <figcaption class="small">Along the board, with the Pico in front and the fan at the far end.</figcaption>
-          </figure>
-          <div class="hw-text">
-            <p><b>Andon light.</b> Real green, yellow and red LEDs and a reset button on the Pico 2. For now the button steps the light through its colours.</p>
-            <p><b>Kill switch.</b> A MOSFET cuts the fan’s power, and the blades coast to a stop. On the board, <b class="num">{andon.killSwitchTrials}</b> fan-off trials passed. The worst PC round trip, from sending the command to the Pico’s reply, was {andon.killSwitchWorstRtt} against a {andon.killSwitchLimit} limit.</p>
-            <p><b>Microphone.</b> A digital microphone read by the Pico. A 1 kHz test tone measured {andon.micToneHz}.</p>
-            <p><b>Dataset.</b> Session {andon.sessionsRecorded} covers {andon.fans} fans, each with {andon.normalMinutes} of normal running and {andon.faultMinutes} of each of {andon.faultTypes} faults. That’s {andon.sessionMinutes}, or <b class="num">{andon.sessionClips}</b> clips of {andon.clipSeconds}, with {andon.streamBreaks} breaks, {andon.framesMissing} missing frames, {andon.framesCorrupt} corrupt frames and {andon.clippedSamples} clipped samples.</p>
-          </div>
-        </div>
+        <p>This is in progress. Session {andon.sessionsRecorded} of the real-fan recordings is done. Sessions 2 and 3 are planned, and my listening sign-off on the recordings is still open.</p>
+        <p>No model has been trained on this audio yet, so nothing here is a detection result. The fan has only ever been stopped by a serial command or the button.</p>
+      </div>
+      <figure class="ev hw-fig hw-full">
+        <Picture src={rigTop} formats={['avif', 'webp']} fallbackFormat="webp" widths={[800, 1400, 1800]} sizes="100vw" alt="A wooden plank seen from above, holding a breadboard. A green Raspberry Pi Pico 2 is at the left, green, yellow and red LEDs run along the top, a push button sits in the middle, a MOSFET and a small microphone board are near the right, and a black 40 mm fan stands at the far right end." />
+        <figcaption class="small">The whole rig on one plank: Pico 2, LEDs, button, MOSFET, microphone and fan.</figcaption>
+      </figure>
+      <figure class="ev hw-fig hw-port">
+        <Picture src={rigAlong} formats={['avif', 'webp']} fallbackFormat="webp" widths={[400, 800]} sizes="(max-width: 899px) 92vw, 216px" alt="A view along the breadboard from its USB end. The Pico 2 is in focus in front, then the three LEDs, the resistors and the push button, with the microphone board and the fan out of focus at the far end." />
+        <figcaption class="small">Along the board, from the Pico’s USB end.</figcaption>
+      </figure>
+      <div class="hw-text">
+        <p><b>Andon light.</b> Real green, yellow and red LEDs and a reset button on the Pico 2. For now the button steps the light through its colours.</p>
+        <p><b>Kill switch.</b> A MOSFET cuts the fan’s power, and the blades coast to a stop. On the board, <b class="num">{andon.killSwitchTrials}</b> fan-off trials passed. The worst PC round trip, from sending the command to the Pico’s reply, was {andon.killSwitchWorstRtt} against a {andon.killSwitchLimit} limit.</p>
+        <p><b>Microphone.</b> A digital microphone read by the Pico. A 1 kHz test tone measured {andon.micToneHz}.</p>
+        <p><b>Dataset.</b> Session {andon.sessionsRecorded} covers {andon.fans} fans, each with {andon.normalMinutes} of normal running and {andon.faultMinutes} of each of {andon.faultTypes} faults. That’s {andon.sessionMinutes}, or <b class="num">{andon.sessionClips}</b> clips of {andon.clipSeconds}, with {andon.streamBreaks} breaks, {andon.framesMissing} missing frames, {andon.framesCorrupt} corrupt frames and {andon.clippedSamples} clipped samples.</p>
         <p><b>Faults.</b> Imbalance is a {andon.tapeSize} square of electrical tape on one blade. Obstruction is a card strip over the bottom third of the intake. I also tried a loose-mount rattle and dropped it, because it sounded like normal running.</p>
-        <div class="hw-faults">
-          <figure class="ev hw-fig">
-            <Picture src={faultImbalance} formats={['avif', 'webp']} fallbackFormat="webp" widths={[500, 900]} sizes="(max-width: 899px) 46vw, 30vw" alt="A close-up of a black fan’s hub and blades. The blade at the top carries a small square of black tape, which shows as a flat patch with straight edges right above the hub." />
-            <figcaption class="small">Imbalance. The tape is black on black, so look at the blade at the top: it’s the flat patch with straight edges, right above the hub.</figcaption>
-          </figure>
-          <figure class="ev hw-fig">
-            <Picture src={faultObstruction} formats={['avif', 'webp']} fallbackFormat="webp" widths={[500, 900]} sizes="(max-width: 899px) 46vw, 30vw" alt="A black 40 mm fan seen at an angle, with a strip of card taped across the bottom third of its open face and the small microphone board in front of it." />
-            <figcaption class="small">Obstruction. The card strip runs across the bottom third of the fan, with the microphone in front.</figcaption>
-          </figure>
-        </div>
+      </div>
+      <div class="hw-faults">
+        <figure class="ev hw-fig">
+          <Picture src={faultImbalance} formats={['avif', 'webp']} fallbackFormat="webp" widths={[500, 900]} sizes="(max-width: 899px) 46vw, 24vw" alt="A close-up of a black fan’s hub and blades. The blade at the top carries a small square of black tape, which shows as a flat patch with straight edges right above the hub." />
+          <figcaption class="small">Imbalance. The tape is black on black, so look at the blade at the top: it’s the flat patch with straight edges, right above the hub.</figcaption>
+        </figure>
+        <figure class="ev hw-fig">
+          <Picture src={faultObstruction} formats={['avif', 'webp']} fallbackFormat="webp" widths={[500, 900]} sizes="(max-width: 899px) 46vw, 24vw" alt="A black 40 mm fan seen at an angle, with a strip of card taped across the bottom third of its open face and the small microphone board in front of it." />
+          <figcaption class="small">Obstruction. The card strip runs across the bottom third of the fan, with the microphone in front.</figcaption>
+        </figure>
+      </div>
+      <div class="hw-data">
         <table class="facts-table hw-table">
           <caption class="small">Largest band change against that fan’s normal sound, averaged over each recording. These show that the faults change the sound. They are not detection results.</caption>
           <thead><tr><th scope="col">Fan</th><th scope="col">Imbalance</th><th scope="col">Obstruction</th></tr></thead>
@@ -196,6 +193,7 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
     </section>
 
     <nav class="onward wrap" aria-label="Code and next project">
+      <p class="built">Built with {stack}</p>
       <a class="code-end" href={p.repo}><Icon name="github" /> Andon’s code on GitHub</a>
       <a href="/projects/image-stitcher/">Next project: Image Stitcher</a>
     </nav>
@@ -228,17 +226,27 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
 </script>
 
 <style>
+  .hw { row-gap: var(--s7); }
   .hw-fig :global(img) { display: block; width: 100%; height: auto; }
-  .hw-along { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: var(--s6); align-items: start; }
-  .hw-text { display: grid; gap: var(--s4); max-width: 38em; }
-  .hw-faults { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s5); align-items: start; }
+  .hw-full { grid-column: 1 / -1; }
+  .hw-port { grid-column: 1 / 5; max-width: 12rem; }
+  .hw-text { grid-column: 5 / 13; display: grid; gap: var(--s5); max-width: 36em; align-content: start; }
+  /* Both fan photos in one frame, so the row lines up. */
+  .hw-faults { grid-column: 1 / 7; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); align-items: start; }
+  .hw-faults :global(img) { aspect-ratio: 9 / 10; object-fit: cover; }
+  .hw-data { grid-column: 7 / 13; display: grid; gap: var(--s4); }
   .hw-table th { width: auto; }
   .hw-band { white-space: nowrap; }
   .hw-range { display: block; color: var(--dim); margin-top: 2px; }
   .hw-note { color: var(--dim); }
+  @media (max-width: 899px) {
+    .hw { row-gap: var(--s5); }
+    .hw-port, .hw-text, .hw-faults, .hw-data { grid-column: 1 / -1; }
+    /* The tall photo is cropped to the Pico and the LEDs. */
+    .hw-port { max-width: 28rem; }
+    .hw-port :global(img) { aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 82%; }
+  }
   @media (max-width: 599px) {
-    .hw-along { grid-template-columns: 1fr; }
-    .hw-along figure { max-width: 60%; }
     .hw-faults { gap: var(--s4); }
     .hw-band { display: block; }
   }
