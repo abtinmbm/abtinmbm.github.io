@@ -1,0 +1,96 @@
+---
+// The rig's circuit, drawn from the wiring list at the top of firmware/src/main.c and
+// firmware/src/mic.h in the public Andon repo (read 2026-11-09). Change it if those change.
+const gnd = (x: number, y: number) => `M${x} ${y}h0M${x - 10} ${y}h20M${x - 6.5} ${y + 5}h13M${x - 3} ${y + 10}h6`;
+const pins = [
+  [40, 'GP10'], [76, 'GP11'], [112, 'GP12'], [160, 'GP14'], [310, 'GP16'], [428, 'GP18'], [458, 'GP19'], [488, 'GP20'],
+] as const;
+const leds = [
+  { y: 40, c: '#2e9d4f', name: 'Green' },
+  { y: 76, c: '#f2b705', name: 'Yellow' },
+  { y: 112, c: '#d62828', name: 'Red' },
+];
+const X = 345; // the shared ground line for the light and the button
+---
+<svg class="wiring" viewBox="0 0 440 526" role="img"
+  aria-label="Circuit diagram. Pico 2 pins GP10, GP11 and GP12 each drive an LED, green, yellow and red, through a 220 ohm resistor to ground. GP14 goes through a push button to ground. GP16 drives the gate of an IRLZ44N MOSFET through 220 ohms, with 5.1 kilohms from gate to ground. The fan sits between 5 volts and the drain, with a 1N4007 diode across it, and the source goes to ground. GP18 and GP19 clock an ICS-43434 microphone, whose data comes back on GP20. The microphone runs from 3.3 volts, and its SEL and GND pins go to ground.">
+  <!-- Pico -->
+  <rect class="block" x="0.5" y="10" width="96" height="500" />
+  <text class="name" transform="translate(32 260) rotate(-90)" text-anchor="middle">Raspberry Pi Pico 2</text>
+  {pins.map(([y, n]) => <text class="pin" x="90" y={y + 5} text-anchor="end">{n}</text>)}
+
+  <!-- Andon light -->
+  <text class="group" x="118" y="20">Andon light</text>
+  <text class="val" x="235" y="20" text-anchor="middle">220 Ω each</text>
+  {leds.map(({ y, c, name }) => <>
+    <path class="w" d={`M96 ${y}H214M256 ${y}H286M304 ${y}H${X}`} />
+    <rect class="r" x="214" y={y - 7} width="42" height="14" />
+    <path d={`M286 ${y - 9}L304 ${y}L286 ${y + 9}Z`} fill={c} />
+    <path class="w" d={`M304 ${y - 9}V${y + 9}`} />
+    <text class="pin" x={X + 13} y={y + 5}>{name}</text>
+  </>)}
+
+  <!-- Reset button -->
+  <text class="group" x="118" y="146">Reset button</text>
+  <path class="w" d={`M96 160H250M290 160H${X}M${X} 40V172`} />
+  <circle class="w bg" cx="250" cy="160" r="3" /><circle class="w bg" cx="290" cy="160" r="3" />
+  <path class="w" d="M246 150H294M270 150V140M262 140H278" />
+  <path class="w" d={gnd(X, 172)} />
+  <circle class="dot" cx={X} cy="76" r="2.6" /><circle class="dot" cx={X} cy="112" r="2.6" /><circle class="dot" cx={X} cy="160" r="2.6" />
+
+  <!-- Kill switch -->
+  <text class="group" x="118" y="214">Kill switch</text>
+  <text class="val" x="292" y="214" text-anchor="end">5 V (VBUS)</text>
+  <path class="w" d="M300 209H375M330 209V223M330 257V290H306M306 330H330V372M375 209V231M375 249V276H330" />
+  <circle class="w" cx="330" cy="240" r="17" />
+  <text class="val strong" x="330" y="245" text-anchor="middle">Fan</text>
+  <!-- diode: the stripe is on the +5 V side -->
+  <path class="fill" d="M366 249H384L375 233Z" />
+  <path class="w" d="M366 232H384" />
+  <text class="val" x="390" y="245">1N4007</text>
+  <circle class="dot" cx="330" cy="276" r="2.6" /><circle class="dot" cx="330" cy="209" r="2.6" />
+  <!-- MOSFET: gate at the left, drain up, source down -->
+  <path class="w" d="M96 310H214M256 310H299M299 294V326M306 284V297M306 303V317M306 323V336M306 310H330V330" />
+  <path class="fill" d="M307 310L317 305.5V314.5Z" />
+  <text class="val" x="342" y="315">IRLZ44N</text>
+  <rect class="r" x="214" y="303" width="42" height="14" />
+  <text class="val" x="235" y="295" text-anchor="middle">220 Ω</text>
+  <circle class="dot" cx="280" cy="310" r="2.6" />
+  <path class="w" d="M280 310V324M280 360V372H330" />
+  <rect class="r" x="273" y="324" width="14" height="36" />
+  <text class="val" x="267" y="347" text-anchor="end">5.1 kΩ</text>
+  <path class="w" d={`M305 372V382${gnd(305, 382)}`} />
+  <circle class="dot" cx="305" cy="372" r="2.6" />
+
+  <!-- Microphone -->
+  <text class="group" x="118" y="412">Microphone</text>
+  <text class="val" x="230" y="406">ICS-43434</text>
+  <rect class="block" x="230" y="413" width="110" height="90" />
+  <path class="w" d="M96 428H230M96 458H230M96 488H230" />
+  <path class="fill" d="M172 428l-9 -4.5v9zM172 458l-9 -4.5v9zM163 488l9 -4.5v9z" />
+  <text class="pin" x="238" y="433">BCLK</text>
+  <text class="pin" x="238" y="463">LRCLK</text>
+  <text class="pin" x="238" y="493">DOUT</text>
+  <text class="pin" x="332" y="433" text-anchor="end">3V</text>
+  <text class="pin" x="332" y="463" text-anchor="end">SEL</text>
+  <text class="pin" x="332" y="493" text-anchor="end">GND</text>
+  <path class="w" d="M340 428H372M340 458H372V506M340 488H372" />
+  <text class="val" x="379" y="433">3.3 V</text>
+  <circle class="dot" cx="372" cy="488" r="2.6" />
+  <path class="w" d={gnd(372, 506)} />
+</svg>
+
+<style>
+  .wiring { display: block; width: 100%; height: auto; overflow: visible; }
+  .wiring text { font-family: var(--text); fill: var(--white); }
+  .w { fill: none; stroke: var(--white); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+  .w.bg { fill: var(--black); }
+  .r { fill: var(--black); stroke: var(--white); stroke-width: 1.25; }
+  .block { fill: rgb(59 79 143 / 0.25); stroke: var(--white); stroke-width: 1.25; }
+  .fill, .dot { fill: var(--white); }
+  .wiring .name { font-size: 18px; font-weight: 500; }
+  .wiring .group { font-size: 15px; font-weight: 500; }
+  .wiring .pin { font-size: 14.5px; font-variant-numeric: tabular-nums; }
+  .wiring .val { font-size: 13.5px; fill: var(--dim); }
+  .wiring .val.strong { fill: var(--white); }
+</style>

@@ -5,7 +5,6 @@ import Bars from '../../components/Bars.astro';
 import specNormal from '../../assets/andon/spec-normal.webp';
 import specFault from '../../assets/andon/spec-fault.webp';
 import rigTop from '../../assets/andon/rig-top.webp';
-import rigAlong from '../../assets/andon/rig-along.webp';
 import faultObstruction from '../../assets/andon/fault-obstruction.webp';
 import faultImbalance from '../../assets/andon/fault-imbalance.webp';
 import AucChart from '../../components/AucChart.astro';
@@ -13,6 +12,7 @@ import AndonReplay from '../../components/AndonReplay.astro';
 import ProjectTrail from '../../components/ProjectTrail.astro';
 import Icon from '../../components/Icon.astro';
 import AndonPipeline from '../../components/AndonPipeline.astro';
+import AndonWiring from '../../components/AndonWiring.astro';
 import { andon } from '../../data/metrics';
 import { projects } from '../../data/projects';
 import '../../styles/project.css';
@@ -142,9 +142,9 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
         <Picture src={rigTop} formats={['avif', 'webp']} fallbackFormat="webp" widths={[800, 1400, 1800]} sizes="100vw" alt="A wooden plank seen from above, holding a breadboard. A green Raspberry Pi Pico 2 is at the left, green, yellow and red LEDs run along the top, a push button sits in the middle, a MOSFET and a small microphone board are near the right, and a black 40 mm fan stands at the far right end." />
         <figcaption class="small">The whole rig on one plank: Pico 2, LEDs, button, MOSFET, microphone and fan.</figcaption>
       </figure>
-      <figure class="ev hw-fig hw-port">
-        <Picture src={rigAlong} formats={['avif', 'webp']} fallbackFormat="webp" widths={[400, 800]} sizes="(max-width: 899px) 92vw, 216px" alt="A view along the breadboard from its USB end. The Pico 2 is in focus in front, then the three LEDs, the resistors and the push button, with the microphone board and the fan out of focus at the far end." />
-        <figcaption class="small">Along the board, from the Pico’s USB end.</figcaption>
+      <figure class="ev hw-port">
+        <AndonWiring />
+        <figcaption class="small">The circuit, drawn from the pin list in the firmware. The PC powers the Pico over USB, and only one fan is wired at a time.</figcaption>
       </figure>
       <div class="hw-text">
         <p><b>Andon light.</b> Real green, yellow and red LEDs and a reset button on the Pico 2. For now the button steps the light through its colours.</p>
@@ -229,7 +229,7 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
   .hw { row-gap: var(--s7); }
   .hw-fig :global(img) { display: block; width: 100%; height: auto; }
   .hw-full { grid-column: 1 / -1; }
-  .hw-port { grid-column: 1 / 5; max-width: 12rem; }
+  .hw-port { grid-column: 1 / 5; }
   .hw-text { grid-column: 5 / 13; display: grid; gap: var(--s5); max-width: 36em; align-content: start; }
   /* Both fan photos in one frame, so the row lines up. */
   .hw-faults { grid-column: 1 / 7; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); align-items: start; }
@@ -242,9 +242,7 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
   @media (max-width: 899px) {
     .hw { row-gap: var(--s5); }
     .hw-port, .hw-text, .hw-faults, .hw-data { grid-column: 1 / -1; }
-    /* The tall photo is cropped to the Pico and the LEDs. */
-    .hw-port { max-width: 28rem; }
-    .hw-port :global(img) { aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 82%; }
+    .hw-port { max-width: 32rem; }
   }
   @media (max-width: 599px) {
     .hw-faults { gap: var(--s4); }
