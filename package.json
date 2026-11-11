@@ -20,8 +20,11 @@
     "astro": "^7.4.5"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.12",
     "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.64.1",
-    "fflate": "^0.8.3"
+    "@types/node": "^26.6.6",
+    "fflate": "^0.8.3",
+    "typescript": "^6.0.3"
   }
 }
