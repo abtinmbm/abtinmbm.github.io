@@ -100,6 +100,16 @@ const first = 0;
       </ol>
     </section>
 
+    <section class="sec wrap grid" aria-labelledby="data-h">
+      <div class="side"><h2 id="data-h">The data and the method</h2></div>
+      <div class="main two-col">
+        <p><b>Where the photos came from.</b> There are no real drone photos yet. I wrote a simulator that makes every test mission. It draws a random {stitcher.simField} field of blobs, rectangles, lines and noise, and cuts photos out of it as a camera {stitcher.simAltitude} up would see them, lens distortion included, using the calibration of a {stitcher.simCamera} Arducam camera. Three drones fly back and forth in rows. The simulator adds the errors a real flight has: GPS 1 or 3 m off, altitude and heading slightly off, compass error, and photos arriving shuffled. Because it made the photos, it knows where each one truly was.</p>
+        <p><b>What was tuned and what was scored.</b> Nothing in the stitcher is trained on these photos, so there’s no training set. Settings such as the blur limit were picked on simulated photos. The results come from {stitcher.simFields} simulated fields, each flown at 1 m and 3 m of GPS error. They come from the same simulator, and two of them are also used in the blur check’s tests, so there’s no set held back and scored only once at the end.</p>
+        <p><b>What kind of method it is.</b> It isn’t a model trained for this project. XFeat is a neural network its authors already trained, used as-is with their published weights, only to find matching points. Everything after it is fixed geometry: RANSAC throws out matches that don’t agree, and a least-squares solver lines all the photos up. The photo checks are hand-set limits on blur, exposure and tilt.</p>
+        <p><b>What it outputs.</b> A map image, with a file giving its GPS corners and how many metres each pixel covers, plus a list of rejected photos and why. To score a simulated mission, each placed photo’s corners are compared with where they truly are. That gives the alignment and map-position rows below. A mission counts as one connected map when every placed photo ends up in a single group.</p>
+      </div>
+    </section>
+
     <section class="sec wrap grid" aria-labelledby="results-h">
       <div class="side">
         <h2 id="results-h">One connected map in {stitcher.missions} simulated missions</h2>

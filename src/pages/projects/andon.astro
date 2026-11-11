@@ -68,6 +68,16 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
       </div>
     </section>
 
+    <section class="sec wrap grid" aria-labelledby="data-h">
+      <div class="side"><h2 id="data-h">The data and the model</h2></div>
+      <div class="main two-col">
+        <p><b>Where the sound came from.</b> DCASE 2020 Task 2 is built from two public datasets: ToyADMOS (toy cars and conveyors) and MIMII (real fans, pumps, slide rails and valves). The dataset authors recorded the machines and made the faults on purpose, for example with damaged parts, leaks, blockages or imbalance. Background noise recorded in real factories was mixed in, so the clips sound like a factory floor.</p>
+        <p><b>How it’s split.</b> Training uses only normal clips. The development test set mixes normal and faulty clips, and it’s where every choice was made. The evaluation set is other machines of the same types: the model learns their normal sound, but their test clips were scored once, at the end. There’s no separate validation set for the CNN. It trains for a fixed 100 epochs and keeps the last one.</p>
+        <p><b>What kind of model it is.</b> It isn’t regression, and it isn’t a hand-tuned filter. A fixed front end turns sound into 128 frequency bands every 32 ms. A CNN then learns, from those bands, to name which machine it’s hearing.</p>
+        <p><b>What it outputs.</b> A score, not a yes or no: how unsure the model is that it’s hearing the right machine. The light makes the yes or no from that score, using the control-chart limits and the 2-in-a-row and 3-in-a-row rules above.</p>
+      </div>
+    </section>
+
     <section class="sec wrap grid" aria-labelledby="results-h">
       <div class="side">
         <h2 id="results-h">Better than the DCASE baseline on five of six machine types</h2>

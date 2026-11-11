@@ -121,6 +121,13 @@ export const stitcher = {
   rowKeptTurned: 317,
   // candidates at the 180° turn (rerun 2026-11-06). Measured before yaw was added.
   rowCandidatesTurned: 714,
+  // Simulator setup, PR #215 round 3: image_stitcher/README.md Accuracy section (120 x 90 m, 25 m,
+  // 5 random fields each at 1 m and 3 m GPS error) and camera_info.yaml (Arducam 640 x 480).
+  // Blur tests use seeds 3 and 4 (test_stitcher_quality.py); evaluate.py scores seeds 0-4.
+  simField: '120 by 90 m',
+  simAltitude: '25 m',
+  simCamera: '640 × 480',
+  simFields: '5',
 };
 
 export const lloyd = {
