@@ -49,6 +49,8 @@
   .spec img { display: block; width: 100%; height: auto; }
   .spec > span, .spec-bar > .small { color: var(--dim); }
   .two-col { columns: 2; column-gap: var(--s7); }
+  /* .main is a grid, and multicol is ignored on grid containers */
+  .main.two-col { display: block; }
   .two-col > p { break-inside: avoid; margin-bottom: var(--s5); }
   .built { color: var(--dim); }
 
