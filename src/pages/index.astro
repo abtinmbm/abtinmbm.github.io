@@ -182,11 +182,10 @@ const person = {
 
 <style>
   /* first screen */
-  .hero { position: relative; height: 100svh; min-height: 820px; overflow: hidden;
-    background: radial-gradient(120% 90% at 30% 120%, var(--glow), var(--deep) 45%, var(--black) 85%); }
-  .sky { position: absolute; inset: 0; }
-  .hero::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-    background: linear-gradient(to top, rgb(1 3 10 / 0.94) 0%, rgb(1 3 10 / 0.86) 30%, rgb(1 3 10 / 0.5) 44%, transparent 58%); }
+  /* The sky's glow and trails fade out toward the bottom, into the star field behind the page, with no edge. */
+  .hero { position: relative; height: 100svh; min-height: 820px; overflow: hidden; }
+  .sky { position: absolute; inset: 0; background: radial-gradient(95% 75% at 35% 72%, rgb(13 34 87 / 0.85), rgb(6 16 49 / 0.55) 45%, transparent 82%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 38%, rgb(0 0 0 / 0.45) 66%, rgb(0 0 0 / 0.12) 84%, transparent 100%); mask-image: linear-gradient(to bottom, #000 0%, #000 38%, rgb(0 0 0 / 0.45) 66%, rgb(0 0 0 / 0.12) 84%, transparent 100%); }
   .who { position: absolute; z-index: 3; left: var(--edge); right: var(--edge); bottom: var(--edge);
     text-shadow: 0 0 6px var(--black), 0 0 18px var(--black); }
   .who h1 { font-size: var(--t-name); line-height: 1; letter-spacing: 0; white-space: nowrap; margin-bottom: var(--s5); }
@@ -264,10 +263,8 @@ const person = {
   .c-sub { color: var(--dim); overflow-wrap: anywhere; }
 
   @media (max-width: 759px) {
-    .hero { height: auto; min-height: 0; background: none; overflow: visible; }
-    .hero::after { display: none; }
-    .sky { position: relative; height: min(70svh, 520px); overflow: hidden;
-      background: radial-gradient(140% 90% at 30% 120%, var(--glow), var(--deep) 45%, var(--black) 85%); }
+    .hero { height: auto; min-height: 0; overflow: visible; }
+    .sky { position: relative; height: min(70svh, 520px); overflow: hidden; }
     .who { position: relative; left: auto; right: auto; bottom: auto; margin-top: -56px; padding: 0 var(--edge); }
     .who h1 { font-size: clamp(22px, 7.6vw, 44px); margin-bottom: var(--s4); }
     .intro { row-gap: var(--s5); }

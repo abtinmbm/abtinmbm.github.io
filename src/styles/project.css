@@ -1,104 +1,104 @@
-/* Shared by the project pages. Each page only adds what is its own. */
-  .proj { padding-bottom: var(--page-end); }
+/* Project pages: one reading column, with figures at one of two widths.
+   Every block sits on the same centred column, so nothing floats or leaves odd gaps.
+   - text:  the reading column (about 70 characters)
+   - wide:  figures that need room (charts, maps, photos)
+   Each section is its own grid with the same columns, so everything lines up down the page. */
+.proj {
+  --measure: min(44rem, calc(100vw - 2 * var(--edge)));
+  --wide: min(70rem, calc(100vw - 2 * var(--edge)));
+  padding-bottom: var(--page-end);
+}
+.col {
+  display: grid;
+  grid-template-columns:
+    [full-start] minmax(var(--edge), 1fr)
+    [wide-start] minmax(0, calc((var(--wide) - var(--measure)) / 2))
+    [text-start] var(--measure) [text-end]
+    minmax(0, calc((var(--wide) - var(--measure)) / 2)) [wide-end]
+    minmax(var(--edge), 1fr) [full-end];
+}
+.col > * { grid-column: text; min-width: 0; }
+.col > .wide { grid-column: wide; }
 
-  .top { position: relative; min-height: max(min(78svh, 760px), 640px); display: flex; align-items: flex-end; overflow: hidden;
-    background: radial-gradient(110% 80% at 20% 130%, var(--glow), var(--deep) 45%, var(--black) 85%); }
-  .top-sky { position: absolute; inset: 0; }
-  .top::after { content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(to top, rgb(1 3 10 / 0.94) 0%, rgb(1 3 10 / 0.85) 34%, transparent 62%); }
-  .top-text { position: relative; z-index: 1; width: 100%; padding-block: 180px var(--s8); display: grid; gap: var(--s5); grid-template-columns: minmax(0, 1fr); }
-  /* the key number sits at the right of the header, level with the summary */
-  @media (min-width: 1100px) {
-    .top-text { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s8); }
-    .top-text > * { grid-column: 1; }
-    .top-text > .key { grid-column: 2; grid-row: 2 / span 3; align-self: end; justify-items: end; text-align: right; }
-  }
-  .top-text > * { min-width: 0; }
-  /* 11vw keeps long titles inside a 390px phone */
-  .top h1 { font-size: min(var(--t-title), 11vw); line-height: 0.95; letter-spacing: 0.01em; }
-  .top .lead { max-width: 34em; }
-  .top .status { max-width: 46em; color: var(--dim); }
-  .top .status a { color: var(--white); margin-left: 0.3em; }
-  .lead { font-size: var(--t-lead); line-height: 1.4; }
-  .code-link a, .code-end { display: inline-flex; align-items: center; gap: 0.5em; font-weight: 500; }
-  /* problem, result and stack, for a reader with ten seconds */
-  .summary { margin: 0; max-width: 46em; display: grid; gap: var(--s2); }
-  .summary div { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: var(--s4); }
-  .summary dt { color: var(--dim); }
-  .summary dd { margin: 0; }
+/* ---------- header ---------- */
+/* The header's glow and trail fade out toward the bottom, into the star field behind the page. */
+.top { position: relative; overflow: hidden; }
+.top-sky { position: absolute; inset: 0;
+  background: radial-gradient(95% 75% at 35% 72%, rgb(13 34 87 / 0.85), rgb(6 16 49 / 0.55) 45%, transparent 82%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 38%, rgb(0 0 0 / 0.45) 66%, rgb(0 0 0 / 0.12) 84%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 38%, rgb(0 0 0 / 0.45) 66%, rgb(0 0 0 / 0.12) 84%, transparent 100%); }
+.top-in { position: relative; z-index: 1; padding-block: 200px var(--s7); text-shadow: 0 0 6px var(--black), 0 0 18px var(--black); }
+.top-in > * + * { margin-top: var(--s5); }
+.top h1 { font-size: min(clamp(52px, 7.6vw, 116px), 12vw); line-height: 0.95; letter-spacing: 0.01em; }
+.top .lead { font-size: var(--t-lead); line-height: 1.4; }
 
-  /* Every section below the header has the same two columns: what it is on the left
-     (a heading, or a short framing paragraph), the substance on the right. */
-  .sec { padding-block: var(--section); border-top: 1px solid var(--line); row-gap: var(--s5); align-items: start; }
-  .sec.first { border-top: 0; padding-top: var(--s7); }
-  /* Wide sections: the heading on top, the substance across the full width. */
-  .sec.wide > .side, .sec.wide > .main { grid-column: 1 / -1; padding-right: 0; }
-  .sec.wide > .side { max-width: 44em; }
-  .sec.wide .two-col { display: grid; columns: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6) var(--s8); }
-  .sec.wide .two-col > p { margin: 0; max-width: 38em; }
-  .sec.wide .steps { grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: var(--s6); }
-  /* Evidence sections: the heading and its paragraph on the left, the figure beside it. */
-  .sec.ev-sec { align-items: center; }
-  .sec.ev-sec > .side { grid-column: 1 / 6; gap: var(--s5); }
-  .sec.ev-sec > .main { grid-column: 7 / 13; }
-  .sec.ev-sec > .side > p { max-width: 34em; }
-  .side { grid-column: 1 / 5; display: grid; gap: var(--s4); align-content: start; padding-right: var(--s5); }
-  .main { grid-column: 5 / 13; display: grid; gap: var(--s5); align-content: start; min-width: 0; }
-  .main > p, .main .prose { max-width: 40em; }
-  .proj h2, .proj h3 { font-size: clamp(24px, 2.5vw, 38px); font-weight: 500; line-height: 1.12; letter-spacing: -0.02em; text-wrap: balance; }
-  .side .note { color: var(--dim); font-size: 16px; line-height: 1.5; }
-  .lede { font-size: clamp(19px, 1.65vw, 24px); line-height: 1.38; text-wrap: pretty; }
-  .lede-more { color: var(--dim); }
-  .main b, .side b { font-weight: 500; }
+/* the facts a reader needs in ten seconds, in one row */
+.facts { margin-bottom: 0; display: grid; }
+.facts div { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); gap: var(--s4); padding-block: var(--s3); border-top: 1px solid var(--line); }
+.facts dt { color: var(--dim); font-size: 14px; line-height: 1.7; }
+.facts dd { margin: 0; font-size: 16px; line-height: 1.5; }
+.facts dd a { font-weight: 500; }
 
-  /* the steps read across in two columns */
-  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6) var(--s7); counter-reset: step; }
-  .steps li { counter-increment: step; display: grid; gap: var(--s2); align-content: start; }
-  .steps li::before { content: counter(step); font-size: 18px; font-weight: 500; color: var(--dim); font-variant-numeric: tabular-nums; }
+/* jump links to each section */
+.toc { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2) var(--s5); font-size: 15px; }
+.toc span { color: var(--dim); }
+.toc a { text-decoration-color: rgb(243 245 255 / 0.35); }
+.toc a:hover { text-decoration-color: var(--white); }
 
-  /* a paragraph with its evidence beside it */
-  .pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s7); align-items: start; }
-  .pair > p { max-width: 34em; }
-  .ev { margin: 0; }
-  .ev figcaption { margin-top: var(--s4); color: var(--dim); font-size: 15px; line-height: 1.5; }
-  .specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4) var(--gap); }
-  .specs figcaption { grid-column: 1 / -1; margin-top: 0; }
-  .spec { display: grid; gap: 8px; }
-  .spec img { display: block; width: 100%; height: auto; }
-  .spec > span, .spec-bar > .small { color: var(--dim); }
-  .two-col { columns: 2; column-gap: var(--s7); }
-  /* .main is a grid, and multicol is ignored on grid containers */
-  .main.two-col { display: block; }
-  .two-col > p { break-inside: avoid; margin-bottom: var(--s5); }
-  .built { color: var(--dim); }
+/* ---------- sections ---------- */
+.part { padding-block: var(--section); border-top: 1px solid var(--line); scroll-margin-top: var(--s4); }
+.part.first { border-top: 0; padding-top: var(--s5); }
+.part > * + * { margin-top: var(--s5); }
+.part > h2 + *, .part > h3 + * { margin-top: var(--s4); }
+.part > figure, .part > .fig { margin-block: var(--s7); }
+.part > figure:last-child, .part > .fig:last-child { margin-bottom: 0; }
+.part > h3 { margin-top: var(--s7); }
+.part > h2 + h3 { margin-top: var(--s6); }
 
-  .onward { padding-block: var(--section) 0; border-top: 1px solid var(--line); display: grid; gap: var(--s6); justify-items: start; }
-  .onward a { font-weight: 500; font-size: var(--t-h3); line-height: 1.2; text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
+.proj h2 { font-size: clamp(28px, 3vw, 42px); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; text-wrap: balance; }
+.proj h3 { font-size: clamp(21px, 1.8vw, 26px); font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; text-wrap: balance; }
+.proj p { line-height: 1.6; }
+.intro { font-size: var(--t-lead); line-height: 1.45 !important; }
+.proj b { font-weight: 500; }
+.aside { color: var(--dim); font-size: 16px; }
 
-  @media (max-width: 1099px) {
-    .sec.wide .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (max-width: 899px) {
-    .sec { row-gap: var(--s4); }
-    .sec.first { padding-top: var(--s6); }
-    .side, .main, .sec.ev-sec > .side, .sec.ev-sec > .main { grid-column: 1 / -1; padding-right: 0; }
-    .sec.ev-sec > .main { margin-top: var(--s4); }
-    .sec.wide .two-col { grid-template-columns: 1fr; gap: var(--s5); }
-    .pair { grid-template-columns: 1fr; gap: var(--s5); }
-    .two-col { columns: 1; }
-  }
-  @media (max-width: 399px) { .summary div { grid-template-columns: 1fr; gap: 0; } }
-  @media (max-width: 599px) {
-    .steps, .sec.wide .steps { grid-template-columns: 1fr; gap: var(--s5); }
-    .top { min-height: 0; }
-    /* the trail ends above the title on a phone */
-    .top-sky { bottom: auto; height: 230px; }
-    .top-text { padding-block: 244px var(--s6); }
-  }
+.proj figure { margin-inline: 0; }
+.proj figcaption, .cap { margin-top: var(--s3); color: var(--dim); font-size: 15px; line-height: 1.5; max-width: 44rem; }
+.proj figure img { display: block; width: 100%; height: auto; }
+
+/* two things side by side at the same size */
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4) var(--gap); align-items: start; }
+.duo > figure { margin: 0; }
+.duo > figcaption { grid-column: 1 / -1; margin-top: 0; }
+
+/* labelled paragraphs: the data, the split, the model, the output */
+.defs { margin-bottom: 0; display: grid; gap: var(--s5); }
+.defs dt { font-weight: 500; }
+.defs dd { margin: var(--s1) 0 0; line-height: 1.6; }
+
+/* numbered steps, one under the other */
+.steps { list-style: none; margin-bottom: 0; padding: 0; display: grid; gap: var(--s4); counter-reset: step; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 2em minmax(0, 1fr); align-items: baseline; }
+.steps li::before { content: counter(step); color: var(--dim); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.code-link { display: inline-flex; align-items: center; gap: 0.5em; }
+
+.onward { padding-block: var(--section) 0; border-top: 1px solid var(--line); }
+.onward > * + * { margin-top: var(--s4); }
+.onward .built { color: var(--dim); }
+.onward a { font-weight: 500; font-size: clamp(20px, 2vw, 26px); line-height: 1.25; text-decoration-thickness: 2px; text-underline-offset: 0.2em; display: inline-flex; align-items: center; gap: 0.5em; justify-self: start; }
 
 /* a results table: measure, then result with its context */
 .facts-table { width: 100%; border-collapse: collapse; }
-.facts-table caption { text-align: left; color: var(--dim); padding-bottom: var(--s3); }
+.facts-table caption { text-align: left; color: var(--dim); padding-bottom: var(--s3); font-size: 15px; }
 .facts-table th, .facts-table td { text-align: left; vertical-align: top; padding: var(--s3) var(--s4) var(--s3) 0; border-top: 1px solid var(--line); font-weight: 400; }
-.facts-table th { color: var(--dim); width: 42%; }
-@media (max-width: 599px) { .facts-table th { width: auto; } }
+.facts-table th { color: var(--dim); width: 40%; }
+
+@media (max-width: 599px) {
+  .top-sky { bottom: auto; height: 230px; }
+  .top-in { padding-top: 240px; }
+  .facts div { grid-template-columns: 1fr; gap: 2px; }
+  .duo { grid-template-columns: 1fr; }
+  .facts-table th { width: auto; }
+  .part > figure, .part > .fig { margin-block: var(--s6); }
+}
