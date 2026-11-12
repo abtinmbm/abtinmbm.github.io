@@ -32,6 +32,7 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
       <div class="top-text wrap">
         <h1 class="display">Andon</h1>
         <p class="lead">A machine-sound anomaly detector that learns only from healthy recordings, and turns a green, yellow or red light when a machine starts to sound wrong.</p>
+        <p class="key"><span class="key-n">{andon.meanAuc}</span><span class="key-l">AUC on machines it never trained on, where 50% is a coin flip. The challenge’s own baseline scores <b>{andon.baselineAuc}</b>.</span></p>
         <dl class="summary">
           <div><dt>Problem</dt><dd>Machine faults are rare and costly to record, so the detector has to learn from healthy sound alone.</dd></div>
           <div><dt>Result</dt><dd>Played a faulty recording and a healthy one it has never heard, Andon picks the faulty one {andon.meanAuc} of the time ({andon.meanAuc} AUC; 50% is a coin flip). The DCASE 2020 challenge’s own baseline model scores {andon.baselineAuc} on the same test. Shrunk to {andon.int8Size}, it’s small enough to fit on a microcontroller.</dd></div>
@@ -54,11 +55,11 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
       </div>
     </section>
 
-    <section class="sec wrap grid" aria-labelledby="how-h">
+    <section class="sec wide wrap grid" aria-labelledby="how-h">
       <div class="side"><h2 id="how-h">From a sound to a light</h2></div>
       <div class="main">
       <AndonPipeline />
-      <ol class="steps">
+      <ol class="steps" style="--n:5">
         <li><p><b>Listen.</b> Each 10-second clip becomes a log-mel spectrogram: how loud each of 128 frequency bands is, every 32 ms.</p></li>
         <li><p><b>Recognize.</b> One small CNN per machine type learns to tell that type’s machines apart, from normal recordings only.</p></li>
         <li><p><b>Score.</b> If the CNN can’t recognize the machine it’s hearing, the score rises. Each 2-second window gets a score, every second.</p></li>
@@ -68,7 +69,7 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
       </div>
     </section>
 
-    <section class="sec wrap grid" aria-labelledby="data-h">
+    <section class="sec wide wrap grid" aria-labelledby="data-h">
       <div class="side"><h2 id="data-h">The data and the model</h2></div>
       <div class="main two-col">
         <p><b>Where the sound came from.</b> DCASE 2020 Task 2 is built from two public datasets: ToyADMOS (toy cars and conveyors) and MIMII (real fans, pumps, slide rails and valves). The dataset authors recorded the machines and made the faults on purpose, for example with damaged parts, leaks, blockages or imbalance. Background noise recorded in real factories was mixed in, so the clips sound like a factory floor.</p>
@@ -99,10 +100,11 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
 
     <div class="story">
       <h2 class="visually-hidden">What was hard</h2>
-      <section class="sec wrap grid" aria-labelledby="hard-1">
-        <div class="side"><h3 id="hard-1">There were no faults to train on</h3></div>
-        <div class="main pair">
+      <section class="sec ev-sec wrap grid" aria-labelledby="hard-1">
+        <div class="side"><h3 id="hard-1">There were no faults to train on</h3>
           <p>Instead of learning what a fault sounds like, the CNN learns to name which machine it hears. Low confidence in the right name becomes the anomaly score. On the evaluation set, valve went from {andon.valveAe} AUC with the baseline to {andon.valveCnn}.</p>
+        </div>
+        <div class="main">
           <figure class="ev specs">
             {[
               { img: specNormal, name: 'Normal', audio: '/audio/fan-normal.mp3', alt: 'Spectrogram of a normal clip: steady bright bands in the low frequencies.' },
@@ -110,7 +112,7 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
             ].map((c) => (
               <div class="spec" data-listen>
                 <div class="spec-img">
-                  <Picture src={c.img} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 92vw, 30vw" alt={c.alt} />
+                  <Picture src={c.img} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 939]} sizes="(max-width: 899px) 46vw, 23vw" alt={c.alt} />
                   <i class="spec-head" aria-hidden="true"></i>
                 </div>
                 <div class="spec-bar">
@@ -124,10 +126,11 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
           </figure>
         </div>
       </section>
-      <section class="sec wrap grid" aria-labelledby="hard-2">
-        <div class="side"><h3 id="hard-2">Overconfidence hurt the score</h3></div>
-        <div class="main pair">
+      <section class="sec ev-sec wrap grid" aria-labelledby="hard-2">
+        <div class="side"><h3 id="hard-2">Overconfidence hurt the score</h3>
           <p>Without mixup, the ToyConveyor classifier hit 100% training accuracy, which likely left little room for a fault to lower its confidence. Blending pairs of training examples (mixup) raised mean development AUC from {andon.devAucNoMixup} to {andon.devAucMixup}.</p>
+        </div>
+        <div class="main">
           <div class="ev">
             <Bars min={50} max={100} ticks={[50, 75, 100]} unit="%" caption="Mean AUC on the development set. 50% is guessing."
               rows={[{ label: 'No mixup', to: num(andon.devAucNoMixup), text: andon.devAucNoMixup }, { label: 'Mixup', to: num(andon.devAucMixup), text: andon.devAucMixup, strong: true }]} />
@@ -165,11 +168,11 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
       </div>
       <div class="hw-faults">
         <figure class="ev hw-fig">
-          <Picture src={faultImbalance} formats={['avif', 'webp']} fallbackFormat="webp" widths={[500, 900]} sizes="(max-width: 899px) 46vw, 24vw" alt="A close-up of a black fan’s hub and blades. The blade at the top carries a small square of black tape, which shows as a flat patch with straight edges right above the hub." />
+          <Picture src={faultImbalance} formats={['avif', 'webp']} fallbackFormat="webp" widths={[500, 900]} sizes="(max-width: 899px) 46vw, 32vw" alt="A close-up of a black fan’s hub and blades. The blade at the top carries a small square of black tape, which shows as a flat patch with straight edges right above the hub." />
           <figcaption class="small">Imbalance. The tape is black on black, so look at the blade at the top: it’s the flat patch with straight edges, right above the hub.</figcaption>
         </figure>
         <figure class="ev hw-fig">
-          <Picture src={faultObstruction} formats={['avif', 'webp']} fallbackFormat="webp" widths={[500, 900]} sizes="(max-width: 899px) 46vw, 24vw" alt="A black 40 mm fan seen at an angle, with a strip of card taped across the bottom third of its open face and the small microphone board in front of it." />
+          <Picture src={faultObstruction} formats={['avif', 'webp']} fallbackFormat="webp" widths={[500, 900]} sizes="(max-width: 899px) 46vw, 32vw" alt="A black 40 mm fan seen at an angle, with a strip of card taped across the bottom third of its open face and the small microphone board in front of it." />
           <figcaption class="small">Obstruction. The card strip runs across the bottom third of the fan, with the microphone in front.</figcaption>
         </figure>
       </div>
@@ -239,12 +242,12 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
   .hw { row-gap: var(--s7); }
   .hw-fig :global(img) { display: block; width: 100%; height: auto; }
   .hw-full { grid-column: 1 / -1; }
-  .hw-port { grid-column: 1 / 5; }
-  .hw-text { grid-column: 5 / 13; display: grid; gap: var(--s5); max-width: 36em; align-content: start; }
-  /* Both fan photos in one frame, so the row lines up. */
-  .hw-faults { grid-column: 1 / 7; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); align-items: start; }
-  .hw-faults :global(img) { aspect-ratio: 9 / 10; object-fit: cover; }
-  .hw-data { grid-column: 7 / 13; display: grid; gap: var(--s4); }
+  /* the circuit on the left; text, the two faults and the table share the main column */
+  .hw-port { grid-column: 1 / 5; grid-row: span 3; align-self: start; position: sticky; top: var(--s6); padding-right: var(--s5); }
+  .hw-text { grid-column: 5 / 13; display: grid; gap: var(--s5); max-width: 40em; align-content: start; }
+  .hw-faults { grid-column: 5 / 13; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); align-items: start; }
+  .hw-faults :global(img) { aspect-ratio: 1; object-fit: cover; }
+  .hw-data { grid-column: 5 / 13; display: grid; gap: var(--s4); }
   .hw-table th { width: auto; }
   .hw-band { white-space: nowrap; }
   .hw-range { display: block; color: var(--dim); margin-top: 2px; }
@@ -252,7 +255,7 @@ const stack = 'Python, PyTorch, scikit-learn, Streamlit, C and the Pico SDK.';
   @media (max-width: 899px) {
     .hw { row-gap: var(--s5); }
     .hw-port, .hw-text, .hw-faults, .hw-data { grid-column: 1 / -1; }
-    .hw-port { max-width: 32rem; }
+    .hw-port { max-width: 32rem; position: static; grid-row: auto; padding-right: 0; }
   }
   @media (max-width: 599px) {
     .hw-faults { gap: var(--s4); }

@@ -21,6 +21,7 @@ const p = projects.find((x) => x.slug === 'lloyd')!;
       <div class="top-text wrap">
         <h1 class="display">Lloyd’s algorithm</h1>
         <p class="lead">Spreads a drone swarm evenly over any field with a GPS boundary, for the Waterloo Aerial Robotics Group.</p>
+        <p class="key"><span class="key-n">{lloyd.cvStart} → {lloyd.cvEnd}</span><span class="key-l">Spacing unevenness from a bunched start to the end, where 0 is perfectly even. Median of <b>{lloyd.runs}</b> simulated runs.</span></p>
         <dl class="summary">
           <div><dt>Problem</dt><dd>After take-off the drones are bunched together. To cover a field they have to spread out evenly, whatever its shape.</dd></div>
           <div><dt>Result</dt><dd>The swarm settled into even spacing in {lloyd.runs} simulated runs. Spacing unevenness fell from {lloyd.cvStart} to {lloyd.cvEnd} (median; 0 is perfectly even). Tested in simulation only.</dd></div>
@@ -43,6 +44,16 @@ const p = projects.find((x) => x.slug === 'lloyd')!;
       </div>
     </section>
 
+    <section class="sec wide wrap grid" aria-labelledby="data-h">
+      <div class="side"><h2 id="data-h">The data and the method</h2></div>
+      <div class="main two-col">
+        <p><b>Where the test fields came from.</b> There’s no recorded data. The tests make their own: 3 fields (a 200&nbsp;m square, a 200&nbsp;m L-shape and an irregular field), with 4, 6 or 10 drones starting bunched near a launch point, from 10 different random starts each. A further {lloyd.fuzzStarts} random starts put drones outside the field on purpose.</p>
+        <p><b>What was tuned and what was scored.</b> Nothing is learned, so there’s no training or test split. Every run is scored the same way, by spacing unevenness and coverage cost, and the tests check that the coverage cost never goes up from one step to the next.</p>
+        <p><b>What kind of method it is.</b> It isn’t a trained model or a hand-tuned rule. Lloyd’s algorithm is fixed geometry: split the field into Voronoi cells, move each drone to the middle of its cell, and repeat until no drone moves more than 10&nbsp;cm in a step.</p>
+        <p><b>What it outputs.</b> Where each drone should go next, by drone, each step. The result shown here comes from running those steps until the swarm settles, then measuring how evenly the drones are spaced.</p>
+      </div>
+    </section>
+
     <section class="sec wrap grid" aria-labelledby="results-h">
       <div class="side">
         <h2 id="results-h">Even spacing in {lloyd.runs} simulated runs</h2>
@@ -61,10 +72,10 @@ const p = projects.find((x) => x.slug === 'lloyd')!;
       </div>
     </section>
 
-    <section class="sec wrap grid" aria-labelledby="hard-h">
+    <section class="sec wide wrap grid" aria-labelledby="hard-h">
       <div class="side"><h2 id="hard-h">What was hard</h2></div>
       <div class="main">
-        <ol class="steps">
+        <ol class="steps" style="--n:3">
           <li><p><b>Concave fields.</b> In an L-shaped field, a cell’s centroid can fall outside the cell. Then the drone goes to the nearest point of its own cell instead, so it stays inside and the coverage cost still never goes up.</p></li>
           <li><p><b>Stray drones.</b> Drones that start outside the field are pulled back in and kept apart. Testing random starts found a crash: two stray drones snapped to the same corner. Now they’re placed one at a time on free points.</p></li>
           <li><p><b>Proving the cost never rises.</b> The coverage cost is computed exactly from each cell’s polygon, not estimated by sampling, so a test can check it never goes up. I broke each key fix on purpose to make sure a test catches it.</p></li>

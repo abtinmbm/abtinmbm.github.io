@@ -16,6 +16,7 @@ const total = photos.length;
 ---
 <Base
   title="Photography | Abtin Aryanpour"
+  current="photography"
   description="Photos by Abtin Aryanpour, taken on a Canon EOS 90D: cities at night, school sports, fire performers, mountains and a few cats."
 >
   <header class="ph-head wrap">
@@ -57,21 +58,21 @@ const total = photos.length;
 </Base>
 
 <style>
-  .ph-head { padding-block: var(--s6) var(--s4); display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s3) var(--s6); }
+  .ph-head { padding-block: var(--page-top) var(--s6); display: grid; justify-items: center; text-align: center; gap: var(--s3); }
   h1 { font-size: var(--t-h2); line-height: 1; letter-spacing: 0.01em; }
   .lead { line-height: 1.4; color: var(--dim); }
 
-  .viewer { --stage: clamp(320px, calc(100svh - 340px), 860px); padding-bottom: var(--s7); scroll-margin-top: 16px; }
+  .viewer { --stage: clamp(320px, calc(100svh - 360px), 860px); padding-bottom: var(--page-end); scroll-margin-top: 16px; }
   /* One photo per screen width. Without JavaScript this still scrolls and snaps by swipe or trackpad. */
   .track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
   .track::-webkit-scrollbar { display: none; }
   .track:focus-visible { outline: 2px solid var(--white); outline-offset: 4px; }
-  .slide { flex: 0 0 100%; height: var(--stage); margin: 0; display: grid; place-items: start; scroll-snap-align: center; scroll-snap-stop: always; }
+  .slide { flex: 0 0 100%; height: var(--stage); margin: 0; display: grid; place-items: center; scroll-snap-align: center; scroll-snap-stop: always; }
   .slide :global(picture) { display: contents; }
   .slide :global(source) { display: none; }
   .slide :global(img) { display: block; max-width: 100%; max-height: var(--stage); width: auto; height: auto; }
 
-  .controls { display: flex; justify-content: flex-start; align-items: center; gap: var(--s5); margin-top: var(--s4); }
+  .controls { display: flex; justify-content: center; align-items: center; gap: var(--s5); margin-top: var(--s4); }
   .controls[hidden] { display: none; }
   .count { min-width: 6.5em; text-align: center; color: var(--dim); }
   .count b { color: var(--white); font-weight: 500; }
@@ -83,7 +84,7 @@ const total = photos.length;
   .step:disabled { opacity: 0.3; cursor: default; border-color: var(--line); }
 
   /* The film strip: every photo, the current one bright and outlined. */
-  .strip { display: flex; gap: 6px; margin-top: var(--s4); overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .strip { display: flex; justify-content: safe center; gap: 6px; margin-top: var(--s4); overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
   .thumb { flex: 0 0 auto; display: block; height: 64px; aspect-ratio: var(--ta); opacity: 0.45; outline: 1px solid transparent; outline-offset: 2px; transition: opacity 160ms ease, outline-color 160ms ease; }
   .thumb :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
   .thumb:hover { opacity: 0.8; }
@@ -91,10 +92,12 @@ const total = photos.length;
   .thumb[aria-current="true"] { opacity: 1; outline-color: var(--white); }
 
   @media (max-width: 759px) {
-    .ph-head { padding-top: var(--s6); }
     .viewer { --stage: clamp(280px, calc(100svh - 360px), 560px); padding-inline: 0; }
     .controls, .strip { padding-inline: var(--edge); }
     .thumb { height: 48px; }
+    /* On a phone the frame fits the current photo, so a panorama doesn't float in an empty box. */
+    .track { align-items: flex-start; overflow-y: hidden; transition: height 200ms ease; }
+    .slide { height: auto; }
   }
 </style>
 
@@ -111,8 +114,15 @@ const total = photos.length;
     controls.hidden = false;
     let cur = 0;
 
+    const phone = matchMedia('(max-width: 759px)');
+    const fit = () => {
+      const img = slides[cur].querySelector('img');
+      track.style.height = phone.matches && img?.offsetHeight ? `${img.offsetHeight}px` : '';
+    };
+    for (const img of track.querySelectorAll('img')) img.addEventListener('load', fit);
     const show = (k: number, link = true) => {
       cur = k;
+      fit();
       count.textContent = String(k + 1);
       prev.disabled = k === 0;
       next.disabled = k === slides.length - 1;
@@ -155,6 +165,6 @@ const total = photos.length;
     const m = /^#p(\d+)$/.exec(location.hash);
     if (m) requestAnimationFrame(() => { go(Number(m[1]) - 1, 'auto'); window.scrollTo(0, 0); });
     else show(0, false);
-    new ResizeObserver(() => go(cur, 'auto')).observe(track);
+    new ResizeObserver(() => { fit(); go(cur, 'auto'); }).observe(track);
   }
 </script>

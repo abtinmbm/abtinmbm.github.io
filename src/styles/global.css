@@ -16,6 +16,9 @@
 
   --edge: clamp(16px, 2.8vw, 40px);
   --gap: 20px;
+  /* one rhythm for every page: --section between sections, --group between groups inside one,
+     --page-top from the header to a page title */
+  --section: var(--s8); --group: var(--s7); --page-top: var(--s8); --page-end: var(--s9);
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 144px;
 
   --display: "Panchang", "Arial Black", sans-serif;
@@ -29,6 +32,9 @@
   --t-small: 14px;
 
   color-scheme: dark;
+}
+@media (max-width: 759px) {
+  :root { --section: var(--s7); --group: var(--s6); --page-top: var(--s7); --page-end: var(--s8); }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -58,6 +64,11 @@ a:hover, a:focus-visible { text-decoration-thickness: 2px; }
 .dim { color: var(--dim); }
 .small { font-size: var(--t-small); line-height: 1.45; }
 .num { font-variant-numeric: tabular-nums; }
+/* one number per project, set large: the result a reader should leave with */
+.key { display: grid; gap: var(--s2); }
+.key-n { font-weight: 500; font-size: clamp(48px, 6.4vw, 104px); line-height: 0.9; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.key-l { color: var(--dim); max-width: 22em; font-size: 16px; line-height: 1.45; }
+.key-l b { color: var(--white); font-weight: 500; }
 .wrap { padding-inline: var(--edge); }
 .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); }
 
@@ -71,3 +82,4 @@ a:hover, a:focus-visible { text-decoration-thickness: 2px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+.key-sm .key-n { font-size: clamp(40px, 4.2vw, 64px); }

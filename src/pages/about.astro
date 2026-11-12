@@ -59,24 +59,23 @@ import { awards } from '../data/metrics';
 </Base>
 
 <style>
-  .about { padding-block: calc(var(--s9) + 40px) var(--s10); align-items: start; }
+  .about { padding-block: var(--page-top) var(--page-end); align-items: start; }
   .side { grid-column: 1 / 6; position: sticky; top: var(--s6); }
   :global(.about-photo) { display: block; }
   :global(.about-photo img) { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
-  .main { grid-column: 7 / 13; display: grid; gap: var(--s6); max-width: 36em; }
+  .main { grid-column: 7 / 13; display: grid; gap: var(--s5); max-width: 36em; }
   h1 { font-size: var(--t-title); line-height: 0.95; letter-spacing: -0.01em; }
   .lead { font-size: var(--t-lead); line-height: 1.4; }
   .body { display: grid; gap: var(--s4); }
-  section { margin-top: var(--s5); }
+  section, .more { margin-top: calc(var(--group) - var(--s5)); }
   h2 { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; margin-bottom: var(--s4); }
   .list { margin: 0; padding: 0; list-style: none; display: grid; }
   .list > div, .list > li { padding-block: var(--s3); border-top: 1px solid var(--line); }
   .list dt { font-weight: 500; }
   .list dd { margin: 0; color: var(--dim); }
-  .more { margin-top: var(--s5); }
   .more .dim { margin-inline: 0.3em; }
   @media (max-width: 759px) {
-    .about { padding-top: var(--s7); row-gap: var(--s7); }
+    .about { row-gap: var(--s6); }
     .side { grid-column: 1 / 13; position: static; }
     .main { grid-column: 1 / 13; }
   }

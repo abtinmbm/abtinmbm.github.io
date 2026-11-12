@@ -69,8 +69,9 @@ const person = {
       <div class="p-text">
         <h3 id="andon-h" class="head">Andon</h3>
         <p class="lead">Hears when a machine starts to sound wrong, after learning only from healthy recordings.</p>
+        <p class="key"><span class="key-n">{andon.meanAuc}</span><span class="key-l">AUC on machines it never trained on (50% is a coin flip), against <b>{andon.baselineAuc}</b> for the challenge’s baseline.</span></p>
         <p class="status"><b>In progress.</b> A solo project. The software works. Now it’s moving onto a Raspberry Pi Pico 2.</p>
-        <p>Played a faulty recording and a healthy one it has never heard, it picks the faulty one {andon.meanAuc} of the time ({andon.meanAuc} AUC), against {andon.baselineAuc} for the challenge’s own baseline model. Shrunk to {andon.int8Size}, it fits on a microcontroller.</p>
+        <p>Played a faulty recording and a healthy one it has never heard, it picks the faulty one {andon.meanAuc} of the time. Shrunk to {andon.int8Size}, it fits on a microcontroller.</p>
         <p class="p-links"><a href="/projects/andon/">Read about Andon</a><a href={repo('andon')}>Code on GitHub<span class="visually-hidden"> for Andon</span></a></p>
       </div>
       <div class="p-media">
@@ -95,7 +96,7 @@ const person = {
             <h4 id="stitch-h" class="head">Image Stitcher</h4>
             <p>Merges out-of-order, GPS-tagged photos from several drones into one top-down map.</p>
             <p class="status"><StatusBadge slug="image-stitcher" /> The subteam is reviewing pull request #215.</p>
-            <p>In {stitcher.missions} simulated missions it built one connected map, with photos lined up to {stitcher.alignment} on average.</p>
+            <p class="key key-sm"><span class="key-n">{stitcher.missions}</span><span class="key-l">simulated missions built one connected map, with photos lined up to <b>{stitcher.alignment}</b> on average.</span></p>
             <p class="p-links"><a href="/projects/image-stitcher/">Read about the stitcher</a><a href={repo('image-stitcher')}>Code on GitHub (PR #215)<span class="visually-hidden"> for the Image Stitcher</span></a></p>
           </div>
         </article>
@@ -108,7 +109,7 @@ const person = {
             <h4 id="lloyd-h" class="head">Lloyd’s algorithm</h4>
             <p>Spreads a drone swarm evenly over any field with a GPS boundary.</p>
             <p class="status"><StatusBadge slug="lloyd" /> Waiting for review on pull request #247.</p>
-            <p>In {lloyd.runs} simulated runs, spacing unevenness fell from {lloyd.cvStart} to {lloyd.cvEnd} (0 is perfectly even).</p>
+            <p class="key key-sm"><span class="key-n">{lloyd.cvStart} → {lloyd.cvEnd}</span><span class="key-l">spacing unevenness in <b>{lloyd.runs}</b> simulated runs, where 0 is perfectly even.</span></p>
             <p class="p-links"><a href="/projects/lloyd/">Read about it</a><a href={repo('lloyd')}>Code on GitHub (PR #247)<span class="visually-hidden"> for Lloyd’s algorithm</span></a></p>
           </div>
         </article>
@@ -193,7 +194,7 @@ const person = {
   .who .avail { margin-top: var(--s3); font-weight: 500; }
 
   /* intro */
-  .intro { padding-block: var(--s9) var(--s8); align-items: center; }
+  .intro { padding-block: var(--section); align-items: center; }
   :global(.portrait) { grid-column: 1 / 6; display: block; }
   :global(.portrait img) { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
   .intro-text { grid-column: 7 / 13; display: grid; gap: var(--s4); max-width: 36em; }
@@ -203,7 +204,7 @@ const person = {
   .head { font-weight: 500; letter-spacing: -0.015em; }
 
   /* projects */
-  .work { display: grid; gap: var(--s9); padding-bottom: var(--s9); }
+  .work { display: grid; gap: calc(var(--section) * 2); padding-bottom: var(--section); }
   .p-text { display: grid; gap: var(--s4); align-content: start; }
   .p-text h3 { font-size: var(--t-h2); line-height: 1.05; }
   .status b { font-weight: 500; }
@@ -231,15 +232,14 @@ const person = {
   .task-text h4 { font-size: var(--t-h3); line-height: 1.15; }
 
   /* earlier work */
-  .earlier { padding-block: var(--s9); border-top: 1px solid var(--line); }
-  .earlier h2 { font-size: var(--t-h3); margin-bottom: var(--s7); }
+  .earlier { padding-block: var(--section); border-top: 1px solid var(--line); }
+  .earlier h2 { font-size: var(--t-h2); line-height: 1.05; margin-bottom: var(--s6); }
   .earlier ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7) var(--gap); }
   .earlier li { display: grid; gap: var(--s2); align-content: start; max-width: 34em; }
   .earlier h3 { font-size: 18px; }
 
-  /* contact: its own band, lit from below like the sky at the top */
-  .contact { position: relative; overflow: hidden; border-top: 1px solid var(--line);
-    background: radial-gradient(90% 120% at 80% 140%, var(--glow), var(--deep) 50%, var(--black) 90%); }
+  /* contact: open to the star field behind the page */
+  .contact { position: relative; overflow: hidden; border-top: 1px solid var(--line); }
   .c-inner { padding-block: var(--s9); row-gap: var(--s7); align-items: start; }
   .c-side { grid-column: 1 / 5; display: grid; gap: var(--s4); }
   .c-side h2 { font-size: var(--t-h2); line-height: 1.05; }
@@ -270,12 +270,10 @@ const person = {
       background: radial-gradient(140% 90% at 30% 120%, var(--glow), var(--deep) 45%, var(--black) 85%); }
     .who { position: relative; left: auto; right: auto; bottom: auto; margin-top: -56px; padding: 0 var(--edge); }
     .who h1 { font-size: clamp(22px, 7.6vw, 44px); margin-bottom: var(--s4); }
-    .intro { padding-block: var(--s7); row-gap: var(--s5); }
+    .intro { row-gap: var(--s5); }
     :global(.portrait) { grid-column: 1 / 9; }
     .intro { align-items: start; }
     .intro-text { grid-column: 1 / 13; }
-    .work { gap: var(--s8); padding-bottom: var(--s8); }
-    .earlier { padding-block: var(--s7); }
     .earlier h2 { margin-bottom: var(--s5); }
     .p-andon .p-text, .p-media { grid-column: 1 / 13; }
     .p-media { margin-top: var(--s5); }

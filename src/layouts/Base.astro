@@ -1,12 +1,13 @@
 ---
 import '../styles/global.css';
+import Backdrop from '../components/Backdrop.astro';
 
 interface Props {
   title: string;
   description: string;
   /** Header sits over the first screen instead of above it. */
   overlay?: boolean;
-  current?: 'home' | 'work' | 'about' | 'resume';
+  current?: 'home' | 'work' | 'about' | 'resume' | 'photography';
 }
 const { title, description, overlay = false, current } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -22,6 +23,7 @@ const nav = [
   { href: '/#work', label: 'Work', key: 'work' },
   { href: '/about/', label: 'About', key: 'about' },
   { href: '/resume/', label: 'Resume', key: 'resume' },
+  { href: '/photography/', label: 'Photography', key: 'photography' },
   { href: '/#contact', label: 'Contact', key: 'contact' },
 ];
 ---
@@ -52,6 +54,7 @@ const nav = [
   <slot name="head" />
 </head>
 <body>
+  <Backdrop />
   <a class="skip" href="#main">Skip to content</a>
   <header class:list={['site-head', { overlay }]}>
     <a class="site-name" href="/" aria-current={current === 'home' ? 'page' : undefined}>Abtin Aryanpour</a>
@@ -83,8 +86,10 @@ const nav = [
   .site-foot > p:first-child { white-space: nowrap; }
   .foot-links { display: flex; flex-wrap: wrap; gap: 8px 24px; }
   .site-foot { display: flex; justify-content: space-between; gap: 16px; padding-block: 32px 40px; border-top: 1px solid var(--line); font-size: 14px; color: var(--dim); }
-  @media (max-width: 420px) {
-    .site-head { font-size: 14px; }
-    .site-head ul { gap: 12px; }
+  /* On a phone the name gets its own row, so the five links have room. */
+  @media (max-width: 599px) {
+    .site-head { flex-direction: column; align-items: flex-start; gap: 10px; padding-block: 16px; }
+    .site-head ul { gap: 4px 16px; flex-wrap: wrap; }
   }
+  @media (max-width: 380px) { .site-head { font-size: 14px; } .site-head ul { gap: 4px 12px; } }
 </style>
