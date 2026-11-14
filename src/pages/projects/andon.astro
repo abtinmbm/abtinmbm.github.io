@@ -125,7 +125,7 @@ const clips = [
 
     <section id="hardware" class="part col" aria-labelledby="hw-h">
       <h2 id="hw-h">The hardware so far</h2>
-      <p>This is in progress. Session {andon.sessionsRecorded} of the real-fan recordings is done. Sessions 2 and 3 are planned, and my listening sign-off on the recordings is still open. No model has been trained on this audio yet, so nothing here is a detection result. The fan has only ever been stopped by a serial command or the button.</p>
+      <p>This is in progress. No model has been trained on the real fans’ audio yet, so nothing here is a detection result. The fan has only ever been stopped by a serial command or the button.</p>
       <figure class="wide">
         <Picture src={rigTop} formats={['avif', 'webp']} fallbackFormat="webp" widths={[800, 1400, 1800]} sizes="(max-width: 1160px) 100vw, 70rem" alt="A wooden plank seen from above, holding a breadboard. A green Raspberry Pi Pico 2 is at the left, green, yellow and red LEDs run along the top, a push button sits in the middle, a MOSFET and a small microphone board are near the right, and a black 40 mm fan stands at the far right end." />
         <figcaption class="small">The whole rig on one plank: Pico 2, LEDs, button, MOSFET, microphone and fan.</figcaption>
@@ -139,8 +139,18 @@ const clips = [
         <AndonWiring />
         <figcaption class="small">The circuit, drawn from the pin list in the firmware. The PC powers the Pico over USB, and only one fan is wired at a time.</figcaption>
       </figure>
+
+      <h3>Fast enough on the board</h3>
+      <p>The microphone delivers sound in {andon.frameMs} frames, so the work for each frame has to finish before the next one arrives. My budget is under {andon.computeBudgetMs} per frame. Measured on the Pico 2 itself (its RP2350 chip at 150 MHz, one of its two cores, average of 3 runs), each frame takes <b class="num">{andon.computeMsPerFrame}</b>: {andon.logmelMsPerFrame} to turn the sound into frequency bands, and {andon.cnnMsPerFrame} for the CNN’s share.</p>
+      <p>The CNN gives one score for each {andon.scoreWindow} window of sound, and one score takes {andon.cnnMsPerScore}. My first C version took {andon.oldCnnMsPerScore} per score, or {andon.oldComputeMsPerFrame} per frame, which was over budget. Rewriting the innermost loop of the convolution made it {andon.kernelSpeedup} faster.</p>
+      <p>The faster version still gives the same answers as the Python version, checked on the board: {andon.int8InputDiffs} int8 inputs differ, the largest difference in a score is {andon.worstScoreErr}, and the built-in self-test passes. The program sets aside {andon.staticRam} of memory when it’s built.</p>
+
+      <h3>The real-fan recordings</h3>
+      <p>The first session was recorded at home. A model can learn the room instead of the fault: the background, the desk and the echoes. So every session used for training or evaluation is now recorded in one room, the one where the device will be calibrated and demonstrated.</p>
+      <p>There will be three sessions: d1 and d2 for development, where I make choices, and d3 held back and scored once at the end. Each adds a control take: the fan is taken off its mount, put back and recorded running normally, so that just handling the fan isn’t mistaken for a fault. None of the three has been recorded yet. The home session is kept, but it’s never used for training or scoring.</p>
+
       <dl class="defs">
-        <div><dt>Dataset</dt><dd>Session {andon.sessionsRecorded} covers {andon.fans} fans, each with {andon.normalMinutes} of normal running and {andon.faultMinutes} of each of {andon.faultTypes} faults. That’s {andon.sessionMinutes}, or <b class="num">{andon.sessionClips}</b> clips of {andon.clipSeconds}, with {andon.streamBreaks} breaks, {andon.framesMissing} missing frames, {andon.framesCorrupt} corrupt frames and {andon.clippedSamples} clipped samples.</dd></div>
+        <div><dt>Home session</dt><dd>It covers {andon.fans} fans, each with {andon.normalMinutes} of normal running and {andon.faultMinutes} of each of {andon.faultTypes} faults. That’s {andon.sessionMinutes}, or <b class="num">{andon.sessionClips}</b> clips of {andon.clipSeconds}, with {andon.streamBreaks} breaks, {andon.framesMissing} missing frames, {andon.framesCorrupt} corrupt frames and {andon.clippedSamples} clipped samples.</dd></div>
         <div><dt>Faults</dt><dd>Imbalance is a {andon.tapeSize} square of electrical tape on one blade. Obstruction is a card strip over the bottom third of the intake. I also tried a loose-mount rattle and dropped it, because it sounded like normal running.</dd></div>
       </dl>
       <div class="fig duo fans">
@@ -154,7 +164,7 @@ const clips = [
         </figure>
       </div>
       <table class="facts-table hw-table">
-        <caption>Largest band change against that fan’s normal sound, averaged over each recording. These show that the faults change the sound. They are not detection results.</caption>
+        <caption>From the home session. Largest band change against that fan’s normal sound, averaged over each recording. These show that the faults change the sound. They are not detection results.</caption>
         <thead><tr><th scope="col">Fan</th><th scope="col">Imbalance</th><th scope="col">Obstruction</th></tr></thead>
         <tbody>
           {andon.bandChange.map((r) => (
@@ -168,13 +178,13 @@ const clips = [
     <section id="limits" class="part col" aria-labelledby="short-h">
       <h2 id="short-h">Where it still falls short</h2>
       <p>AUC isn’t real-world performance. {andon.meanAuc} AUC still caught only {andon.faultsCaught} of faults on a continuous stream of test audio, and {andon.valveCaught} for valve. {andon.falseAlarmsPerHour} false alarms per hour is too many for a real line. A much simpler Gaussian mixture model, a classic statistical method, beats the CNN on {andon.gmmWins} machine types.</p>
-      <p>On the Pico 2 itself, the compute came out far above my estimate. It measured <b class="num">{andon.computeMsPerFrame}</b> per {andon.frameMs} frame on one core, over the {andon.computeBudgetMs} budget, against the {andon.estComputeMs} I estimated. Each CNN score takes {andon.cnnMsPerScore}, {andon.cnnVsEstimate} the {andon.estCnnMsPerScore} estimate.</p>
+      <p>On the Pico 2, one CNN score takes {andon.cnnMsPerScore}, {andon.cnnVsEstimate} my planning estimate of {andon.estCnnMsPerScore}. It fits the budget, but my estimate was well off.</p>
     </section>
 
     <section id="next" class="part col" aria-labelledby="next-h">
       <h2 id="next-h">What’s next</h2>
       <p class="intro">A Raspberry Pi Pico 2 that cuts power to a real fan the moment it hears a fault.</p>
-      <p>The log-mel front end and the int8 CNN now run in C on the Pico 2. On the board, {andon.int8InputDiffs} int8 inputs differ from Python, and the self-test passed on all {andon.selfTestRuns} runs. The fan switch and the microphone exist too. The light’s full logic is still in Python, and the board doesn’t score live audio yet. Next come sessions 2 and 3 of the recordings, training on the real fans’ sound, bringing the compute under budget, and then running the whole loop on the device.</p>
+      <p>The log-mel front end and the int8 CNN now run in C on the Pico 2. On the board, {andon.int8InputDiffs} int8 inputs differ from Python, and the self-test passed on all {andon.selfTestRuns} runs. The fan switch and the microphone exist too. The light’s full logic is still in Python, and the board doesn’t score live audio yet. Next come recording sessions d1, d2 and d3 in one room, training on the real fans’ sound, and then running the whole loop on the device.</p>
     </section>
 
     <nav class="onward col" aria-label="Code and next project">

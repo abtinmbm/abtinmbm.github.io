@@ -1,6 +1,7 @@
 // Every number on the site lives here, with where it came from.
 // Sources: docs/02_PROJECTS.md (checked 2026-11-03) and the public Andon README
-// and model card (github.com/abtinmbm/andon, read 2026-11-04). If a repo changes,
+// and model card (github.com/abtinmbm/andon, read 2026-11-04;
+// results/h5_bench_pico2.md and DECISIONS.md read 2026-11-14). If a repo changes,
 // change the number here and every page follows.
 
 export const andon = {
@@ -31,13 +32,22 @@ export const andon = {
   computeBudgetMs: '20 ms',
   frameMs: '32 ms',
   estCnnMsPerScore: '98.32 ms',
-  // results/h5_bench_pico2.md: measured on the Pico 2, one core, 150 MHz, mean of 3 runs.
-  computeMsPerFrame: '29.16 ms',
-  cnnMsPerScore: '886.44 ms',
-  cnnVsEstimate: '9.0×',
+  // results/h5_bench_pico2.md (2026-11-14): measured on the Pico 2 (RP2350), one core, 150 MHz, mean of 3 runs.
+  computeMsPerFrame: '10.82 ms',
+  logmelMsPerFrame: '1.456 ms',
+  cnnMsPerFrame: '9.365 ms',
+  scoreWindow: '2 s',
+  cnnMsPerScore: '299.68 ms',
+  cnnVsEstimate: '3.0 times',
+  // DECISIONS.md 2026-11-10/14: the first C convolution kernel, timed on the board, and the rewrite's speed-up.
+  oldCnnMsPerScore: '886.44 ms',
+  oldComputeMsPerFrame: '29.16 ms',
+  kernelSpeedup: '3.0 times',
   // results/h5_bench_pico2.md: C against Python on the exported test vectors, on the board.
   int8InputDiffs: '0 of 24,576',
+  worstScoreErr: '2.48e-07',
   selfTestRuns: '3',
+  staticRam: '194,560 bytes',
   // Totals over results/h1_fan_latency.md, h1_fan_latency_50.md and h1_fan_latency_kick.md: fan-off commands, 20 + 10 + 10.
   killSwitchTrials: '40 of 40',
   // results/h1_fan_latency_kick.md: the worst PC round trip of the three runs, against the 100 ms limit stated there.
@@ -45,8 +55,8 @@ export const andon = {
   killSwitchLimit: '100 ms',
   // results/h2_mic_tone.md: 1 kHz test tone as the microphone measured it.
   micToneHz: '1000.02 Hz',
-  // docs/recording_protocol.md: 3 sessions planned. results/h2_dataset.md: session s1 rows only.
-  sessionsRecorded: '1 of 3',
+  // DECISIONS.md 2026-11-14: dev and eval sessions d1, d2 (dev) and d3 (eval), all in one room, none recorded yet.
+  // The first session, s1, was recorded at home and is never used for training or scoring.
   // configs/h2_recording.yaml and results/h2_dataset.md (s1): per fan, per session.
   fans: '3',
   normalMinutes: '30 min',
