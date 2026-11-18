@@ -63,15 +63,15 @@ const experience: Entry[] = [
   },
 ];
 const awards = [
-  '1st place (2025) and 4th place (2024): Coding & Programming, Canadian National Leadership Conference',
-  'Euclid (86/100), Hypatia (33/40) Honour Roll; Fermat, CSMC Distinction: Waterloo Math Contests, 2025–26',
-  'Excellence in Mathematics: Bayview Secondary School Mathematics Department (2025, 2026)',
+  'Canadian National Leadership Conference: 1st place (2025) and 4th place (2024), Coding & Programming',
+  'Waterloo Math Contests, 2025–26: Euclid (86/100), Hypatia (33/40) Honour Roll; Fermat, CSMC Distinction',
+  'Bayview Secondary School: Excellence in Mathematics (2025, 2026)',
 ];
 const skills = [
-  ['Languages', 'C, Python, C++, SQL, JavaScript, Java'],
-  ['Embedded', 'Raspberry Pi Pico SDK, Arm Cortex-M33, PIO, DMA, I2S, PWM, USB serial, fixed-point math'],
-  ['ML and vision', 'PyTorch, NumPy, OpenCV, scikit-learn, int8 quantization, FFT/log-mel, RANSAC, least squares'],
-  ['Tools and platforms', 'Git, GitHub Actions (CI), CMake, pytest, Django, SQLite, AWS EC2'],
+  ['Languages', 'C, Python, C++, JavaScript'],
+  ['Embedded', 'Raspberry Pi Pico SDK, Arm Cortex-M33, DMA, I2S, PWM, USB serial, fixed-point math'],
+  ['ML and DSP', 'PyTorch, NumPy, OpenCV, scikit-learn, int8 quantization, FFT, mel spectrograms'],
+  ['Tools and platforms', 'Git, GitHub Actions (CI), CMake, pytest, Django, AWS EC2'],
 ];
 ---
 <Base
@@ -153,7 +153,7 @@ const skills = [
       <div class="view view-pdf" id="view-pdf" role="tabpanel" aria-labelledby="tab-pdf">
         <a class="sheet" href={pdf} target="_blank" rel="noopener">
           <Picture src={pdfPage} formats={['avif', 'webp']} fallbackFormat="webp" widths={[700, 1100, 1700]} sizes="(max-width: 899px) 100vw, 60vw"
-            alt="The one-page resume PDF: education, technical skills, projects (Andon and CyberShield) and experience (Waterloo Aerial Robotics Group and Spirit of Math)." loading="lazy" />
+            alt="The one-page resume PDF: education, technical skills, projects (Andon and CyberShield), experience (Waterloo Aerial Robotics Group and Spirit of Math) and awards." loading="lazy" />
         </a>
         <p class="small dim">The same page as the PDF. Click it to open the PDF, where the links work.</p>
       </div>
