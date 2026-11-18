@@ -23,7 +23,7 @@ const p = projects.find((x) => x.slug === 'lloyd')!;
         <p class="lead">Spreads a drone swarm evenly over any field with a GPS boundary, for the Waterloo Aerial Robotics Group.</p>
         <p class="key"><span class="key-n">{lloyd.cvStart} → {lloyd.cvEnd}</span><span class="key-l">Spacing unevenness from a bunched start to the end, where 0 is perfectly even. Median of <b>{lloyd.runs}</b> simulated runs. Tested in simulation only.</span></p>
         <dl class="facts">
-          <div><dt>Status</dt><dd><StatusBadge slug="lloyd" /> Open and waiting for review.</dd></div>
+          <div><dt>Status</dt><dd><StatusBadge slug="lloyd" /></dd></div>
           <div><dt>Role</dt><dd>Built for the autonomy software team in November 2026, as my second task there. I wrote the whole pull request: the module and its {lloyd.tests} tests.</dd></div>
           <div><dt>Code</dt><dd><a class="code-link" href={p.repo}><Icon name="github" /> Pull request #247</a></dd></div>
         </dl>
@@ -56,7 +56,7 @@ const p = projects.find((x) => x.slug === 'lloyd')!;
       <h2 id="results-h">Even spacing in {lloyd.runs} simulated runs</h2>
       <p>Spacing unevenness is how much each drone’s distance to its nearest neighbour varies (standard deviation divided by mean). 0 is perfectly even.</p>
       <table class="facts-table">
-        <caption>All simulated: 3 fields (a 200 m square, a 200 m L-shape and an irregular field) × 4, 6 and 10 drones × 10 starts, each bunched near a launch point.</caption>
+        <caption>All simulated, on the test fields described above.</caption>
         <tbody>
           <tr><th scope="row">Settled into even spacing</th><td>{lloyd.runs} runs</td></tr>
           <tr><th scope="row">Spacing unevenness</th><td><span class="num">{lloyd.cvStart}</span> at the start, <span class="num">{lloyd.cvEnd}</span> at the end (medians)</td></tr>

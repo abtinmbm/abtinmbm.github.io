@@ -45,9 +45,6 @@ export const andon = {
   kernelSpeedup: '3.0 times',
   // results/h5_bench_pico2.md: C against Python on the exported test vectors, on the board.
   int8InputDiffs: '0 of 24,576',
-  worstScoreErr: '2.48e-07',
-  selfTestRuns: '3',
-  staticRam: '194,560 bytes',
   // Totals over results/h1_fan_latency.md, h1_fan_latency_50.md and h1_fan_latency_kick.md: fan-off commands, 20 + 10 + 10.
   killSwitchTrials: '40 of 40',
   // results/h1_fan_latency_kick.md: the worst PC round trip of the three runs, against the 100 ms limit stated there.
@@ -64,8 +61,6 @@ export const andon = {
   faultTypes: '2',
   // DECISIONS 2026-11-16 and configs `fault_speed_pct`: underspeed runs the fan at 85 % duty. Protocol: PWM at 25 kHz.
   underspeedDuty: '85%',
-  // DECISIONS 2026-11-16, dpilot check on id_00: at 90 % the Sunon's tone does not move (it doesn't slow down).
-  noSlowDuty: '90%',
   pwmKhz: '25,000',
   // results/h2_dataset.md clip table, d1 and d2, per fan: normal 198 clips / 33.0 min (30 min take + 3 min control
   // take; d1 id_02 has 197 / 32.8 after one excluded clip), each fault 18 clips / 3.0 min.

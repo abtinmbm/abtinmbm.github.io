@@ -50,7 +50,7 @@ const first = 0;
         <p class="lead">Merges out-of-order photos from several drones, each tagged with a GPS (Global Positioning System) position, into one top-down map that sits in the right place on the Earth.</p>
         <p class="key"><span class="key-n">{stitcher.missions}</span><span class="key-l">simulated missions built one connected map, with photos lined up to <b>{stitcher.alignment}</b> on average. Tested in simulation only.</span></p>
         <dl class="facts">
-          <div><dt>Status</dt><dd><StatusBadge slug="image-stitcher" /> The third round of revisions was pushed on November 9, 2026.</dd></div>
+          <div><dt>Status</dt><dd><StatusBadge slug="image-stitcher" /></dd></div>
           <div><dt>Role</dt><dd>Built for the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026. I wrote the whole pull request: the stitcher, the simulator that makes test missions with known true positions, the {stitcher.tests} tests and the evaluation script.</dd></div>
           <div><dt>Code</dt><dd><a class="code-link" href={p.repo}><Icon name="github" /> Pull request #215</a></dd></div>
         </dl>
@@ -195,7 +195,7 @@ const first = 0;
     <section id="limits" class="part col" aria-labelledby="short-h">
       <h2 id="short-h">Where it still falls short</h2>
       <p>Every result is from simulation. There are no real flight photos yet: the drone’s camera software doesn’t log roll, pitch or yaw yet, so its photos are rejected for now, and the lens calibration still has to be checked against the camera actually flown.</p>
-      <p>Yaw is defined as degrees clockwise from north for the top of the image, and neither that nor the camera mounting has been confirmed against real drone output. The accuracy figures come from simulated east-west flights. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms. The pull request hasn’t merged.</p>
+      <p>Neither the yaw convention nor the camera mounting has been confirmed against real drone output. The accuracy figures come from simulated east-west flights. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms. The pull request hasn’t merged.</p>
     </section>
 
     <nav class="onward col" aria-label="Code and next project">

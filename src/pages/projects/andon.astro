@@ -142,7 +142,7 @@ const clips = [
       <h3>Fast enough on the board</h3>
       <p>The microphone delivers sound in {andon.frameMs} frames, so the work for each frame has to finish before the next one arrives. My budget is under {andon.computeBudgetMs} per frame. Measured on the Pico 2 itself (its RP2350 chip at 150 MHz, one of its two cores, average of 3 runs), each frame takes <b class="num">{andon.computeMsPerFrame}</b>: {andon.logmelMsPerFrame} to turn the sound into frequency bands, and {andon.cnnMsPerFrame} for the CNN’s share.</p>
       <p>The CNN gives one score for each {andon.scoreWindow} window of sound, and one score takes {andon.cnnMsPerScore}. My first C version took {andon.oldCnnMsPerScore} per score, or {andon.oldComputeMsPerFrame} per frame, which was over budget. Rewriting the innermost loop of the convolution made it {andon.kernelSpeedup} faster.</p>
-      <p>The faster version still gives the same answers as the Python version, checked on the board: {andon.int8InputDiffs} int8 inputs differ, the largest difference in a score is {andon.worstScoreErr}, and the built-in self-test passes. The program sets aside {andon.staticRam} of memory when it’s built.</p>
+      <p>The faster version still gives the same answers as the Python version, checked on the board: {andon.int8InputDiffs} int8 inputs differ, and the built-in self-test passes.</p>
 
       <h3>The real-fan recordings</h3>
       <p>The first session was recorded at home. A model can learn the room instead of the fault: the background, the desk and the echoes. So every session used for training or evaluation is now recorded in one room, the one where the device will be calibrated and demonstrated. The home session is kept on disk, but it’s never used for training or scoring.</p>
@@ -152,9 +152,8 @@ const clips = [
         {andon.sessions.map((s) => (
           <div><dt>{s.name}, {s.date}</dt><dd>{s.takes} takes. The Pico sent <b class="num">{s.frames}</b> numbered, checked audio frames to the PC over USB (Universal Serial Bus), with {s.breaks} breaks, {s.missing} missing and {s.corrupt} corrupt. {s.excluded === '0' ? 'No clips were left out.' : 'One normal clip is left out, because of a knock, not the fan.'}</dd></div>
         ))}
-        <div><dt>Faults</dt><dd>Underspeed isn’t a change to the fan. It’s a speed setting. The fan’s power is switched on and off {andon.pwmKhz} times a second (pulse-width modulation, or PWM), and for underspeed it’s on {andon.underspeedDuty} of the time instead of all of it, so the fan runs slower, like a worn motor or a weak power supply. The fan takes a while to slow down, so the first {andon.underspeedSkip} of each underspeed recording is never used. Obstruction is a card strip over the bottom third of the intake.</dd></div>
-        <div><dt>Dropped faults</dt><dd>Imbalance, a small piece of tape on one blade, was dropped during d1 because it didn’t repeat. How much it changed the sound depended on how each piece was cut, placed and pressed, and at full speed it could lift: on ANVISION A a larger piece lifted and buzzed part-way through two tries, which were stopped and saved nothing. The imbalance recordings that were made are kept, but never used. Before that, I tried a loose-mount rattle and dropped it, because it sounded like normal running.</dd></div>
-        <div><dt>Repeat check</dt><dd>Switched on {andon.noSlowDuty} of the time, the Sunon doesn’t slow down at all. At {andon.underspeedDuty} it slows a lot, so its underspeed could change size from one day to the next. Before d2, I set a limit: in its most-changed band ({andon.repeatBand}), d2 had to land within {andon.repeatTolerance} of d1. It was {andon.repeatD1} in d1 and {andon.repeatD2} in d2, a difference of {andon.repeatDiff}, inside the limit.</dd></div>
+        <div><dt>Faults</dt><dd>Underspeed isn’t a change to the fan. It’s a speed setting. The fan’s power is switched on and off {andon.pwmKhz} times a second (pulse-width modulation, or PWM), and for underspeed it’s on {andon.underspeedDuty} of the time instead of all of it, so the fan runs slower, like a worn motor or a weak power supply. The fan takes a while to slow down, so the first {andon.underspeedSkip} of each underspeed recording is never used. Obstruction is a card strip over the bottom third of the intake. A third fault, a piece of tape on one blade, was dropped during d1 because it changed the sound by a different amount each time.</dd></div>
+        <div><dt>Repeat check</dt><dd>Before d2, I set a limit for the {andon.repeatFan}’s underspeed: in its most-changed band ({andon.repeatBand}), d2 had to land within {andon.repeatTolerance} of d1. It was {andon.repeatD1} in d1 and {andon.repeatD2} in d2, a difference of {andon.repeatDiff}, inside the limit.</dd></div>
       </dl>
       <figure class="fig fault-photo">
         <Picture src={faultObstruction} formats={['avif', 'webp']} fallbackFormat="webp" widths={[500, 900]} sizes="(max-width: 599px) 92vw, 22rem" alt="A black 40 mm fan seen at an angle, with a strip of card taped across the bottom third of its open face and the small microphone board in front of it." />
@@ -169,7 +168,6 @@ const clips = [
           ))}
         </tbody>
       </table>
-      <p class="aside">On the Sunon, obstruction’s most-changed band moved between sessions, from {andon.bandChange[0].obsBand[0]} in d1 to {andon.bandChange[0].obsBand[1]} in d2.</p>
     </section>
 
     <section id="limits" class="part col" aria-labelledby="short-h">
@@ -181,7 +179,7 @@ const clips = [
     <section id="next" class="part col" aria-labelledby="next-h">
       <h2 id="next-h">What’s next</h2>
       <p class="intro">A Raspberry Pi Pico 2 that cuts power to a real fan the moment it hears a fault.</p>
-      <p>The log-mel front end and the int8 CNN now run in C on the Pico 2. On the board, {andon.int8InputDiffs} int8 inputs differ from Python, and the self-test passed on all {andon.selfTestRuns} runs. The fan switch and the microphone exist too. The light’s full logic is still in Python, and the board doesn’t score live audio yet. Sessions d1 and d2 are recorded. Next comes d3, the held-back session, then training on the real fans’ sound. Because underspeed turns the whole sound down, a plain loudness check will be scored next to the models. Then the whole loop runs on the device.</p>
+      <p>The light’s full logic is still in Python, and the board doesn’t score live audio yet. Next comes d3, the held-back session, then training on the real fans’ sound, then running the whole loop on the device.</p>
       <p>To test it, a serial command will switch the fan to underspeed in the middle of a run, and the board will log the time from the switch to the fan stopping. The obstruction card can only be fitted with the fan off, so those trials fit the card, then start the fan, are timed from the fan starting, and are reported separately.</p>
     </section>
 
