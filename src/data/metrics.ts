@@ -1,7 +1,7 @@
 // Every number on the site lives here, with where it came from.
-// Sources: docs/02_PROJECTS.md (checked 2026-11-03) and the public Andon README
+// Sources: docs/02_PROJECTS.md (checked 2026-11-17) and the public Andon README
 // and model card (github.com/abtinmbm/andon, read 2026-11-04;
-// results/h5_bench_pico2.md and DECISIONS.md read 2026-11-14). If a repo changes,
+// results/h5_bench_pico2.md and DECISIONS.md read 2026-11-14; real-fan recordings read 2026-11-17 at 4703322). If a repo changes,
 // change the number here and every page follows.
 
 export const andon = {
@@ -55,31 +55,47 @@ export const andon = {
   killSwitchLimit: '100 ms',
   // results/h2_mic_tone.md: 1 kHz test tone as the microphone measured it.
   micToneHz: '1000.02 Hz',
-  // DECISIONS.md 2026-11-14: dev and eval sessions d1, d2 (dev) and d3 (eval), all in one room, none recorded yet.
-  // The first session, s1, was recorded at home and is never used for training or scoring.
-  // configs/h2_recording.yaml and results/h2_dataset.md (s1): per fan, per session.
+  // Real-fan recordings: github.com/abtinmbm/andon at 4703322 (read 2026-11-17): results/h2_dataset.md,
+  // docs/recording_protocol.md, configs/h2_recording.yaml, PLAN.md H6/H7 and DECISIONS.md 2026-11-14 to 2026-11-17.
+  // DECISIONS 2026-11-14: dev sessions d1 and d2 and eval session d3, all in one room. The first session, s1,
+  // was recorded at home and moved to `other`: never used for training or scoring.
+  // configs/h2_recording.yaml `fans`: id_00 Sunon, id_01 ANVISION A, id_02 ANVISION B.
   fans: '3',
-  normalMinutes: '30 min',
-  faultMinutes: '3 min',
   faultTypes: '2',
-  // results/h2_dataset.md (s1): 9 rows summed.
-  sessionMinutes: '108 min',
-  sessionClips: '648',
+  // DECISIONS 2026-11-16 and configs `fault_speed_pct`: underspeed runs the fan at 85 % duty. Protocol: PWM at 25 kHz.
+  underspeedDuty: '85%',
+  // DECISIONS 2026-11-16, dpilot check on id_00: at 90 % the Sunon's tone does not move (it doesn't slow down).
+  noSlowDuty: '90%',
+  pwmKhz: '25,000',
+  // results/h2_dataset.md clip table, d1 and d2, per fan: normal 198 clips / 33.0 min (30 min take + 3 min control
+  // take; d1 id_02 has 197 / 32.8 after one excluded clip), each fault 18 clips / 3.0 min.
+  normalClips: '198',
+  normalMinutes: '33 min',
+  faultClips: '18',
+  faultMinutes: '3 min',
   clipSeconds: '10 s',
-  // results/h2_dataset.md (s1): stream table for breaks, missing and corrupt; clip table for clipped samples.
-  streamBreaks: '0',
-  framesMissing: '0',
-  framesCorrupt: '0',
-  clippedSamples: '0',
-  // docs/recording_protocol.md, Faults table.
-  tapeSize: '5 × 5 mm',
-  // results/h2_dataset.md (s1): largest band change of each fault take against that fan's normal clips, mean over the take.
+  // DECISIONS 2026-11-16 (rules fixed before d2): the first 3 clips (30 s) of every underspeed take are never used.
+  underspeedSkip: '30 s',
+  // results/h2_dataset.md stream table and excluded clips; dates from the protocol's session notes.
+  sessions: [
+    { name: 'd1', date: 'Nov 16, 2026', takes: '14', frames: '461,322', breaks: '0', missing: '0', corrupt: '0', excluded: '1' },
+    { name: 'd2', date: 'Nov 17, 2026', takes: '12', frames: '438,813', breaks: '0', missing: '0', corrupt: '0', excluded: '0' },
+  ],
+  // DECISIONS 2026-11-16/17 and results/h2_dataset.md repeatability table: id_00 underspeed, 4000–8000 Hz,
+  // tolerance fixed before d2.
+  repeatFan: 'Sunon',
+  repeatBand: '4000–8000 Hz',
+  repeatD1: '−14.2 dB',
+  repeatD2: '−11.9 dB',
+  repeatDiff: '+2.3 dB',
+  repeatTolerance: '±3 dB',
+  // results/h2_dataset.md band table, d1 and d2: change in the biggest band of each fault take against the same
+  // fan's normal clips in the same session, mean over the take. Pairs are [d1, d2].
   bandChange: [
-    { fan: 'Sunon', imbalance: '+6.6 dB', imbalanceBand: '0–125 Hz', obstruction: '+14.0 dB', obstructionBand: '250–500 Hz' },
-    // imbalanceRange: results/h2_dataset.md (s1), per clip, biggest band. The take was uneven (Abtin, 2026-11-09).
-    { fan: 'ANVISION A', imbalance: '+5.3 dB', imbalanceBand: '0–125 Hz', imbalanceRange: '−1.0 to +8.2 dB', obstruction: '+11.4 dB', obstructionBand: '500–1000 Hz' },
-    { fan: 'ANVISION B', imbalance: '+6.2 dB', imbalanceBand: '0–125 Hz', obstruction: '+11.1 dB', obstructionBand: '500–1000 Hz' },
-  ] as { fan: string; imbalance: string; imbalanceBand: string; imbalanceRange?: string; obstruction: string; obstructionBand: string }[],
+    { fan: 'Sunon', under: ['−14.2', '−11.9'], underBand: '4000–8000 Hz', obs: ['+14.0', '+13.7'], obsBand: ['500–1000 Hz', '250–500 Hz'] },
+    { fan: 'ANVISION A', under: ['−8.8', '−8.3'], underBand: '2000–4000 Hz', obs: ['+10.8', '+11.9'], obsBand: ['500–1000 Hz', '500–1000 Hz'] },
+    { fan: 'ANVISION B', under: ['−9.7', '−8.4'], underBand: '2000–4000 Hz', obs: ['+8.8', '+9.3'], obsBand: ['500–1000 Hz', '500–1000 Hz'] },
+  ] as { fan: string; under: [string, string]; underBand: string; obs: [string, string]; obsBand: [string, string] }[],
   // docs/02 "Hard problems": mean dev AUC without and with mixup.
   devAucNoMixup: '84.33%',
   devAucMixup: '86.64%',
