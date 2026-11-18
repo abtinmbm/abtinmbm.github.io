@@ -114,26 +114,37 @@ export const andon = {
 
 export const stitcher = {
   // All simulated: 10 missions, 91 photos each, 3 drones, shuffled arrival, flown east-west,
-  // 5° simulated yaw error. Round 3 of PR #215, image_stitcher/README.md Accuracy table (public).
+  // 5° simulated yaw error. PR #215 round 4 (head 1c76f7d, 2026-11-17): 3ds_groundside/src/image_stitcher/README.md
+  // Accuracy table (public), and Abtin's `python -m tests.image_stitcher.evaluate` run on 1c76f7d
+  // (portfolio/eval_179_results_2026-11-17_first_photos_final.txt). Accuracy unchanged from round 3.
   missions: '10 of 10',
   photos: '91',
   // README Accuracy table: per-mission averages, 4.0–7.3 cm at 1 m GPS error and 4.3–8.3 cm at 3 m.
   alignment: '4.0–8.3 cm',
-  // Same missions with refinement off and on: Abtin's rerun of 2026-11-09 on the round 3 code, published with his OK.
+  // Same missions with refinement off and on: Abtin's rerun of 2026-11-09 on 4a9bbdf (round 3), published with his OK.
+  // Not rerun on round 4; change only after rerunning portfolio/tools/eval_179_stitcher.py on the current code.
   refineBefore: '13.6–69.8 cm',
   refineAfter: '4.0–8.3 cm',
-  // Map position vs truth, split by simulated GPS error (README Accuracy table, round 3).
-  mapError1: '0.16–0.31 m',
-  mapError3: '0.47–0.94 m',
+  // Map position vs truth, split by simulated GPS error (README Accuracy table, round 4).
+  mapError1: '0.162–0.307 m',
+  mapError3: '0.472–0.935 m',
   // README: no photo rejected in the evaluation (10 × 91). Blur limit check (resume PDF): 2,730 photos × 9 conditions,
   // 5 sharp (clean, JPEG 75, noise σ2 and σ4, dim) and 4 blurred (Gaussian 0.7 px, 5 px motion at 0/45/90°).
   rejectedGood: '0 of 910',
   blurWrong: '0 of 2,730 photos under 9 conditions (5 sharp, 4 slightly blurred; none combine noise and blur)',
-  // Per photo on a laptop CPU, simulated. Now: README Accuracy section, round 3. Before: the same README before yaw.
-  speed: '0.12–0.19 s',
+  // Per photo on a laptop CPU, simulated. Now: the round 4 evaluate run on 1c76f7d (0.133–0.186 s over the 10 missions).
+  // Before: the PR README before yaw.
+  speed: '0.13–0.19 s',
+  speedFrom: 0.13,
+  speedTo: 0.19,
   speedBefore: '0.42–0.75 s',
-  // Stitcher tests in PR #215, round 3. Abtin, 2026-11-09.
-  tests: '112',
+  // Stitcher tests at 1c76f7d: 130 collected in tests/unit/test_stitcher_*.py and tests/integration/test_image_stitcher.py
+  // (259 in 3ds_groundside), all passing in CI run 44230696092. Checked with pytest --collect-only, 2026-11-17.
+  tests: '130',
+  // Round 4: a per-point cut of conflicting matches in refinement, measured before it was rejected (simulated,
+  // same 10 missions). portfolio/179-image-stitcher.md, refine_conflict_residuals_179.py. Correct matches sit up to
+  // 30.6 px off before refinement; wrong repeating-ground matches about 880 px.
+  strictCutAlignment: '4.9–14.6 cm',
   // Constant yaw offsets of 0, 90 and 180°, simulated at 3 m GPS error: Abtin's rerun of 2026-11-09, published with his OK.
   yawOffsetRuns: '12 of 12',
   // One simulated pair across a row turn, from the worked example run on 2026-11-04. Measured before yaw was added.
@@ -142,7 +153,7 @@ export const stitcher = {
   rowKeptTurned: 317,
   // candidates at the 180° turn (rerun 2026-11-06). Measured before yaw was added.
   rowCandidatesTurned: 714,
-  // Simulator setup, PR #215 round 3: image_stitcher/README.md Accuracy section (120 x 90 m, 25 m,
+  // Simulator setup, PR #215: 3ds_groundside/src/image_stitcher/README.md Accuracy section (120 x 90 m, 25 m,
   // 5 random fields each at 1 m and 3 m GPS error) and camera_info.yaml (Arducam 640 x 480).
   // Blur tests use seeds 3 and 4 (test_stitcher_quality.py); evaluate.py scores seeds 0-4.
   simField: '120 by 90 m',

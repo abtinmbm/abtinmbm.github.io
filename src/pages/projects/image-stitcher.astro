@@ -50,7 +50,7 @@ const first = 0;
         <p class="lead">Merges out-of-order photos from several drones, each tagged with a GPS (Global Positioning System) position, into one top-down map that sits in the right place on the Earth.</p>
         <p class="key"><span class="key-n">{stitcher.missions}</span><span class="key-l">simulated missions built one connected map, with photos lined up to <b>{stitcher.alignment}</b> on average. Tested in simulation only.</span></p>
         <dl class="facts">
-          <div><dt>Status</dt><dd><StatusBadge slug="image-stitcher" /></dd></div>
+          <div><dt>Status</dt><dd><StatusBadge slug="image-stitcher" /> The fourth round of revisions, which shortened the code and tightened refinement and the GPS checks, was pushed on November 17, 2026. It passes its automated checks and is back with the reviewer.</dd></div>
           <div><dt>Role</dt><dd>Built for the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026. I wrote the whole pull request: the stitcher, the simulator that makes test missions with known true positions, the {stitcher.tests} tests and the evaluation script.</dd></div>
           <div><dt>Code</dt><dd><a class="code-link" href={p.repo}><Icon name="github" /> Pull request #215</a></dd></div>
         </dl>
@@ -122,7 +122,7 @@ const first = 0;
           <tr><th scope="row">Map position against the truth</th><td><span class="num">{stitcher.mapError1}</span> at 1 m of GPS error, <span class="num">{stitcher.mapError3}</span> at 3 m. Closer than the GPS error itself</td></tr>
           <tr><th scope="row">Quality checks</th><td>{stitcher.rejectedGood} evaluation photos wrongly rejected. Blur check wrong on {stitcher.blurWrong}</td></tr>
           <tr><th scope="row">Speed</th><td><span class="num">{stitcher.speed}</span> per photo on a laptop CPU, down from <span class="num">{stitcher.speedBefore}</span> before yaw</td></tr>
-          <tr><th scope="row">Bad input</th><td>A broken message or failed map save is logged and skipped. A photo with a GPS glitch is rejected instead of stretching the map</td></tr>
+          <tr><th scope="row">Bad input</th><td>A broken message or failed map save is logged and skipped. A photo with a GPS glitch, or a position outside valid latitude and longitude, is rejected instead of stretching the map. The first 3 photos are checked against each other, so one wrong first GPS fix can’t become the map’s origin and get every later photo rejected</td></tr>
           <tr><th scope="row">Tests</th><td>{stitcher.tests} stitcher tests, plus a ground-truth mission simulator</td></tr>
         </tbody>
       </table>
@@ -137,7 +137,7 @@ const first = 0;
       <div class="fig wide"><MatchPair total={total} /></div>
       <div class="fig">
         <Bars min={0} max={1} ticks={[0, 0.5, 1]} unit="s" caption="Seconds per photo, simulated missions, on a laptop CPU."
-          rows={[{ label: 'Before yaw', from: 0.42, to: 0.75, text: stitcher.speedBefore }, { label: 'Now', from: 0.12, to: 0.19, text: stitcher.speed, strong: true }]} />
+          rows={[{ label: 'Before yaw', from: 0.42, to: 0.75, text: stitcher.speedBefore }, { label: 'Now', from: stitcher.speedFrom, to: stitcher.speedTo, text: stitcher.speed, strong: true }]} />
       </div>
 
       <h3>A compass can’t be trusted to place photos</h3>
@@ -172,6 +172,7 @@ const first = 0;
         <Bars min={0} max={75} ticks={[0, 25, 50, 75]} unit="cm" caption="After the fix: average misalignment of photos relative to each other, across simulated missions."
           rows={[{ label: 'Without it', from: 13.6, to: 69.8, text: stitcher.refineBefore }, { label: 'With it', from: 4.0, to: 8.3, text: stitcher.refineAfter, strong: true }]} />
       </div>
+      <p>In the fourth round, the reviewer asked me to keep matches that conflict with a photo’s other matches out of refinement. I measured first. Cutting every matched point that sat a few pixels off made alignment worse, {stitcher.strictCutAlignment} on average against {stitcher.refineAfter}, because before refinement removes drift, correct matches can sit up to about 30 pixels off. So only clear conflicts are dropped: wrong matches over repeating ground, hundreds of pixels off. Both figures are from the simulated missions.</p>
 
       <h3>Good matches split the map</h3>
       <p>The stitcher builds clusters, groups of photos that line up with each other, and merges two when a new photo bridges them. Small clusters with noisy GPS rejected good matches. Now a cluster’s GPS check only counts once the cluster spans four times the GPS error, and a simulated repeating-ground test checks that wrong matches stay blocked.</p>
