@@ -39,7 +39,7 @@ const first = 0;
 ---
 <Base
   title="Image Stitcher: one map from several drones | Abtin Aryanpour"
-  description="Merges out-of-order, GPS-tagged drone photos into one georeferenced map, for the Waterloo Aerial Robotics Group. Tested in simulation; in review."
+  description="Merges out-of-order, GPS-tagged drone photos into one georeferenced map, for the Waterloo Aerial Robotics Group. Tested in simulation; merged."
   current="work"
 >
   <article class="proj">
@@ -50,7 +50,7 @@ const first = 0;
         <p class="lead">Merges out-of-order photos from several drones, each tagged with a GPS (Global Positioning System) position, into one top-down map that sits in the right place on the Earth.</p>
         <p class="key"><span class="key-n">{stitcher.missions}</span><span class="key-l">simulated missions built one connected map, with photos lined up to <b>{stitcher.alignment}</b> on average. Tested in simulation only.</span></p>
         <dl class="facts">
-          <div><dt>Status</dt><dd><StatusBadge slug="image-stitcher" /> The fourth round of revisions, which shortened the code and tightened refinement and the GPS checks, was pushed on November 17, 2026. It passes its automated checks and is back with the reviewer.</dd></div>
+          <div><dt>Status</dt><dd><StatusBadge slug="image-stitcher" /> Merged into the team’s main branch on November 18, 2026, after four rounds of review. The last round shortened the code and tightened refinement and the GPS checks.</dd></div>
           <div><dt>Role</dt><dd>Built for the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026. I wrote the whole pull request: the stitcher, the simulator that makes test missions with known true positions, the {stitcher.tests} tests and the evaluation script.</dd></div>
           <div><dt>Code</dt><dd><a class="code-link" href={p.repo}><Icon name="github" /> Pull request #215</a></dd></div>
         </dl>
@@ -196,7 +196,7 @@ const first = 0;
     <section id="limits" class="part col" aria-labelledby="short-h">
       <h2 id="short-h">Where it still falls short</h2>
       <p>Every result is from simulation. There are no real flight photos yet: the drone’s camera software doesn’t log roll, pitch or yaw yet, so its photos are rejected for now, and the lens calibration still has to be checked against the camera actually flown.</p>
-      <p>Neither the yaw convention nor the camera mounting has been confirmed against real drone output. The accuracy figures come from simulated east-west flights. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms. The pull request hasn’t merged.</p>
+      <p>Neither the yaw convention nor the camera mounting has been confirmed against real drone output. The accuracy figures come from simulated east-west flights. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms.</p>
     </section>
 
     <nav class="onward col" aria-label="Code and next project">

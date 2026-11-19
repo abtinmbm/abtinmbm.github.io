@@ -210,6 +210,6 @@ test('the Lloyd run shows the finished swarm when motion is reduced, and replays
 
 test('status badges read from the project list', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('#image-stitcher .badge')).toHaveText('In review');
+  await expect(page.locator('#image-stitcher .badge')).toHaveText('Merged');
   await expect(page.locator('#lloyd .badge')).toHaveText('In review');
 });

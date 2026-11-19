@@ -53,8 +53,10 @@ export const projects: Project[] = [
     slug: 'image-stitcher',
     name: 'Image Stitcher',
     line: 'Turns drone photos into one map',
-    status: 'in review',
+    status: 'merged',
     start: '2026-10-16T03:04:43Z',
+    // last commit 1c76f7d (2026-11-18 03:28 UTC); squash-merged as ce37d8d on 2026-11-19 00:29 UTC.
+    end: '2026-11-18T23:59:00Z',
     href: '/projects/image-stitcher/',
     repo: 'https://github.com/UWARG/autonomy-monorepo/pull/215',
     team: 'warg',
