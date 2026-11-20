@@ -41,7 +41,7 @@ const experience: Entry[] = [
     title: 'Groundside image stitcher', href: '/projects/image-stitcher/', repo: 'https://github.com/UWARG/autonomy-monorepo/pull/215', pr: 'Pull request #215 (merged)',
     points: [
       'Built a Python stitcher (PyTorch, OpenCV, XFeat, RANSAC) that merges out-of-order, GPS-tagged photos from 3 drones into one georeferenced map. Sole developer, merged with 130 tests.',
-      'Designed a joint least-squares pose refinement that cut mean simulated misalignment from 13.6–69.8 cm to 4.0–8.3 cm.',
+      'Designed a least-squares pose refinement that cut mean simulated misalignment from 13.6–69.8 cm to 4.0–8.3 cm.',
       'Solved feature matching across 180° row turns, then used drone yaw to extract features once per photo, cutting simulated time per photo from 0.42–0.75 s to 0.13–0.19 s.',
       'Implemented lens undistortion and blur, exposure and tilt checks that keep unusable photos out of the map.',
     ],
