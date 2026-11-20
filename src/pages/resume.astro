@@ -21,7 +21,7 @@ const projectEntries: Entry[] = [
       'Trained a PyTorch CNN on healthy audio only to flag machine faults, reaching 92.13% mean AUC on held-out DCASE 2020 data, against 79.70% for the baseline autoencoder I reproduced.',
       'Turned the scores into a streaming green, yellow and red alert with control-chart (SPC) limits and a latching stop.',
       'Quantized the CNN to int8 (3.9× smaller at 92.08% AUC) and ported log-mel features and inference to C, bit-exact with Python and real-time on the Pico 2’s Cortex-M33.',
-      'Recorded a 3-day dataset of 3 real fans through the Pico’s I2S mic with zero lost audio frames, and ported a per-fan Gaussian mixture model to C that runs in real time.',
+      'Wrote real-time C firmware for the Pico 2 (I2S mic capture via PIO and DMA, FFT log-mel features, per-fan Gaussian mixture scoring) that matches Python’s scores using about 5% of one core.',
     ],
   },
   {
