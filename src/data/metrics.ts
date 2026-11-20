@@ -171,8 +171,9 @@ export const lloyd = {
   cvEnd: '0.06',
   // PR #247 README: cells can still differ in area, largest up to about 1.8x the smallest.
   areaRatio: 'about 1.8×',
-  // PR #247 description: 27 new tests in tests/test_lloyd.py.
-  tests: '27',
+  // PR #247 description (head 6bf6e52, after review): 28 tests in tests/test_lloyd.py.
+  // runs, cvStart and cvEnd rerun on 6bf6e52 on 2026-11-19 (eval_219_results_2026-11-19.txt): identical.
+  tests: '28',
   // portfolio/219-lloyds-algorithm.md: fuzz of random starts, drones up to 20 m outside the region.
   fuzzStarts: '600',
 };

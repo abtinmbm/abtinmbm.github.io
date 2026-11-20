@@ -40,17 +40,15 @@ const experience: Entry[] = [
     tasks: [{
     title: 'Groundside image stitcher', href: '/projects/image-stitcher/', repo: 'https://github.com/UWARG/autonomy-monorepo/pull/215', pr: 'Pull request #215 (merged)',
     points: [
-      'Built it as sole developer in Python (PyTorch, OpenCV, XFeat, RANSAC), merging out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map, with 130 tests.',
-      'Fused image matches with GPS and yaw, aligning photos to 4.3–8.3 cm on average at 3 m simulated GPS error.',
-      'Cut simulated per-photo time from 0.42–0.75 to 0.13–0.19 s using yaw instead of 4-way feature extraction.',
-      'Built a bundle-adjustment-style least-squares solver, cutting simulated misalignment 13.6⁠–⁠69.8 to 4.0⁠–⁠8.3 cm.',
-      'Hardened matching against 180-degree turns and repetitive terrain, forming one map on 10 of 10 simulated runs.',
-      'Built lens undistortion and blur, exposure and tilt checks through 2 review rounds. The blur check sorted 2,730 simulated photos under 9 noise and blur conditions with 0 errors.',
+      'Built a Python stitcher (PyTorch, OpenCV, XFeat, RANSAC) that merges out-of-order, GPS-tagged photos from 3 drones into one georeferenced map for the team’s multi-drone mapping. Sole developer, merged after 4 review rounds with 130 tests.',
+      'Formulated a joint linear least-squares pose refinement to remove chained drift, cutting simulated misalignment from 13.6–69.8 cm to 4.0–8.3 cm (1–2 px), with one connected map on 10 of 10 missions.',
+      'Solved matching across 180° row turns with 4-way XFeat extraction, then replaced it with one north-up pass from drone yaw, cutting simulated time per photo from 0.42–0.75 s to 0.13–0.19 s.',
+      'Added lens undistortion and blur, exposure and tilt checks. 0 of 910 good simulated photos were rejected, and the blur check made 0 errors on 2,730 photos under 9 sharp and blurred conditions.',
     ],
     }, {
     title: 'Swarm spacing (Lloyd’s algorithm)', href: '/projects/lloyd/', repo: 'https://github.com/UWARG/autonomy-monorepo/pull/247', pr: 'Pull request #247 (in review)',
     points: [
-      'Built a module that spreads drones evenly over any GPS-bounded region using Voronoi cells, handling concave areas and stray drones. It reduced spacing unevenness from 0.46 to 0.06 in simulation.',
+      'Built a swarm-spacing module (Lloyd’s algorithm, Voronoi cells, Shapely) that spreads drones over a GPS-bounded field, handling concave fields and drones starting outside it. It cut spacing variation (CV) from 0.46 to 0.06 (median, 90 simulated runs).',
     ],
     }],
   },
@@ -116,17 +114,6 @@ const skills = [
         </dl>
       </section>
 
-      <section aria-labelledby="projects">
-        <h2 id="projects">Projects</h2>
-        {projectEntries.map((e) => (
-          <div class="entry">
-            <div class="e-head"><h3><a href={e.href}>{e.title}</a></h3><p class="when">{e.when}</p></div>
-            <p class="meta">{e.meta}</p>
-            <ul>{e.points!.map((pt) => <li>{pt}</li>)}</ul>
-          </div>
-        ))}
-      </section>
-
       <section aria-labelledby="exp">
         <h2 id="exp">Experience</h2>
         {experience.map((e) => (
@@ -140,6 +127,17 @@ const skills = [
                 <ul>{t.points.map((pt) => <li>{pt}</li>)}</ul>
               </div>
             ))}
+          </div>
+        ))}
+      </section>
+
+      <section aria-labelledby="projects">
+        <h2 id="projects">Projects</h2>
+        {projectEntries.map((e) => (
+          <div class="entry">
+            <div class="e-head"><h3><a href={e.href}>{e.title}</a></h3><p class="when">{e.when}</p></div>
+            <p class="meta">{e.meta}</p>
+            <ul>{e.points!.map((pt) => <li>{pt}</li>)}</ul>
           </div>
         ))}
       </section>
