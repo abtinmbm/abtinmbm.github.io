@@ -111,7 +111,9 @@ export const andon = {
   // results/h3_dev.md: the Stage 1 CNN scored 0.00 AUC on id_02 obstruction and id_00 underspeed (dev).
   cnnFailedCells: 'two of the six',
   // results/h5_gmm_bench_pico2.md (runs 3-4): end-to-end score error 2.51e-06 relative, 1.684 ms per 32 ms frame.
-  gmmRelErrPpm: '2.51 parts per million',
+  gmmRelErr: 'a relative error of 2.51e-06',
+  // README "On the device (H5)": the three fans' float32 mixtures.
+  gmmFlash: '402,480 B',
   gmmMsPerFrame: '1.684 ms',
   // results/h6_jidoka.md (board run at 55cd2cf, one trial per fan): 5 s hold-off, limits on the first 584 windows
   // (10 min), 60 s watched, then 100 % to 85 % by serial command. Switch to fan off (gate pin low), board clock.
@@ -122,6 +124,16 @@ export const andon = {
     { fan: 'ANVISION A (id_01)', s: '3.471 s' },
     { fan: 'ANVISION B (id_02)', s: '3.461 s' },
   ],
+  // Loudness check, dev only (Andon 46fff0d). results/level_check_fans.md: h3_gmm_levelmatched, every test window
+  // shifted to the fan's normal level, 100.00 ± 0.00 in every cell of both dev folds, seeds 0-2.
+  levelMatchedAuc: '100.00 ± 0.00%',
+  // results/level_check_dcase.md, dev test: phase2_level_id (meter per machine ID) vs phase2_gmm_id and phase3_idcnn_mixup.
+  levelDcaseMean: '63.34%',
+  gmmDevAuc: '83.25 ± 0.22%',
+  cnnDevAuc: '86.64 ± 0.57%',
+  levelToyCar: '50.98%',
+  levelToyConveyor: '48.66%',
+  levelValve: '54.28%',
   // docs/02 "Hard problems": mean dev AUC without and with mixup.
   devAucNoMixup: '84.33%',
   devAucMixup: '86.64%',

@@ -17,11 +17,11 @@ const projectEntries: Entry[] = [
     title: 'Andon: machine-sound anomaly detection', href: '/projects/andon/',
     meta: 'Python, C, Raspberry Pi Pico 2', when: 'October 2026 to now',
     points: [
-      'Developed a Pico 2 andon system that hears a fault through an I2S mic and cuts the fan’s power via a MOSFET, stopping each of 3 real fans by itself within 12 s of an injected fault.',
-      'Trained a PyTorch CNN on healthy audio only to flag machine faults, reaching 92.13% mean AUC on held-out DCASE 2020 data, against 79.70% for the baseline autoencoder I reproduced.',
-      'Turned the scores into a streaming green, yellow and red alert with control-chart (SPC) limits and a latching stop.',
-      'Quantized the CNN to int8 (3.9× smaller at 92.08% AUC) and ported log-mel features and inference to C, bit-exact with Python and real-time on the Pico 2’s Cortex-M33.',
-      'Wrote real-time C firmware for the Pico 2 (I2S mic capture via PIO and DMA, FFT log-mel features, per-fan Gaussian mixture scoring) that matches Python’s scores using about 5% of one core.',
+      'Developed a Pico 2 andon system that hears a fault through an I2S mic and cuts the fan’s power via a MOSFET, stopping each of 3 real fans by itself 3.461–11.661 s after an injected fault.',
+      'Wrote real-time C firmware (I2S capture via PIO and DMA, FFT log-mel features, per-fan Gaussian mixture scoring) that matches Python’s scores on the board at 1.684 ms per 32 ms audio frame.',
+      'Trained a PyTorch CNN on healthy audio only, reaching 92.13% mean AUC on held-out DCASE 2020 data against 79.70% for the baseline autoencoder I reproduced.',
+      'Showed the model hears the sound’s shape, not just its volume: with every recording matched to normal loudness, a level meter fails but the model still caught both faults on every fan (dev data).',
+      'Quantized the CNN to int8 (383.0 KB to 98.7 KB at 92.08% AUC) and ported it to C, bit-exact with Python on the Pico 2’s Cortex-M33.',
     ],
   },
   {
@@ -41,8 +41,8 @@ const experience: Entry[] = [
     title: 'Groundside image stitcher', href: '/projects/image-stitcher/', repo: 'https://github.com/UWARG/autonomy-monorepo/pull/215', pr: 'Pull request #215 (merged)',
     points: [
       'Built a Python stitcher (PyTorch, OpenCV, XFeat, RANSAC) that merges out-of-order, GPS-tagged photos from 3 drones into one georeferenced map. Sole developer, merged with 130 tests.',
-      'Designed a joint least-squares pose refinement that cut mean simulated misalignment from 14–70 cm to 4–8 cm.',
-      'Solved feature matching across 180° row turns, then used drone yaw to extract features once per photo, cutting simulated time per photo from 0.42–0.75 s to under 0.2 s.',
+      'Designed a joint least-squares pose refinement that cut mean simulated misalignment from 13.6–69.8 cm to 4.0–8.3 cm.',
+      'Solved feature matching across 180° row turns, then used drone yaw to extract features once per photo, cutting simulated time per photo from 0.42–0.75 s to 0.13–0.19 s.',
       'Implemented lens undistortion and blur, exposure and tilt checks that keep unusable photos out of the map.',
     ],
     }, {

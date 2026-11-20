@@ -71,7 +71,7 @@ const clips = [
     <section id="data" class="part col" aria-labelledby="data-h">
       <h2 id="data-h">The data and the model</h2>
       <dl class="defs">
-        <div><dt>Where the sound came from</dt><dd>DCASE 2020 Task 2 is the machine-sound part of a public audio challenge (Detection and Classification of Acoustic Scenes and Events). It’s built from two public datasets: ToyADMOS (toy cars and conveyors) and MIMII (real fans, pumps, slide rails and valves). The dataset authors recorded the machines and made the faults on purpose, for example with damaged parts, leaks, blockages or imbalance. Background noise recorded in real factories was mixed in, so the clips sound like a factory floor.</dd></div>
+        <div><dt>Where the sound came from</dt><dd>DCASE 2020 Task 2 is the machine-sound part of a public audio challenge (Detection and Classification of Acoustic Scenes and Events). It’s built from two public datasets: ToyADMOS (toy cars and conveyors) and MIMII (real fans, pumps, slide rails and valves). The dataset authors recorded the machines and made the faults on purpose, for example with damaged parts, leaks, blockages or imbalance. Background noise recorded in real factories was mixed in, so the clips sound like a factory floor. The data is shared under CC BY-NC-SA 4.0. The real-fan recordings are my own, described under Hardware.</dd></div>
         <div><dt>How it’s split</dt><dd>Training uses only normal clips. The development test set mixes normal and faulty clips, and it’s where every choice was made. The evaluation set is other machines of the same types: the model learns their normal sound, but their test clips were scored once, at the end, so it’s the fairer test. There’s no separate validation set for the CNN. It trains for a fixed 100 epochs and keeps the last one.</dd></div>
         <div><dt>What kind of model it is</dt><dd>It isn’t regression, and it isn’t a hand-tuned filter. A fixed front end turns sound into 128 frequency bands every 32 ms. A CNN then learns, from those bands, to name which machine it’s hearing.</dd></div>
         <div><dt>What it outputs</dt><dd>A score, not a yes or no: how unsure the model is that it’s hearing the right machine. The light makes the yes or no from that score, using the control-chart limits and the 2-in-a-row and 3-in-a-row rules above.</dd></div>
@@ -84,6 +84,7 @@ const clips = [
       <div class="fig wide"><AucChart /></div>
       <p><b class="num">{andon.meanAucSpread}</b> mean AUC on the held-out evaluation set, against {andon.baselineAucSpread} for the DCASE baseline, scored the same way. The mean is over 3 training runs, each started from a different random seed.</p>
       <p>Before changing anything I reproduced the published baseline on the development set, to within <b class="num">{andon.reproductionGap}</b> AUC points on all six machine types.</p>
+      <p>Loudness alone isn’t enough on the benchmark. A sound-level meter for each machine averages <b class="num">{andon.levelDcaseMean}</b> AUC on the development set, against {andon.gmmDevAuc} for a Gaussian mixture for each machine and {andon.cnnDevAuc} for my CNN. It’s near chance on toy cars ({andon.levelToyCar}), toy conveyors ({andon.levelToyConveyor}) and valves ({andon.levelValve}).</p>
       <p>Played back as a continuous stream of test audio, the light caught <b class="num">{andon.faultsCaught}</b> of 30-second faults, on average {andon.secondsToRed} after they started, with {andon.falseAlarmsPerHour} false alarms per hour.</p>
       <p>It has {andon.weights} weights. Stored as 8-bit integers (int8), it’s <b class="num">{andon.int8Size}</b>, down from {andon.floatSize}, and still scores {andon.int8Auc} AUC. That’s small enough to fit on a microcontroller.</p>
       <p class="aside">The <a href="https://github.com/abtinmbm/andon/releases/tag/checkpoints-v1">trained checkpoints are public</a>, and <a href="https://github.com/abtinmbm/andon#reproduce-the-headline-number">two commands in the README</a> re-check the held-out CNN AUC results from a fresh clone.</p>
@@ -178,8 +179,8 @@ const clips = [
         <div><dt>What it outputs</dt><dd>A score for each window: how unlikely its sound is for that fan when it runs normally. The light turns the scores into green, yellow or red with the same control-chart rules as above, and red cuts the fan.</dd></div>
       </dl>
       <p>On d3 it separated the faults from normal running in all {andon.realCells} fan-and-fault cases: <b class="num">{andon.realAuc}</b> AUC. With the light, {andon.realTakesCaught} fault recordings went red, with {andon.realFalseReds} false reds in {andon.realNormalTime} of normal running.</p>
-      <p><b>A plain sound-level meter did just as well.</b> Underspeed makes a fan quieter and the card makes it louder, both by far more than anything in normal running, so on these two faults the model adds nothing over a level meter. Faults that don’t change the loudness are the harder test.</p>
-      <p>The same model runs in C on the Pico 2. Fed recorded audio of each fan, the board’s scores match Python’s to {andon.gmmRelErrPpm}, and each {andon.frameMs} frame takes <b class="num">{andon.gmmMsPerFrame}</b> of work, against the {andon.computeBudgetMs} budget.</p>
+      <p><b>A plain sound-level meter also gets {andon.realAuc} on these two faults</b>, because underspeed makes a fan quieter and the card makes it louder. So I checked whether the model hears more than volume, on the development sessions only: every test recording was set to the fan’s normal volume, which leaves a level meter nothing to go on. The model still caught every fault, <b class="num">{andon.levelMatchedAuc}</b> AUC on every fan and fault, so it hears the shape of the sound, not just how loud it is. That doesn’t show yet that it would catch a fault that’s quiet in real life.</p>
+      <p>The same model runs in C on the Pico 2. Fed recorded audio of each fan, the board’s scores match Python’s to {andon.gmmRelErr}, and each {andon.frameMs} frame takes <b class="num">{andon.gmmMsPerFrame}</b> of work, against the {andon.computeBudgetMs} budget, and the three fans’ models take {andon.gmmFlash} of flash.</p>
 
       <h3>Stopping the fan by itself</h3>
       <p>After a {andon.jidokaHoldoff} hold-off, the board fits each fan’s limits on its first {andon.limitMinutes} of running, then watches. In each trial, {andon.jidokaWatch} into the watch, a serial command switched the fan from full speed to {andon.underspeedDuty} (underspeed). Nothing else was sent and no button was pressed: the board went red on its own scores and cut the fan’s power.</p>
@@ -196,13 +197,13 @@ const clips = [
       <h2 id="short-h">Where it still falls short</h2>
       <p>AUC isn’t real-world performance. {andon.meanAuc} AUC still caught only {andon.faultsCaught} of faults on a continuous stream of test audio, and {andon.valveCaught} for valve. {andon.falseAlarmsPerHour} false alarms per hour is too many for a real line. A much simpler Gaussian mixture model, a classic statistical method, beats the CNN on {andon.gmmWins} machine types.</p>
       <p>On the Pico 2, one CNN score takes {andon.cnnMsPerScore}, {andon.cnnVsEstimate} my planning estimate of {andon.estCnnMsPerScore}. It fits the budget, but my estimate was well off.</p>
-      <p>On the real fans, both faults change the loudness, so they’re easy to hear. The board has stopped each fan only once so far, and its false-stop rate hasn’t been measured yet.</p>
+      <p>On the real fans, both faults also change the loudness, so they’re easy faults. The same-volume check used the development sessions only, and it doesn’t show the model would catch a fault that’s quiet in real life. The board has stopped each fan only once so far, and its false-stop rate hasn’t been measured yet.</p>
     </section>
 
     <section id="next" class="part col" aria-labelledby="next-h">
       <h2 id="next-h">What’s next</h2>
       <p class="intro">Measuring how reliably the board stops the fan.</p>
-      <p>An hour of normal running to count false stops, then 10 trials of each fault and a demo video. The obstruction card can only be fitted with the fan off, so those trials fit the card, then start the fan, are timed from the fan starting, and are reported separately.</p>
+      <p>An hour of normal running to count false stops, then 10 trials of each fault, a new imbalance fault the model has never heard (judged against a control take and at matched volume), and a demo video. The obstruction card can only be fitted with the fan off, so those trials fit the card, then start the fan, are timed from the fan starting, and are reported separately.</p>
     </section>
 
     <nav class="onward col" aria-label="Code and next project">
