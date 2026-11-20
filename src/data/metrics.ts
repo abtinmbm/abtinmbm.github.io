@@ -34,7 +34,7 @@ export const andon = {
   frameMs: '32 ms',
   estCnnMsPerScore: '98.32 ms',
   // results/h5_bench_pico2.md (2026-11-14): measured on the Pico 2 (RP2350), one core, 150 MHz, mean of 3 runs.
-  computeMsPerFrame: '10.82 ms',
+  computeMsPerFrame: '10.82 ms',
   logmelMsPerFrame: '1.456 ms',
   cnnMsPerFrame: '9.365 ms',
   scoreWindow: '2 s',
@@ -113,8 +113,8 @@ export const andon = {
   // results/h5_gmm_bench_pico2.md (runs 3-4): end-to-end score error 2.51e-06 relative, 1.684 ms per 32 ms frame.
   gmmRelErr: 'a relative error of 2.51e-06',
   // README "On the device (H5)": the three fans' float32 mixtures.
-  gmmFlash: '402,480 B',
-  gmmMsPerFrame: '1.684 ms',
+  gmmFlash: '402,480 B',
+  gmmMsPerFrame: '1.684 ms',
   // results/h6_jidoka.md (board run at 55cd2cf, one trial per fan): 5 s hold-off, limits on the first 584 windows
   // (10 min), 60 s watched, then 100 % to 85 % by serial command. Switch to fan off (gate pin low), board clock.
   jidokaHoldoff: '5-second',
