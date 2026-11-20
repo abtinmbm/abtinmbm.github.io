@@ -119,6 +119,8 @@ export const andon = {
   // (10 min), 60 s watched, then 100 % to 85 % by serial command. Switch to fan off (gate pin low), board clock.
   jidokaHoldoff: '5-second',
   jidokaWatch: 'a minute',
+  jidokaFans: '3 of 3',
+  jidokaRange: '3.461–11.661 s',
   jidokaStops: [
     { fan: 'Sunon (id_00)', s: '11.661 s' },
     { fan: 'ANVISION A (id_01)', s: '3.471 s' },

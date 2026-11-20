@@ -20,7 +20,7 @@ const projectEntries: Entry[] = [
       'Developed a Pico 2 andon system that hears a fault through an I2S mic and cuts the fan’s power via a MOSFET, stopping each of 3 real fans by itself 3.461–11.661 s after an injected fault.',
       'Wrote real-time C firmware (I2S capture via PIO and DMA, FFT log-mel features, per-fan Gaussian mixture scoring) that matches Python’s scores on the board at 1.684 ms per 32 ms audio frame.',
       'Trained a PyTorch CNN on healthy audio only, reaching 92.13% mean AUC on held-out DCASE 2020 data against 79.70% for the baseline autoencoder I reproduced.',
-      'Showed the model hears the sound’s shape, not just its volume: with every recording matched to normal loudness, a level meter fails but the model still caught both faults on every fan (dev data).',
+      'Proved the model hears more than loudness: with volume matched it still caught both real-fan faults at 100% AUC, while a level meter reached only 63.34% AUC on the DCASE dev set.',
       'Quantized the CNN to int8 (383.0 KB to 98.7 KB at 92.08% AUC) and ported it to C, bit-exact with Python on the Pico 2’s Cortex-M33.',
     ],
   },
@@ -151,7 +151,7 @@ const skills = [
       <div class="view view-pdf" id="view-pdf" role="tabpanel" aria-labelledby="tab-pdf">
         <a class="sheet" href={pdf} target="_blank" rel="noopener">
           <Picture src={pdfPage} formats={['avif', 'webp']} fallbackFormat="webp" widths={[700, 1100, 1700]} sizes="(max-width: 899px) 100vw, 60vw"
-            alt="The one-page resume PDF: education, technical skills, projects (Andon and CyberShield), experience (Waterloo Aerial Robotics Group and Spirit of Math) and awards." loading="lazy" />
+            alt="The one-page resume PDF: education, technical skills, experience (Waterloo Aerial Robotics Group and Spirit of Math), projects (Andon and CyberShield) and awards." loading="lazy" />
         </a>
         <p class="small dim">The same page as the PDF. Click it to open the PDF, where the links work.</p>
       </div>
