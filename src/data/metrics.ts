@@ -126,11 +126,11 @@ export const andon = {
   ],
   // Loudness check, dev only (Andon 46fff0d). results/level_check_fans.md: h3_gmm_levelmatched, every test window
   // shifted to the fan's normal level, 100.00 ± 0.00 in every cell of both dev folds, seeds 0-2.
-  levelMatchedAuc: '100.00 ± 0.00%',
+  levelMatchedAuc: '100.00 ± 0.00%',
   // results/level_check_dcase.md, dev test: phase2_level_id (meter per machine ID) vs phase2_gmm_id and phase3_idcnn_mixup.
   levelDcaseMean: '63.34%',
-  gmmDevAuc: '83.25 ± 0.22%',
-  cnnDevAuc: '86.64 ± 0.57%',
+  gmmDevAuc: '83.25 ± 0.22%',
+  cnnDevAuc: '86.64 ± 0.57%',
   levelToyCar: '50.98%',
   levelToyConveyor: '48.66%',
   levelValve: '54.28%',
