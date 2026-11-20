@@ -37,7 +37,7 @@ const clips = [
         <p class="lead">A machine-sound anomaly detector that learns only from healthy recordings, and turns a green, yellow or red light when a machine starts to sound wrong.</p>
         <p class="key"><span class="key-n">{andon.meanAuc}</span><span class="key-l">AUC on machines it never trained on, where 50% is a coin flip. The challenge’s own baseline scores <b>{andon.baselineAuc}</b>.</span></p>
         <dl class="facts">
-          <div><dt>Status</dt><dd>In progress since October 2026. The software is done, and the hardware has started.</dd></div>
+          <div><dt>Status</dt><dd>In progress since October 2026. The software is done, and on a Raspberry Pi Pico 2 it now hears a fault in a real fan and cuts the fan’s power by itself.</dd></div>
           <div><dt>Role</dt><dd>Solo project. I designed and built all of it.</dd></div>
           <div><dt>Code</dt><dd><a class="code-link" href={p.repo}><Icon name="github" /> Andon on GitHub</a></dd></div>
         </dl>
@@ -124,13 +124,13 @@ const clips = [
 
     <section id="hardware" class="part col" aria-labelledby="hw-h">
       <h2 id="hw-h">The hardware so far</h2>
-      <p>This is in progress. No detection model has been trained on the real fans yet. The only training so far was a check of the home session’s data, so nothing here is a detection result. The fan has only ever been stopped by a serial command or the button.</p>
+      <p>The board now does the whole job by itself: it listens to a real fan, scores the sound, and cuts the fan’s power when the sound goes wrong. So far that’s been tried once on each fan.</p>
       <figure class="wide">
         <Picture src={rigTop} formats={['avif', 'webp']} fallbackFormat="webp" widths={[800, 1400, 1800]} sizes="(max-width: 1160px) 100vw, 70rem" alt="A wooden plank seen from above, holding a breadboard. A green Raspberry Pi Pico 2 is at the left, green, yellow and red LEDs run along the top, a push button sits in the middle, a MOSFET and a small microphone board are near the right, and a black 40 mm fan stands at the far right end." />
         <figcaption class="small">The whole rig on one plank: Pico 2, LEDs, button, MOSFET, microphone and fan.</figcaption>
       </figure>
       <dl class="defs">
-        <div><dt>Andon light</dt><dd>Real green, yellow and red LEDs and a reset button on the Pico 2. For now the button steps the light through its colours.</dd></div>
+        <div><dt>Andon light</dt><dd>Real green, yellow and red LEDs and a reset button on the Pico 2. The detector’s scores drive the light. Red cuts the fan, and only the button clears it.</dd></div>
         <div><dt>Kill switch</dt><dd>A MOSFET cuts the fan’s power, and the blades coast to a stop. On the board, <b class="num">{andon.killSwitchTrials}</b> fan-off trials passed. The worst PC round trip, from sending the command to the Pico’s reply, was {andon.killSwitchWorstRtt} against a {andon.killSwitchLimit} limit.</dd></div>
         <div><dt>Microphone</dt><dd>A digital microphone read by the Pico. A 1 kHz test tone measured {andon.micToneHz}.</dd></div>
       </dl>
@@ -146,14 +146,14 @@ const clips = [
 
       <h3>The real-fan recordings</h3>
       <p>The first session was recorded at home. A model can learn the room instead of the fault: the background, the desk and the echoes. So every session used for training or evaluation is now recorded in one room, the one where the device will be calibrated and demonstrated. The home session is kept on disk, but it’s never used for training or scoring.</p>
-      <p>There are three sessions, each on a different day: d1 and d2 for development, where I make every choice, and d3, held back and scored once at the end. d1 and d2 are recorded, and d3 is still to come. In each session, every one of the {andon.fans} fans gets about {andon.normalMinutes} of normal running ({andon.normalClips} clips of {andon.clipSeconds}) and {andon.faultMinutes} of each of {andon.faultTypes} faults ({andon.faultClips} clips each), recorded in takes: one unbroken recording of one fan in one condition. The normal running includes a control take: the fan is taken off its mount, put back and recorded running normally, so that just handling the fan isn’t mistaken for a fault.</p>
+      <p>There are three sessions, each on a different day: d1 and d2 for development, where I make every choice, and d3, held back and scored once at the end. In each session, every one of the {andon.fans} fans gets about {andon.normalMinutes} of normal running ({andon.normalClips} clips of {andon.clipSeconds}) and {andon.faultMinutes} of each of {andon.faultTypes} faults ({andon.faultClips} clips each), recorded in takes: one unbroken recording of one fan in one condition. The normal running includes a control take: the fan is taken off its mount, put back and recorded running normally, so that just handling the fan isn’t mistaken for a fault.</p>
 
       <dl class="defs">
         {andon.sessions.map((s) => (
-          <div><dt>{s.name}, {s.date}</dt><dd>{s.takes} takes. The Pico sent <b class="num">{s.frames}</b> numbered, checked audio frames to the PC over USB (Universal Serial Bus), with {s.breaks} breaks, {s.missing} missing and {s.corrupt} corrupt. {s.excluded === '0' ? 'No clips were left out.' : 'One normal clip is left out, because of a knock, not the fan.'}</dd></div>
+          <div><dt>{s.name}, {s.date}</dt><dd>{s.takes} takes. The Pico sent <b class="num">{s.frames}</b> numbered, checked audio frames to the PC over USB (Universal Serial Bus), with {s.breaks} breaks, {s.missing} missing and {s.corrupt} corrupt. {s.note}</dd></div>
         ))}
         <div><dt>Faults</dt><dd>Underspeed isn’t a change to the fan. It’s a speed setting. The fan’s power is switched on and off {andon.pwmKhz} times a second (pulse-width modulation, or PWM), and for underspeed it’s on {andon.underspeedDuty} of the time instead of all of it, so the fan runs slower, like a worn motor or a weak power supply. The fan takes a while to slow down, so the first {andon.underspeedSkip} of each underspeed recording is never used. Obstruction is a card strip over the bottom third of the intake. A third fault, a piece of tape on one blade, was dropped during d1 because it changed the sound by a different amount each time.</dd></div>
-        <div><dt>Repeat check</dt><dd>Before d2, I set a limit for the {andon.repeatFan}’s underspeed: in its most-changed band ({andon.repeatBand}), d2 had to land within {andon.repeatTolerance} of d1. It was {andon.repeatD1} in d1 and {andon.repeatD2} in d2, a difference of {andon.repeatDiff}, inside the limit.</dd></div>
+        <div><dt>Repeat check</dt><dd>Before d2, I set a limit for the {andon.repeatFan}’s underspeed: in its most-changed band ({andon.repeatBand}), each later session had to land within {andon.repeatTolerance} of d1. It was {andon.repeatD1} in d1, {andon.repeatD2} in d2 ({andon.repeatDiff}) and {andon.repeatD3} in d3 ({andon.repeatDiffD3}), both inside the limit.</dd></div>
       </dl>
       <figure class="fig fault-photo">
         <Picture src={faultObstruction} formats={['avif', 'webp']} fallbackFormat="webp" widths={[500, 900]} sizes="(max-width: 599px) 92vw, 22rem" alt="A black 40 mm fan seen at an angle, with a strip of card taped across the bottom third of its open face and the small microphone board in front of it." />
@@ -168,19 +168,41 @@ const clips = [
           ))}
         </tbody>
       </table>
+
+      <h3>A model for the real fans</h3>
+      <p>The CNN from the first stage didn’t carry over. On the development sessions it rated the fault as more normal than normal running in {andon.cnnFailedCells} fan-and-fault cases. So the real fans use a simpler model, chosen on d1 and d2 by a rule I wrote down before any run.</p>
+      <dl class="defs">
+        <div><dt>Where the sound came from</dt><dd>The three sessions above, which I recorded through the Pico’s microphone in one room, with that room’s own background noise.</dd></div>
+        <div><dt>How it’s split</dt><dd>The model learns each fan’s normal sound from d1 and d2 only, and never hears a fault while it learns. d3 was scored once, at the end. As on the device, the light’s limits come from the first {andon.limitMinutes} of the tested session’s normal running, and the light is judged on the rest.</dd></div>
+        <div><dt>What kind of model it is</dt><dd>A Gaussian mixture model for each fan: a statistical description of that fan’s normal sound, fitted to the average of the 128 frequency bands over each 2-second window. It isn’t a CNN, regression or a hand-tuned filter.</dd></div>
+        <div><dt>What it outputs</dt><dd>A score for each window: how unlikely its sound is for that fan when it runs normally. The light turns the scores into green, yellow or red with the same control-chart rules as above, and red cuts the fan.</dd></div>
+      </dl>
+      <p>On d3 it separated the faults from normal running in all {andon.realCells} fan-and-fault cases: <b class="num">{andon.realAuc}</b> AUC. With the light, {andon.realTakesCaught} fault recordings went red, with {andon.realFalseReds} false reds in {andon.realNormalTime} of normal running.</p>
+      <p><b>A plain sound-level meter did just as well.</b> Underspeed makes a fan quieter and the card makes it louder, both by far more than anything in normal running, so on these two faults the model adds nothing over a level meter. Faults that don’t change the loudness are the harder test.</p>
+      <p>The same model runs in C on the Pico 2. Fed recorded audio of each fan, the board’s scores match Python’s to {andon.gmmRelErrPpm}, and each {andon.frameMs} frame takes <b class="num">{andon.gmmMsPerFrame}</b> of work, against the {andon.computeBudgetMs} budget.</p>
+
+      <h3>Stopping the fan by itself</h3>
+      <p>After a {andon.jidokaHoldoff} hold-off, the board fits each fan’s limits on its first {andon.limitMinutes} of running, then watches. In each trial, {andon.jidokaWatch} into the watch, a serial command switched the fan from full speed to {andon.underspeedDuty} (underspeed). Nothing else was sent and no button was pressed: the board went red on its own scores and cut the fan’s power.</p>
+      <table class="facts-table">
+        <caption>Time from the speed switch to the fan’s power being cut, on the board’s own clock. One trial per fan.</caption>
+        <thead><tr><th scope="col">Fan</th><th scope="col">Switch to power cut</th></tr></thead>
+        <tbody>
+          {andon.jidokaStops.map((r) => <tr><th scope="row">{r.fan}</th><td class="num">{r.s}</td></tr>)}
+        </tbody>
+      </table>
     </section>
 
     <section id="limits" class="part col" aria-labelledby="short-h">
       <h2 id="short-h">Where it still falls short</h2>
       <p>AUC isn’t real-world performance. {andon.meanAuc} AUC still caught only {andon.faultsCaught} of faults on a continuous stream of test audio, and {andon.valveCaught} for valve. {andon.falseAlarmsPerHour} false alarms per hour is too many for a real line. A much simpler Gaussian mixture model, a classic statistical method, beats the CNN on {andon.gmmWins} machine types.</p>
       <p>On the Pico 2, one CNN score takes {andon.cnnMsPerScore}, {andon.cnnVsEstimate} my planning estimate of {andon.estCnnMsPerScore}. It fits the budget, but my estimate was well off.</p>
+      <p>On the real fans, both faults change the loudness, so they’re easy to hear. The board has stopped each fan only once so far, and its false-stop rate hasn’t been measured yet.</p>
     </section>
 
     <section id="next" class="part col" aria-labelledby="next-h">
       <h2 id="next-h">What’s next</h2>
-      <p class="intro">A Raspberry Pi Pico 2 that cuts power to a real fan the moment it hears a fault.</p>
-      <p>The light’s full logic is still in Python, and the board doesn’t score live audio yet. Next comes d3, the held-back session, then training on the real fans’ sound, then running the whole loop on the device.</p>
-      <p>To test it, a serial command will switch the fan to underspeed in the middle of a run, and the board will log the time from the switch to the fan stopping. The obstruction card can only be fitted with the fan off, so those trials fit the card, then start the fan, are timed from the fan starting, and are reported separately.</p>
+      <p class="intro">Measuring how reliably the board stops the fan.</p>
+      <p>An hour of normal running to count false stops, then 10 trials of each fault and a demo video. The obstruction card can only be fitted with the fan off, so those trials fit the card, then start the fan, are timed from the fan starting, and are reported separately.</p>
     </section>
 
     <nav class="onward col" aria-label="Code and next project">

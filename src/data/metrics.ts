@@ -1,7 +1,8 @@
 // Every number on the site lives here, with where it came from.
 // Sources: docs/02_PROJECTS.md (checked 2026-11-17) and the public Andon README
 // and model card (github.com/abtinmbm/andon, read 2026-11-04;
-// results/h5_bench_pico2.md and DECISIONS.md read 2026-11-14; real-fan recordings read 2026-11-17 at 4703322). If a repo changes,
+// results/h5_bench_pico2.md and DECISIONS.md read 2026-11-14; real-fan recordings read 2026-11-17 at 4703322;
+// d3, the real-fan model, its C port and the board stopping the fans read 2026-11-20 at 392266b). If a repo changes,
 // change the number here and every page follows.
 
 export const andon = {
@@ -71,10 +72,12 @@ export const andon = {
   clipSeconds: '10 s',
   // DECISIONS 2026-11-16 (rules fixed before d2): the first 3 clips (30 s) of every underspeed take are never used.
   underspeedSkip: '30 s',
-  // results/h2_dataset.md stream table and excluded clips; dates from the protocol's session notes.
+  // results/h2_dataset.md stream table and excluded clips/takes; dates from the protocol's session notes and the
+  // README timeline (d3: 2026-11-18, takes stamped 2026-11-19 02:00–04:00 UTC).
   sessions: [
-    { name: 'd1', date: 'Nov 16, 2026', takes: '14', frames: '461,322', breaks: '0', missing: '0', corrupt: '0', excluded: '1' },
-    { name: 'd2', date: 'Nov 17, 2026', takes: '12', frames: '438,813', breaks: '0', missing: '0', corrupt: '0', excluded: '0' },
+    { name: 'd1', date: 'Nov 16, 2026', takes: '14', frames: '461,322', breaks: '0', missing: '0', corrupt: '0', note: 'One normal clip is left out, because of a knock, not the fan.' },
+    { name: 'd2', date: 'Nov 17, 2026', takes: '12', frames: '438,813', breaks: '0', missing: '0', corrupt: '0', note: 'No clips were left out.' },
+    { name: 'd3', date: 'Nov 18, 2026', takes: '13', frames: '450,068', breaks: '0', missing: '0', corrupt: '0', note: 'One take was saved under the wrong fan’s name, so it’s left out whole and was recorded again. Two normal clips are left out because of a door thud, not the fan.' },
   ],
   // DECISIONS 2026-11-16/17 and results/h2_dataset.md repeatability table: id_00 underspeed, 4000–8000 Hz,
   // tolerance fixed before d2.
@@ -83,6 +86,9 @@ export const andon = {
   repeatD1: '−14.2 dB',
   repeatD2: '−11.9 dB',
   repeatDiff: '+2.3 dB',
+  // results/h2_dataset.md repeatability table, d3 against d1.
+  repeatD3: '−13.7 dB',
+  repeatDiffD3: '+0.4 dB',
   repeatTolerance: '±3 dB',
   // results/h2_dataset.md band table, d1 and d2: change in the biggest band of each fault take against the same
   // fan's normal clips in the same session, mean over the take. Pairs are [d1, d2].
@@ -91,6 +97,31 @@ export const andon = {
     { fan: 'ANVISION A', under: ['−8.8', '−8.3'], underBand: '2000–4000 Hz', obs: ['+10.8', '+11.9'], obsBand: ['500–1000 Hz', '500–1000 Hz'] },
     { fan: 'ANVISION B', under: ['−9.7', '−8.4'], underBand: '2000–4000 Hz', obs: ['+8.8', '+9.3'], obsBand: ['500–1000 Hz', '500–1000 Hz'] },
   ] as { fan: string; under: [string, string]; underBand: string; obs: [string, string]; obsBand: [string, string] }[],
+  // Real fans (H3). results/h3_eval.md: h3_gmm (seeds 0-2) and h3_level, trained on d1+d2, d3 scored once.
+  // AUC 100.00 ± 0.00 in all 6 fan x fault cells for both; light 0.00 false reds/h on same-mount normals, 6 of 6
+  // fault takes red. README: normal running in d3 is about an hour over the three fans. Limits: first 10 min
+  // (limit_clips: 60) of the tested session's main take. configs/h3_gmm.yaml: 4-component full-covariance GMM per
+  // fan on each 64-frame (2.05 s) window's mean log-mel, scored by negative log-likelihood.
+  realAuc: '100%',
+  realCells: 'six',
+  realTakesCaught: '6 of 6',
+  realFalseReds: '0',
+  realNormalTime: 'about an hour',
+  limitMinutes: '10 minutes',
+  // results/h3_dev.md: the Stage 1 CNN scored 0.00 AUC on id_02 obstruction and id_00 underspeed (dev).
+  cnnFailedCells: 'two of the six',
+  // results/h5_gmm_bench_pico2.md (runs 3-4): end-to-end score error 2.51e-06 relative, 1.684 ms per 32 ms frame.
+  gmmRelErrPpm: '2.51 parts per million',
+  gmmMsPerFrame: '1.684 ms',
+  // results/h6_jidoka.md (board run at 55cd2cf, one trial per fan): 5 s hold-off, limits on the first 584 windows
+  // (10 min), 60 s watched, then 100 % to 85 % by serial command. Switch to fan off (gate pin low), board clock.
+  jidokaHoldoff: '5-second',
+  jidokaWatch: 'a minute',
+  jidokaStops: [
+    { fan: 'Sunon (id_00)', s: '11.661 s' },
+    { fan: 'ANVISION A (id_01)', s: '3.471 s' },
+    { fan: 'ANVISION B (id_02)', s: '3.461 s' },
+  ],
   // docs/02 "Hard problems": mean dev AUC without and with mixup.
   devAucNoMixup: '84.33%',
   devAucMixup: '86.64%',
