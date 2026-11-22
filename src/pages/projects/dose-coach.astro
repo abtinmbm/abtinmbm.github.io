@@ -1,0 +1,151 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import ProjectTrail from '../../components/ProjectTrail.astro';
+import Icon from '../../components/Icon.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import DoseCurls from '../../components/DoseCurls.astro';
+import DoseWiring from '../../components/DoseWiring.astro';
+import buildTop from '../../assets/dose/build-top.webp';
+import wrist from '../../assets/dose/wrist-sensor.webp';
+import { dose } from '../../data/metrics';
+import { projects } from '../../data/projects';
+import '../../styles/project.css';
+
+const p = projects.find((x) => x.slug === 'dose-coach')!;
+---
+<Base
+  title="Dose Coach: a handheld coach for rehab exercise | Abtin Aryanpour"
+  description="An Arduino exercise coach for a supervised rehab class. It walks each person through their plan, judges every bicep curl from a wrist sensor, and logs each set. A first-year design project."
+  current="work"
+>
+  <article class="proj">
+    <header class="top">
+      <div class="top-sky"><ProjectTrail slug="dose-coach" /></div>
+      <div class="top-in col">
+        <h1 class="display">Dose Coach</h1>
+        <p class="lead">A handheld coach for a supervised exercise class. It walks each person through their plan, judges every bicep curl from a sensor on the wrist, and logs each set.</p>
+        <p class="key"><span class="key-n">{dose.repsSorted}</span><span class="key-l">test reps sorted correctly as good, too fast, half or fast half, {dose.repsEach} of each from {dose.testers} people. They were recorded after every rule was fixed.</span></p>
+        <dl class="facts">
+          <div><dt>Status</dt><dd><StatusBadge slug="dose-coach" /> A first-year design project for ECE 198, built in November 2026.</dd></div>
+          <div><dt>Role</dt><dd>On a team of 4. I wrote all the firmware, built and wired the board, and ran every test.</dd></div>
+          <div><dt>Code</dt><dd><a class="code-link" href={p.repo}><Icon name="github" /> Dose Coach on GitHub</a></dd></div>
+        </dl>
+        <nav class="toc" aria-label="On this page"><span>On this page</span><a href="#how">How it works</a><a href="#data">The data</a><a href="#results">Results</a><a href="#hard">What was hard</a><a href="#limits">Limits</a></nav>
+      </div>
+    </header>
+
+    <section class="part first col" aria-labelledby="why-h">
+      <h2 id="why-h" class="visually-hidden">Why it exists</h2>
+      <p class="intro">In the course’s design brief, one instructor runs an exercise class of 10 to 12 cancer and stroke survivors. Paper logs record that someone exercised, but not how much or how well, so a rep done too fast or cut short goes unseen.</p>
+      <p>The client was a scenario set by the course. The device was tested by me and a friend, not in a real class.</p>
+      <figure class="duo wide shots">
+        <Picture src={buildTop} formats={['avif', 'webp']} fallbackFormat="webp" widths={[520, 1040]} sizes="(max-width: 599px) 92vw, 34rem" alt="The device from above on a cardboard base. A blue LCD at the top reads “Bicep Curls, 0/5, Set 1/2”. Below it, an Arduino with a black Grove shield sits beside a small breadboard holding a yellow and a red LED and three push buttons. A cable runs down to the wrist sensor, whose red power light is on." />
+        <Picture src={wrist} formats={['avif', 'webp']} fallbackFormat="webp" widths={[520, 1040]} sizes="(max-width: 599px) 92vw, 34rem" alt="The wrist sensor strapped to a forearm: a small blue accelerometer board on a cardboard plate, held by a black velcro strap, with its wires looping back to the device on the desk." />
+        <figcaption class="small">The finished build, and the accelerometer on its velcro wrist strap. One cable carries the sensor’s power and readings back to the board.</figcaption>
+      </figure>
+    </section>
+
+    <section id="how" class="part col" aria-labelledby="how-h">
+      <h2 id="how-h">From a plan to a logged set</h2>
+      <ol class="steps">
+        <li><p><b>Plan.</b> A plan file lists each exercise with its reps or seconds, sets and rest. It’s uploaded with the firmware. Curls are judged by the wrist sensor, other exercises are counted with taps, and holds are timed.</p></li>
+        <li><p><b>Zero.</b> For curls, the person lets their arm hang straight down and taps the pad. The device waits for the arm to be still for half a second and saves which way gravity points. That position is 0°.</p></li>
+        <li><p><b>Measure.</b> {dose.readingsPerSec} times a second it averages {dose.samples} readings of each axis and smooths them. The elbow angle is how far gravity has turned inside the sensor since the zero.</p></li>
+        <li><p><b>Judge.</b> Each movement is checked against the rules below. The screen shows Good!, Too fast or Go higher, the buzzer beeps, and the red LED flashes on a warning.</p></li>
+        <li><p><b>Rest and log.</b> A countdown times the rest before the next set. Each finished set goes to a laptop over USB as one row of {dose.csvColumns} columns: reps, time, form problems and the average peak angle.</p></li>
+      </ol>
+      <figure class="duo wide clips">
+        <video controls playsinline muted preload="none" poster="/video/dose-full-set.jpg" width="720" height="1040" aria-label="A set of bicep curls on the device, 27 seconds, no sound">
+          <source src="/video/dose-full-set.mp4" type="video/mp4" />
+        </video>
+        <video controls playsinline muted preload="none" poster="/video/dose-coaching.jpg" width="720" height="1072" aria-label="The screen coaching half and fast curls, 11 seconds, no sound">
+          <source src="/video/dose-coaching.mp4" type="video/mp4" />
+        </video>
+        <figcaption class="small">Left: one set from the start. The arm hangs down, a tap saves the zero, the curls are counted, and the rest countdown starts. Right: half and fast curls. The screen says Go higher or Too fast and the red LED flashes. Both clips have no sound.</figcaption>
+      </figure>
+      <div class="fig wide">
+        <DoseCurls captionId="curl-cap">
+          <figcaption id="curl-cap" class="small">A real recording from the wrist sensor: {dose.curls} slow curls, all judged Good. Each one peaked at {dose.curlPeaks} and took {dose.curlTimes}, the time shown above it. Between reps the arm rests at about 15°, under the 25° line, so each rep ends cleanly.</figcaption>
+        </DoseCurls>
+      </div>
+      <h3>How a rep is judged</h3>
+      <p>A movement starts when the arm rises past {dose.startDeg} and ends when it drops below {dose.endDeg}. The gap between the two stops a wobble at the bottom from counting twice. Then the checks run in this order.</p>
+      <table class="facts-table">
+        <caption>The rules, from the firmware.</caption>
+        <thead><tr><th scope="col">The movement</th><th scope="col">Screen</th><th scope="col">Counted?</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Up and down in under {dose.bump}</th><td>Nothing (a bump)</td><td>No</td></tr>
+          <tr><th scope="row">Reached {dose.topDeg}, took {dose.tooFast} or more</th><td>Good!</td><td>Yes</td></tr>
+          <tr><th scope="row">Reached {dose.topDeg}, took under {dose.tooFast}</th><td>Too fast</td><td>Yes, flagged</td></tr>
+          <tr><th scope="row">Under {dose.topDeg}, faster than {dose.fastSpeed}</th><td>Too fast</td><td>No</td></tr>
+          <tr><th scope="row">Under {dose.topDeg}, at a normal speed</th><td>Go higher</td><td>No</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="data" class="part col" aria-labelledby="data-h">
+      <h2 id="data-h">The data and the method</h2>
+      <dl class="defs">
+        <div><dt>Where the data came from</dt><dd>Readings from the wrist accelerometer, recorded by me and a friend with a test program that prints the angle {dose.readingsPerSec} times a second. The sensor feels the arm’s movement as well as gravity, so a fast curl that brakes at the top reads {dose.fastLow} low, and a loose strap adds wobble.</dd></div>
+        <div><dt>What set the rules, and what was scored</dt><dd>Nothing is trained, so there’s no training set. The {dose.startDeg}, {dose.topDeg} and {dose.endDeg} lines and the {dose.tooFast} limit were fixed in the design before any reps were recorded. Only the {dose.fastSpeed} speed limit came from data, from practice runs on two earlier days: slow full curls peaked at <span class="nw">{dose.slowPeak}</span>, fast ones at <span class="nw">{dose.fastPeak}</span> and half curls at <span class="nw">{dose.halfPeak}</span>. The {dose.repsSorted.split(' / ')[1]} test reps were new recordings, made after every rule was fixed.</dd></div>
+        <div><dt>What kind of method it is</dt><dd>It isn’t machine learning or a trained model. It’s a set of fixed rules, chosen by hand, applied to an angle worked out from the direction of gravity.</dd></div>
+        <div><dt>What it outputs</dt><dd>A label for each movement: Good, Too fast, Go higher, or nothing for a bump. The {dose.repsSorted} result compares that label with the kind of rep the tester was asked to do.</dd></div>
+      </dl>
+    </section>
+
+    <section id="results" class="part col" aria-labelledby="results-h">
+      <h2 id="results-h">Every test rep sorted correctly</h2>
+      <p>Each tester did {dose.repsEach} reps of each of {dose.repTypes} kinds: good, too fast, half, and fast half. The device put all {dose.repsSorted.split(' / ')[1]} in the right group. The other tests checked the parts against a simple reference.</p>
+      <table class="facts-table">
+        <caption>All tests on November 21, 2026.</caption>
+        <thead><tr><th scope="col">Test</th><th scope="col">Result</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Rep sorting, against the rep type asked for</th><td><span class="num">{dose.repsSorted}</span> correct</td></tr>
+          <tr><th scope="row">Angle at 30°, 60°, 90° and 120°, against a phone level app, 3 tries each</th><td>Average error at most <span class="num">{dose.angleError}</span>. It always reads {dose.angleLow} low</td></tr>
+          <tr><th scope="row">Angle noise with the sensor still</th><td><span class="num">{dose.stillNoise}</span> spread</td></tr>
+          <tr><th scope="row">A 20 s set, against a phone stopwatch</th><td class="num">{dose.timer}</td></tr>
+          <tr><th scope="row">Failures caused on purpose</th><td><span class="num">{dose.failureTests}</span> handled as expected</td></tr>
+        </tbody>
+      </table>
+      <p>The failures were unplugging and replugging the wrist sensor mid-set, unplugging the screen, resting a hand on the pad, moving during the zero, a double tap at the end of a set, and a tap after the workout ends. With the sensor unplugged, the screen says “Sensor?” and taps take over the counting.</p>
+    </section>
+
+    <section id="hard" class="part col" aria-labelledby="hard-h">
+      <h2 id="hard-h">What was hard</h2>
+      <h3>The screen library froze the board</h3>
+      <p>On this board the screen’s clock line has no working pull-up resistor, and Arduino’s standard I2C library timed out and hung. So the firmware drives the screen’s two I2C lines itself. It also notices when the screen is unplugged and reconnects within {dose.lcdRetry}.</p>
+      <h3>Fast curls read low</h3>
+      <p>When a fast curl brakes at the top, the sensor feels the braking as extra tilt and reads {dose.fastLow} low, so fast curls were judged as half curls. Speed fixed it: a curl that stays under {dose.topDeg} but moves faster than {dose.fastSpeed} is called Too fast, since the height can’t be trusted and “slow down” is the right advice either way.</p>
+      <h3>The strap wobbled during the zero</h3>
+      <p>Tapping the pad shakes the arm, so the stillness check kept failing and asking for another tap. Now it ignores the first 0.3&nbsp;s after the tap, then waits up to 4&nbsp;s for half a second of stillness.</p>
+    </section>
+
+    <section id="hardware" class="part col" aria-labelledby="hw-h">
+      <h2 id="hw-h">The circuit</h2>
+      <p>An Arduino UNO R4 Minima with a Grove Base Shield, powered by a laptop over USB. The screen, buzzer and touch pad plug into the shield, and the LEDs and buttons sit on a breadboard.</p>
+      <figure class="dwiring-fig">
+        <DoseWiring />
+        <figcaption class="small">The circuit, drawn from the pin list in the firmware. The buttons need no resistors because the board’s own pull-ups hold each pin high until it’s pressed.</figcaption>
+      </figure>
+    </section>
+
+    <section id="limits" class="part col" aria-labelledby="short-h">
+      <h2 id="short-h">Where it still falls short</h2>
+      <p>Only bicep curls are judged; other exercises are counted by taps. The sensor sees forearm tilt only, so swinging the body or turning the arm goes unnoticed, and fast reps read low. The angle reads {dose.angleLow} low, which a calibration factor would mostly fix. A cable ties the wrist to the device, and the log needs a laptop. It was tested on {dose.testers} people, never in a real class.</p>
+    </section>
+
+    <nav class="onward col" aria-label="Code and next project">
+      <p class="built">Built with C++ on Arduino.</p>
+      <a href={p.repo}><Icon name="github" /> Dose Coach’s code on GitHub</a>
+      <a href="/projects/image-stitcher/">Next project: Image Stitcher</a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .dwiring-fig { max-width: 34rem; }
+  .nw { white-space: nowrap; }
+  .shots :global(img) { aspect-ratio: 4 / 5; object-fit: cover; }
+  .clips video { display: block; width: 100%; height: auto; aspect-ratio: 720 / 1056; object-fit: cover; background: var(--deep); }
+</style>

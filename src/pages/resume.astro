@@ -9,7 +9,7 @@ interface Task { title: string; href: string; repo: string; pr: string; points: 
 interface Entry { title: string; href?: string; meta: string; when: string; points?: string[]; text?: string; tasks?: Task[] }
 const education: Entry[] = [{
   title: 'University of Waterloo',
-  meta: 'Waterloo, ON. Candidate for BASc in Computer Engineering, Co-op Program.',
+  meta: 'Candidate for BASc in Computer Engineering, Co-op Program.',
   when: 'September 2026 to April 2031',
 }];
 const projectEntries: Entry[] = [
@@ -20,8 +20,16 @@ const projectEntries: Entry[] = [
       'Developed a Pico 2 andon system that hears a fault through an I2S mic and cuts the fan’s power via a MOSFET, stopping each of 3 real fans by itself 3.461–11.661 s after an injected fault.',
       'Wrote real-time C firmware (I2S capture via PIO and DMA, FFT log-mel features, per-fan Gaussian mixture scoring) that matches Python’s scores on the board at 1.684 ms per 32 ms audio frame.',
       'Trained a PyTorch CNN on healthy audio only, reaching 92.13% mean AUC on held-out DCASE 2020 data against 79.70% for the baseline autoencoder I reproduced.',
-      'Proved the model hears more than loudness: with volume matched it still caught both real-fan faults at 100% AUC, while a level meter reached only 63.34% AUC on the DCASE dev set.',
       'Quantized the CNN to int8 (383.0 KB to 98.7 KB at 92.08% AUC) and ported it to C, bit-exact with Python on the Pico 2’s Cortex-M33.',
+    ],
+  },
+  {
+    title: 'Dose Coach: wrist-sensor exercise coach', href: '/projects/dose-coach/',
+    meta: 'C++, Arduino UNO R4, I2C, Accelerometer', when: 'November 2026',
+    points: [
+      'Built the hardware, firmware and tests for a 4-person team’s handheld rehab coach that logs every set.',
+      'Wrote C++ firmware that turns wrist accelerometer readings into elbow angle and judges each bicep curl by height and speed, sorting 80 of 80 test reps correctly across 2 people.',
+      'Replaced an LCD library that froze the board with custom I2C code, and added sensor health checks with tap fallback and screen auto-reconnect, passing 7 of 7 injected-failure tests.',
     ],
   },
   {
@@ -29,7 +37,6 @@ const projectEntries: Entry[] = [
     meta: 'Python, Django, JavaScript, Tailwind CSS', when: '2025',
     points: [
       'Built a full-stack forum as the only developer on a 3-person team using Django, jQuery (AJAX) and SQLite, winning 1st of 32 teams at CNLC 2025.',
-      'Implemented voting, sorting, filtering and fuzzy search (Fuse.js) through JSON endpoints, with no page reloads.',
       'Secured accounts with Django auth, CSRF protection, reCAPTCHA and moderator roles, and deployed on AWS.',
     ],
   },
@@ -61,13 +68,12 @@ const experience: Entry[] = [
   },
 ];
 const awards = [
+  'Waterloo Math Contests: Euclid 2026 top 2% of nearly 20,000; Hypatia 2025 top 8%; CSMC 2025 top 11%',
   'Canadian National Leadership Conference: 1st place (2025) and 4th place (2024), Coding & Programming',
-  'Waterloo Math Contests, 2025–26: Euclid (86/100), Hypatia (33/40) Honour Roll; Fermat, CSMC Distinction',
-  'Bayview Secondary School: Excellence in Mathematics (2025, 2026)',
 ];
 const skills = [
   ['Languages', 'C, Python, C++, Java, JavaScript, SQL'],
-  ['Embedded and DSP', 'Pico SDK, Arm Cortex-M33, PIO, DMA, I2S, PWM, watchdog, fixed-point math, FFT, log-mel'],
+  ['Embedded and DSP', 'Pico SDK, Arduino, Arm Cortex-M33, PIO, DMA, I2S, I2C, ADC, PWM, FFT, soldering'],
   ['ML and vision', 'PyTorch, scikit-learn, OpenCV, NumPy, CNNs, Gaussian mixtures, int8 quantization, RANSAC'],
   ['Tools and platforms', 'Git, GitHub Actions (CI), CMake, pytest, Django, SQLite, AWS EC2'],
 ];
@@ -81,9 +87,9 @@ const skills = [
     <header class="cv-side">
       <h1 class="display">Resume</h1>
       <p class="who">Abtin Aryanpour<br /><span class="dim">Computer Engineering, University of Waterloo</span></p>
-      <p class="get"><a href={pdf} target="_blank" rel="noopener">Open the PDF in a new tab</a><a class="small" href={pdf} download>Download it (one page, 122&nbsp;KB)</a></p>
+      <p class="get"><a href={pdf} target="_blank" rel="noopener">Open the PDF in a new tab</a><a class="small" href={pdf} download>Download it (one page, 127&nbsp;KB)</a></p>
       <ul class="reach">
-        <li><a href="mailto:aaryanpo@uwaterloo.ca"><Icon name="mail" />aaryanpo@uwaterloo.ca</a></li>
+        <li><a href="mailto:aryanpourabtin@gmail.com"><Icon name="mail" />aryanpourabtin@gmail.com</a></li>
         <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><Icon name="linkedin" />linkedin.com/in/abtin-aryanpour</a></li>
         <li><a href="https://github.com/abtinmbm"><Icon name="github" />github.com/abtinmbm</a></li>
       </ul>
@@ -151,7 +157,7 @@ const skills = [
       <div class="view view-pdf" id="view-pdf" role="tabpanel" aria-labelledby="tab-pdf">
         <a class="sheet" href={pdf} target="_blank" rel="noopener">
           <Picture src={pdfPage} formats={['avif', 'webp']} fallbackFormat="webp" widths={[700, 1100, 1700]} sizes="(max-width: 899px) 100vw, 60vw"
-            alt="The one-page resume PDF: education, technical skills, experience (Waterloo Aerial Robotics Group and Spirit of Math), projects (Andon and CyberShield) and awards." loading="lazy" />
+            alt="The one-page resume PDF: education, technical skills, experience (Waterloo Aerial Robotics Group and Spirit of Math), projects (Andon, Dose Coach and CyberShield) and awards." loading="lazy" />
         </a>
         <p class="small dim">The same page as the PDF. Click it to open the PDF, where the links work.</p>
       </div>

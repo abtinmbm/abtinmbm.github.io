@@ -229,3 +229,43 @@ export const awards = {
   fblc2025: '1st of 32 teams, Coding & Programming, CNLC 2025 (run by FBLC, Future Business Leaders of Canada)',
   fbla2024: '4th of 32 teams, Coding & Programming, CNLC 2024 (run by FBLA Canada)',
 };
+
+export const dose = {
+  // github.com/abtinmbm/ece198 README "Test results" (Nov 21, 2026), read 2026-11-21 at f1c5d36, and the
+  // symposium slides. The 80 reps were new recordings made after every threshold was fixed (Abtin, 2026-11-21).
+  repsSorted: '80 / 80',
+  repTypes: '4',
+  repsEach: '10',
+  testers: '2',
+  angleError: '5.3°',
+  angleSingle: '7.9°',
+  angleLow: '3–8%',
+  stillNoise: '0.3–0.7°',
+  timer: '20.01 s',
+  demoGood: '9 / 10',
+  demoFastRep: '1.4 s',
+  failureTests: '7 / 7',
+  // ExerciseTracker.ino: rep thresholds. 40/100/25 and 1.5 s fixed in the design on Nov 18, before any
+  // recording; 450°/s chosen from practice runs on Nov 19–20 (Abtin, 2026-11-21).
+  startDeg: '40°',
+  topDeg: '100°',
+  endDeg: '25°',
+  tooFast: '1.5 s',
+  bump: '0.3 s',
+  fastSpeed: '450°/s',
+  // Practice runs (Nov 19–20): peak arm speeds.
+  slowPeak: '275–330°/s',
+  fastPeak: 'about 785°/s',
+  halfPeak: '142–362°/s',
+  // Slides, "Limitations": fast reps read low.
+  fastLow: '20–40°',
+  // ExerciseTracker.ino: 16 samples per axis, a reading every 20 ms, smoothing 0.3; LCD retry 3 s.
+  samples: '16',
+  readingsPerSec: '50',
+  lcdRetry: '3 s',
+  csvColumns: '13',
+  // docs/results/curl_graph.png: 8 slow curls, all Good.
+  curls: '8',
+  curlPeaks: '117–124°',
+  curlTimes: '2.4–3.4 s',
+};

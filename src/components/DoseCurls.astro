@@ -1,0 +1,91 @@
+---
+// A real recording from the wrist sensor: 8 slow bicep curls, every 2nd reading (25 a second).
+// Data: github.com/abtinmbm/ece198 docs/results/curl_plotter_data.txt, copied to src/data/dose-curls.json.
+// Reps are found with the firmware's rules (start above 40°, end below 25°, count at 100° or more).
+// The line is SVG stretched to the box; the labels are HTML, so they stay readable on a phone.
+import data from '../data/dose-curls.json';
+
+interface Props { captionId: string }
+const { captionId } = Astro.props;
+const v: number[] = data.angle;
+const dt: number = data.dt;
+const T = (v.length - 1) * dt;
+const Y = 140;
+
+let up = false, lastBelow = 0, start = 0, peak = 0, pi = 0;
+const reps: { t: number; peak: number; took: number }[] = [];
+v.forEach((a, i) => {
+  const t = i * dt;
+  if (!up) {
+    if (a < 25) lastBelow = t;
+    if (a > 40) { up = true; start = lastBelow; peak = a; pi = i; }
+  } else {
+    if (a > peak) { peak = a; pi = i; }
+    if (a < 25) { up = false; reps.push({ t: pi * dt, peak, took: t - start }); lastBelow = t; }
+  }
+});
+const good = reps.filter((r) => r.peak >= 100 && r.took >= 1.5);
+
+const path = v.map((a, i) => `${i ? 'L' : 'M'}${(i * dt).toFixed(2)} ${(Y - a).toFixed(1)}`).join('');
+const x = (t: number) => `${((t / T) * 100).toFixed(2)}%`;
+const y = (a: number) => `${(((Y - a) / Y) * 100).toFixed(2)}%`;
+const lines = [
+  { a: 100, label: '100°', note: 'must reach', strong: true },
+  { a: 40, label: '40°', note: 'rep starts' },
+  { a: 25, label: '25°', note: 'rep ends' },
+];
+const yTicks = [0, 20, 40, 60, 80, 100, 120, 140];
+const xTicks = [0, 5, 10, 15, 20, 25, 30, 35];
+---
+<figure class="curls">
+  <div class="cc" role="img" aria-labelledby={captionId}
+    aria-label={`Elbow angle over ${Math.round(T)} seconds: ${good.length} curls, each rising from about 15 degrees to a peak of ${Math.round(Math.min(...good.map((r) => r.peak)))} to ${Math.round(Math.max(...good.map((r) => r.peak)))} degrees, above the 100 degree line, and back below 25 degrees.`}>
+    <div class="cc-y" aria-hidden="true">{yTicks.map((t) => <span style={`top:${y(t)}`}>{t}</span>)}</div>
+    <div class="cc-plot" aria-hidden="true">
+      {yTicks.slice(1, -1).map((t) => <i class="grid" style={`top:${y(t)}`}></i>)}
+      {lines.map((l) => <i class:list={['rule', { strong: l.strong }]} style={`top:${y(l.a)}`}></i>)}
+      <svg viewBox={`0 0 ${T.toFixed(2)} ${Y}`} preserveAspectRatio="none">
+        <path d={path} />
+      </svg>
+      {good.map((r) => (
+        <span class="peak" style={`left:${x(r.t)};top:${y(r.peak)}`}><b class="num">{r.took.toFixed(1)}&nbsp;s</b></span>
+      ))}
+    </div>
+    <div class="cc-r" aria-hidden="true">
+      {lines.map((l) => <span class:list={{ strong: l.strong }} style={`top:${y(l.a)}`}><b class="num">{l.label}</b> <i>{l.note}</i></span>)}
+    </div>
+    <div class="cc-x" aria-hidden="true">{xTicks.map((t) => <span style={`left:${x(t)}`}>{t}</span>)}<em>seconds</em></div>
+  </div>
+  <slot />
+</figure>
+
+<style>
+  .curls { margin: 0; }
+  .cc { display: grid; grid-template-columns: 2.4em minmax(0, 1fr) 6.6em; grid-template-rows: auto auto; font-size: 13px; color: var(--dim); }
+  .cc-y { position: relative; grid-column: 1; grid-row: 1; }
+  .cc-y span { position: absolute; right: 8px; transform: translateY(-50%); font-variant-numeric: tabular-nums; }
+  .cc-plot { position: relative; grid-column: 2; grid-row: 1; aspect-ratio: 5 / 2; border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .cc-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .cc-plot path { fill: none; stroke: var(--white); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .grid, .rule { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--line); }
+  .rule { border-top: 1px dashed rgb(155 167 201 / 0.7); }
+  .rule.strong { border-top: 1px solid #6f86d6; }
+  .peak { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--white); box-shadow: 0 0 0 2px var(--black); }
+  .peak b { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-weight: 400; font-size: 12.5px; color: var(--white); white-space: nowrap; }
+  .cc-r { position: relative; grid-column: 3; grid-row: 1; }
+  .cc-r span { position: absolute; left: 10px; transform: translateY(-50%); line-height: 1.2; }
+  .cc-r b { font-weight: 500; color: var(--white); }
+  .cc-r i { font-style: normal; }
+  .cc-x { position: relative; grid-column: 2; grid-row: 2; height: 2.6em; }
+  .cc-x span { position: absolute; top: 6px; transform: translateX(-50%); font-variant-numeric: tabular-nums; }
+  .cc-x span:first-child { transform: none; }
+  .cc-x em { position: absolute; right: 0; top: 6px; font-style: normal; background: var(--black); padding-left: 6px; }
+  @media (max-width: 599px) {
+    .cc { grid-template-columns: 2.1em minmax(0, 1fr) 2.9em; font-size: 12px; }
+    .cc-plot { aspect-ratio: 4 / 3; }
+    .cc-r span { left: 6px; }
+    .cc-r i { display: none; }
+    .peak b { font-size: 10.5px; bottom: 9px; }
+    .cc-x span:nth-child(even) { display: none; }
+  }
+</style>

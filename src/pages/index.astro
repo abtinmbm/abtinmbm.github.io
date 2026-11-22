@@ -5,7 +5,7 @@ import StarTrails from '../components/StarTrails.astro';
 import Icon from '../components/Icon.astro';
 import AndonReplay from '../components/AndonReplay.astro';
 import { projects, skyEntries } from '../data/projects';
-import { andon, stitcher, lloyd, awards } from '../data/metrics';
+import { andon, stitcher, lloyd, dose, awards } from '../data/metrics';
 import StatusBadge from '../components/StatusBadge.astro';
 import lloydRun from '../data/lloyd-run.json';
 import { stepMarkup, viewBox as lloydBox, type LloydRun } from '../lib/lloyd';
@@ -13,6 +13,7 @@ import '../styles/lloyd.css';
 const repo = (slug: string) => projects.find((x) => x.slug === slug)!.repo;
 import portrait from '../assets/photos/abtin-portrait.jpg';
 import mapStage from '../assets/stitcher/stages/stage-20.webp';
+import doseTop from '../assets/dose/build-top.webp';
 
 // On the homepage, links to sections here stay on the page.
 const local = (l: string) => l.replace(/^\/#/, '#');
@@ -24,7 +25,7 @@ const person = {
   '@type': 'Person',
   name: 'Abtin Aryanpour',
   url: 'https://abtinmbm.github.io/',
-  email: 'mailto:aaryanpo@uwaterloo.ca',
+  email: 'mailto:aryanpourabtin@gmail.com',
   description: 'First-year Computer Engineering student at the University of Waterloo.',
   affiliation: [
     { '@type': 'CollegeOrUniversity', name: 'University of Waterloo' },
@@ -116,6 +117,19 @@ const person = {
       </div>
     </section>
 
+    <article id="dose-coach" class="p-dose wrap grid" aria-labelledby="dose-h">
+      <figure class="d-media">
+        <Picture src={doseTop} fallbackFormat="webp" alt="Dose Coach from above: a blue LCD reading “Bicep Curls, 0/5, Set 1/2”, an Arduino with a Grove shield, and a breadboard with two LEDs and three buttons, on a cardboard base." widths={[400, 700, 1040]} sizes="(max-width: 759px) 70vw, 34vw" formats={['avif', 'webp']} />
+      </figure>
+      <div class="p-text">
+        <h3 id="dose-h" class="head">Dose Coach</h3>
+        <p class="lead">A handheld coach for a supervised exercise class that judges every bicep curl from a sensor on the wrist.</p>
+        <p class="key key-sm"><span class="key-n">{dose.repsSorted}</span><span class="key-l">test reps sorted correctly as good, too fast, half or fast half, recorded after every rule was fixed.</span></p>
+        <p class="status"><StatusBadge slug="dose-coach" /> A first-year design project on a team of 4. I wrote the firmware, built the board and ran the tests.</p>
+        <p class="p-links"><a href="/projects/dose-coach/">Read about Dose Coach</a><a href={repo('dose-coach')}>Code on GitHub<span class="visually-hidden"> for Dose Coach</span></a></p>
+      </div>
+    </article>
+
   </section>
 
   <section id="earlier" class="earlier wrap" aria-labelledby="earlier-h">
@@ -143,11 +157,11 @@ const person = {
         <p>Looking for a co&#8209;op, May to August 2027.</p>
       </div>
       <div class="c-main">
-        <a class="c-mail" href="mailto:aaryanpo@uwaterloo.ca" data-copy="aaryanpo@uwaterloo.ca">
-          <span class="c-addr">aaryanpo@uwaterloo.ca</span>
+        <a class="c-mail" href="mailto:aryanpourabtin@gmail.com" data-copy="aryanpourabtin@gmail.com">
+          <span class="c-addr">aryanpourabtin@gmail.com</span>
           <span class="c-hint small"><span class="c-hint-copy"><Icon name="copy" /> Click to copy</span><span class="c-hint-done"><Icon name="check" /> Copied to clipboard</span></span>
         </a>
-        <p class="c-alt small"><a href="mailto:aaryanpo@uwaterloo.ca">Open in your mail app</a></p>
+        <p class="c-alt small"><a href="mailto:aryanpourabtin@gmail.com">Open in your mail app</a></p>
         <span class="visually-hidden" aria-live="polite" data-copy-status></span>
         <ul class="c-links">
           <li><a href="https://github.com/abtinmbm"><span class="c-name">GitHub</span><span class="c-sub small">github.com/abtinmbm</span></a></li>
@@ -215,6 +229,12 @@ const person = {
   .p-andon .p-text { grid-column: 1 / 6; }
   .p-media { grid-column: 7 / 13; }
 
+  /* a hardware project: the photo first, the text beside it */
+  .p-dose { align-items: center; }
+  .d-media { grid-column: 1 / 6; margin: 0; }
+  .d-media :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 1040 / 1250; }
+  .p-dose .p-text { grid-column: 7 / 12; }
+
   /* design-team work: the team as one project, its tasks side by side under it at the same size */
   .team { display: grid; gap: var(--s7); }
   .team-head { display: grid; gap: var(--s4); max-width: 46em; }
@@ -274,6 +294,8 @@ const person = {
     .earlier h2 { margin-bottom: var(--s5); }
     .p-andon .p-text, .p-media { grid-column: 1 / 13; }
     .p-media { margin-top: var(--s5); }
+    .d-media { grid-column: 1 / 10; }
+    .p-dose .p-text { grid-column: 1 / 13; margin-top: var(--s5); }
     .earlier ul { grid-template-columns: 1fr; }
     .tasks { grid-template-columns: 1fr; }
     .c-inner { padding-block: var(--s8); row-gap: var(--s5); }

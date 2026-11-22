@@ -81,6 +81,17 @@ export const projects: Project[] = [
     href: '/projects/andon/',
     repo: 'https://github.com/abtinmbm/andon',
   },
+  {
+    slug: 'dose-coach',
+    name: 'Dose Coach',
+    line: 'Coaches and checks rehab exercise',
+    status: 'finished',
+    // github.com/abtinmbm/ece198: first commit 373b8dc, last f1c5d36 (2026-11-22 04:47 UTC).
+    start: '2026-11-08T04:23:58Z',
+    end: '2026-11-22T23:59:00Z',
+    href: '/projects/dose-coach/',
+    repo: 'https://github.com/abtinmbm/ece198',
+  },
 ];
 
 /** Teams draw one star trail, with their tasks listed under its label. */
