@@ -111,6 +111,10 @@ export interface SkyEntry {
   subs?: { name: string; line: string; link: string }[];
 }
 
+/** Most trails the sky shows. Past this, the oldest trails fold into one "Earlier" trail,
+ *  so adding a project never crowds the first screen. */
+export const SKY_MAX = 5;
+
 /** The star trails, oldest first: one per project, and one per team for all its tasks. */
 export function skyEntries(): SkyEntry[] {
   const out: SkyEntry[] = [];
@@ -123,16 +127,33 @@ export function skyEntries(): SkyEntry[] {
     g.subs!.push({ name: p.name, line: p.line, link });
     if (p.start < g.start) g.start = p.start;
   }
-  // A team's trail is still going while any of its tasks is.
-  for (const g of out.filter((e) => e.subs)) {
-    const members = g.slugs.map((s) => projects.find((x) => x.slug === s)!);
-    if (!members.every((m) => m.end)) continue;
-    // Finished groups: the trail is as long as the time worked on them, not the gap between them.
-    const worked = members.reduce((t, m) => t + (Date.parse(m.end!) - Date.parse(m.start)), 0);
-    g.end = members.map((m) => m.end!).sort().at(-1);
-    g.start = new Date(Date.parse(g.end!) - worked).toISOString();
-  }
-  return out.sort((a, b) => a.start.localeCompare(b.start));
+  for (const g of out.filter((e) => e.subs)) settle(g);
+  out.sort((a, b) => a.start.localeCompare(b.start));
+  if (out.length <= SKY_MAX) return out;
+
+  // Too many: the oldest trails become one, which links to the list of earlier work.
+  const old = out.splice(0, out.length - SKY_MAX + 1);
+  const names = old.flatMap((e) => (e.subs ?? [e]).map((x) => x.name));
+  const folded: SkyEntry = {
+    name: 'Earlier projects',
+    line: names.length <= 2 ? names.join(' and ') : `${names.length} more projects`,
+    link: '/#earlier',
+    start: old[0].start,
+    slugs: old.flatMap((e) => e.slugs),
+    subs: old.flatMap((e) => e.subs ?? [{ name: e.name, line: e.line, link: e.link }]),
+  };
+  settle(folded);
+  return [folded, ...out].sort((a, b) => a.start.localeCompare(b.start));
+}
+
+/** A group's trail is still going while any of its projects is. A finished group's trail is as
+ *  long as the time worked on its projects, not the gap between them. */
+function settle(g: SkyEntry) {
+  const members = g.slugs.map((s) => projects.find((x) => x.slug === s)!);
+  if (!members.every((m) => m.end)) { delete g.end; return; }
+  const worked = members.reduce((t, m) => t + (Date.parse(m.end!) - Date.parse(m.start)), 0);
+  g.end = members.map((m) => m.end!).sort().at(-1);
+  g.start = new Date(Date.parse(g.end!) - worked).toISOString();
 }
 
 export const statusText: Record<Status, string> = {

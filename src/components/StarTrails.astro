@@ -29,8 +29,6 @@ const L0 = layout(projects, 1440, 900, new Date());
   .sky-labels { list-style: none; margin: 0; padding: 0; }
   .sky-labels li { position: absolute; z-index: 2; transform: translate(16px, -50%); white-space: nowrap;
     text-shadow: 0 0 2px var(--black), 0 0 8px var(--black), 0 0 18px var(--black); }
-  /* a soft dark patch behind each label, so trails never strike through its text */
-  .sky-labels li::before { content: ""; position: absolute; inset: -4px -12px; z-index: -1; background: var(--black); opacity: 0.9; filter: blur(9px); border-radius: 12px; }
   .sky-labels li.left { transform: translate(calc(-100% - 16px), -50%); text-align: right; }
   /* a team's name sits level with its head, and its tasks hang below */
   .sky-labels li.team { transform: translate(16px, -17px); }
@@ -43,7 +41,6 @@ const L0 = layout(projects, 1440, 900, new Date());
   /* a team's tasks hang under its name, on a short branch line */
   .sky-labels .subs { list-style: none; margin: 6px 0 0; padding: 0 0 0 14px; border-left: 1px solid rgb(243 245 255 / 0.35); display: grid; gap: 2px; }
   .sky-labels .subs li { position: static; transform: none; text-shadow: none; }
-  .sky-labels .subs li::before { content: none; }
   .sky-labels .subs .n { font-size: 15px; }
   .sky-labels .subs .l { margin-top: 3px; font-size: 13px; }
   .sky-labels li.left .subs { padding: 0 14px 0 0; border-left: 0; border-right: 1px solid rgb(243 245 255 / 0.35); }
@@ -73,6 +70,24 @@ const L0 = layout(projects, 1440, 900, new Date());
 
 <script>
   import { layout, svgMarkup, bgMarkup, trailArrives, type TrailProject } from '../lib/trails';
+
+  // Project trails stop short of every label and pick up again past it, so no line runs through
+  // a name. The cut is soft-edged and leaves the sky behind the label untouched.
+  function cutUnderLabels(svg: SVGSVGElement, field: HTMLElement, list: HTMLElement) {
+    const f = field.getBoundingClientRect();
+    const holes = [...list.querySelectorAll(':scope > li')].map((li) => {
+      const r = li.getBoundingClientRect();
+      return `<rect x="${(r.left - f.left - 10).toFixed(1)}" y="${(r.top - f.top - 4).toFixed(1)}" width="${(r.width + 20).toFixed(1)}" height="${(r.height + 8).toFixed(1)}" rx="8"/>`;
+    }).join('');
+    const ns = 'http://www.w3.org/2000/svg';
+    const defs = svg.querySelector('defs') ?? svg.insertBefore(document.createElementNS(ns, 'defs'), svg.firstChild);
+    defs.querySelector('#t-cut')?.remove();
+    defs.querySelector('#t-cut-blur')?.remove();
+    defs.insertAdjacentHTML('beforeend',
+      `<filter id="t-cut-blur" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>` +
+      `<mask id="t-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="${f.width}" height="${f.height}"><rect width="${f.width}" height="${f.height}" fill="#fff"/><g fill="#000" filter="url(#t-cut-blur)">${holes}</g></mask>`);
+    for (const p of svg.querySelectorAll('.t-line')) p.setAttribute('mask', 'url(#t-cut)');
+  }
 
   for (const field of document.querySelectorAll<HTMLElement>('[data-trails]')) {
     const projects: TrailProject[] = JSON.parse(field.dataset.trails!);
@@ -146,6 +161,7 @@ const L0 = layout(projects, 1440, 900, new Date());
           }
         }
       }
+      cutUnderLabels(svg, field, list);
     };
 
     draw();

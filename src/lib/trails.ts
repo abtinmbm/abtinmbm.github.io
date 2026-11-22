@@ -100,7 +100,6 @@ export function layout(projects: TrailProject[], W: number, H: number, now: Date
   const rMax = S * (mobile ? 0.95 : 1.0);
   const yTop = H * (opts.yTop ?? (mobile ? 0.2 : 0.16));
   const yBottom = H * (opts.yBottom ?? (mobile ? 0.7 : 0.56));
-  const labelled = 3;
 
   // Room each label needs above and below its head, in label heights. A plain label is centred
   // on its head; a team's label starts level with its head and its tasks hang below.
@@ -122,7 +121,7 @@ export function layout(projects: TrailProject[], W: number, H: number, now: Date
     const a0 = a1 - sweepFor(days);
     const head = { x: cx + r * Math.cos((a1 * Math.PI) / 180), y: cy + r * Math.sin((a1 * Math.PI) / 180) };
     const trail: ProjectTrail = { i, r, a0, a1, live: !p.end, head };
-    if (i >= n - labelled) trail.label = { side: head.x > W * (mobile ? 0.5 : 0.62) ? 'left' : 'right' };
+    trail.label = { side: head.x > W * (mobile ? 0.5 : 0.62) ? 'left' : 'right' };
     return trail;
   });
 
