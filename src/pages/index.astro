@@ -1,21 +1,12 @@
 ---
-import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Win from '../components/Win.astro';
 import Icon from '../components/Icon.astro';
-import AndonReplay from '../components/AndonReplay.astro';
-import HomeStages from '../components/HomeStages.astro';
-import HomeLloyd from '../components/HomeLloyd.astro';
-import { projects, featured, archive, statusText } from '../data/projects';
-import { andon, stitcher, lloyd, dose } from '../data/metrics';
-import specNormal from '../assets/andon/spec-normal.webp';
-import specFault from '../assets/andon/spec-fault.webp';
-import doseTop from '../assets/dose/build-top.webp';
+import { projects, featured, statusText } from '../data/projects';
 
 const p = (slug: string) => projects.find((x) => x.slug === slug)!;
 const dot = (slug: string) => p(slug).status.replace(' ', '-');
 const work = featured();
-const old = archive();
 const person = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -26,6 +17,7 @@ const person = {
   affiliation: [
     { '@type': 'CollegeOrUniversity', name: 'University of Waterloo' },
     { '@type': 'Organization', name: 'Waterloo Aerial Robotics Group' },
+    { '@type': 'Organization', name: 'UW Formula Electric' },
   ],
   sameAs: ['https://github.com/abtinmbm', 'https://www.linkedin.com/in/abtin-aryanpour'],
 };
@@ -40,13 +32,14 @@ const person = {
     <Win title="abtin.aryanpour" name="About" id="hello" class="w-name" labelledby="hero-name">
       <h1 id="hero-name" class="big">Abtin Aryanpour</h1>
       <p class="lede">I’m a first-year Computer Engineering student at the University of Waterloo. I like learning by building projects, and I’m always looking for something new to try.</p>
-      <div class="seek"><span class="lbl sunken">Looking for a co&#8209;op, May to August 2027</span><a class="btn go" href="/tour/">Take the demo tour</a><a class="btn" href="#work">See the work</a><a class="btn" href="mailto:aryanpourabtin@gmail.com" data-copy="aryanpourabtin@gmail.com">Copy email</a></div>
+      <p class="teams">I’m on the Waterloo Aerial Robotics Group (WARG) Autonomy subteam and the UW Formula Electric firmware subteam.</p>
+      <div class="seek"><span class="lbl sunken">Looking for a co&#8209;op, May to August 2027</span><a class="btn go" href="/tour/">Take the demo tour</a><a class="btn" href="/projects/">See projects</a><a class="btn" href="mailto:aryanpourabtin@gmail.com" data-copy="aryanpourabtin@gmail.com">Copy email</a></div>
     </Win>
 
     <Win title={`Featured — ${work.length} projects`} name="Featured" id="work" as="nav" class="w-index" label="Featured projects" bare>
       <ol class="index">
         {work.map((x, i) => (
-          <li><a href={x.href ?? `#${x.slug}`}>
+          <li><a href={x.href ?? `/projects/#${x.slug}`}>
             <span class="n">{String(i + 1).padStart(2, '0')}</span>
             <span class="nm">{x.name}</span>
             <span class="ln">{x.line}</span>
@@ -56,88 +49,7 @@ const person = {
       </ol>
     </Win>
 
-    <div class="sec"><h2><small>// 01</small>Andon</h2><p>Solo project, October 2026 to now.</p></div>
-    <Win title="andon — replay" name="Andon" id="andon" as="article" class="w-andon" inClass="andon-in" label="Andon" reveal>
-      <div class="a-text">
-        <p class="line">Hears when a machine starts to sound wrong, after learning only from healthy recordings. On a Raspberry Pi Pico 2 it now hears a fault in a real fan and cuts the fan’s power by itself.</p>
-        <p class="read sunken"><b>{andon.meanAuc}</b><span>AUC on held-out test recordings, scored once (50% is a coin flip), against {andon.baselineAuc} for the challenge’s baseline.</span></p>
-        <p class="meta"><span><i class="dot in-progress"></i>{statusText['in progress']}</span><span>Python · PyTorch · C · Pico SDK</span></p>
-        <div class="links"><a class="btn go" href="/projects/andon/">Read about Andon</a><a class="btn" href={p('andon').repo}><Icon name="github" />Code<span class="visually-hidden"> for Andon on GitHub</span></a></div>
-        <div class="specs">
-          <figure><div class="sunken"><Picture src={specNormal} formats={['avif', 'webp']} fallbackFormat="webp" widths={[320, 640]} sizes="(max-width: 900px) 45vw, 16vw" alt="Spectrogram of a normal clip: steady bright bands in the low frequencies." /></div><figcaption>Normal</figcaption></figure>
-          <figure><div class="sunken"><Picture src={specFault} formats={['avif', 'webp']} fallbackFormat="webp" widths={[320, 640]} sizes="(max-width: 900px) 45vw, 16vw" alt="Spectrogram of a faulty clip from the same fan: the bands look almost the same." /></div><figcaption>Faulty, same fan</figcaption></figure>
-        </div>
-      </div>
-      <div class="a-media">
-        <AndonReplay captionId="andon-cap">
-          <figcaption id="andon-cap" class="cap">One fan’s real scores from the development test clips: about two minutes of normal running, then a fault. This machine was picked to show how the light works.</figcaption>
-        </AndonReplay>
-      </div>
-    </Win>
-
-    <div class="sec" id="warg"><h2><small>// 02</small>WARG</h2><p>Autonomy Software Member, Waterloo Aerial Robotics Group, since September 2026.</p></div>
-    <Win title="image-stitcher — simulated mission" name="Image Stitcher" id="image-stitcher" as="article" class="w-stitch" inClass="fill" labelledby="st-h" reveal>
-      <HomeStages />
-      <div class="w-body">
-        <div>
-          <h3 id="st-h" class="h">Image Stitcher</h3>
-          <p class="line">Merges out-of-order, GPS-tagged photos from several drones into one top-down map. Tested in simulation.</p>
-        </div>
-        <p class="read sm sunken"><b>{stitcher.missions}</b><span>simulated missions built one connected map, with photos lined up to {stitcher.alignment.replace(' ', ' ')} on average.</span></p>
-        <p class="meta"><span><i class="dot merged"></i>{statusText.merged} · PR #215, November 18, 2026</span></p>
-        <div class="links"><a class="btn" href="/projects/image-stitcher/">Read about the stitcher</a><a class="btn" href={p('image-stitcher').repo}><Icon name="github" />PR #215<span class="visually-hidden"> for the Image Stitcher</span></a></div>
-      </div>
-    </Win>
-    <Win title="lloyd — simulated run" name="Lloyd’s algorithm" id="lloyd" as="article" class="w-lloyd" inClass="fill" labelledby="ly-h" reveal>
-      <HomeLloyd />
-      <div class="w-body">
-        <div>
-          <h3 id="ly-h" class="h">Lloyd’s algorithm</h3>
-          <p class="line">Spreads a drone swarm evenly across a field with a GPS boundary.</p>
-        </div>
-        <p class="read sm sunken"><b>{lloyd.cvStart} → {lloyd.cvEnd}</b><span>median spacing unevenness in simulation. {lloyd.runs} runs converged. 0 is perfectly even.</span></p>
-        <p class="meta"><span><i class="dot in-review"></i>{statusText['in review']} · PR #247</span></p>
-        <div class="links"><a class="btn" href="/projects/lloyd/">Read about it</a><a class="btn" href={p('lloyd').repo}><Icon name="github" />PR #247<span class="visually-hidden"> for Lloyd’s algorithm</span></a></div>
-      </div>
-    </Win>
-
-    <div class="sec"><h2><small>// 03</small>Dose Coach</h2><p>First-year design project, team of 4, November 2026.</p></div>
-    <Win title="dose-coach" name="Dose Coach" id="dose-coach" as="article" class="w-dose" inClass="dose-in" labelledby="dose-h" reveal>
-      <figure><div class="sunken"><Picture src={doseTop} fallbackFormat="webp" formats={['avif', 'webp']} widths={[400, 700, 1040]} sizes="(max-width: 900px) 100vw, 24vw" alt="Dose Coach from above: a blue LCD reading “Bicep Curls, 0/5, Set 1/2”, an Arduino with a Grove shield, and a breadboard with two LEDs and three buttons, on a cardboard base." /></div></figure>
-      <div>
-        <h3 id="dose-h" class="h">Dose Coach</h3>
-        <p class="line">A handheld coach for a supervised exercise class that judges every bicep curl from a sensor on the wrist.</p>
-        <p class="meta"><span><i class="dot finished"></i>{statusText.finished}</span></p>
-        <div class="links"><a class="btn go" href="/projects/dose-coach/">Read about Dose Coach</a><a class="btn" href={p('dose-coach').repo}><Icon name="github" />Code<span class="visually-hidden"> for Dose Coach on GitHub</span></a></div>
-      </div>
-      <div class="reads">
-        <p class="read sunken"><b>{dose.repsSorted}</b><span>test reps sorted correctly as good, too fast, half or fast half, recorded after every rule was fixed.</span></p>
-        <p class="note">I wrote the firmware, built the board and ran the tests.</p>
-      </div>
-    </Win>
-
-    <div class="sec" id="archive"><h2><small>// 04</small>Archive</h2><p>Older and smaller projects. New ones join this table.</p></div>
-    <Win title={`archive — ${old.length} items`} name="Archive" id="archive-win" class="w-arch" label="Archive" reveal>
-      <div class="sunken arch">
-        <table>
-          <caption class="visually-hidden">Earlier projects</caption>
-          <thead><tr><th scope="col">Name</th><th scope="col">What it is</th><th scope="col">Year</th><th scope="col">Recognition</th><th scope="col"><span class="visually-hidden">Link</span></th></tr></thead>
-          <tbody>
-            {old.map((x) => (
-              <tr id={x.slug}>
-                <th scope="row" class="n">{x.name}</th>
-                <td class="what">{x.what ?? x.line}</td>
-                <td class="y num">{x.year}</td>
-                <td class="rec">{x.note}</td>
-                <td class="go"><a href={x.href ?? x.repo}>{x.href ? 'Read' : 'Code'}<span class="visually-hidden"> for {x.name}</span></a></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Win>
-
-    <div class="sec" id="contact"><h2><small>// 05</small>Contact</h2><p>Looking for a co&#8209;op, May to August 2027.</p></div>
+    <div class="sec" id="contact"><h2>Contact</h2><p>Looking for a co&#8209;op, May to August 2027.</p></div>
     <Win title="email" name="Email" id="email-win" class="w-mail" label="Email">
       <a class="mail sunken" href="mailto:aryanpourabtin@gmail.com" data-copy="aryanpourabtin@gmail.com">aryanpourabtin@gmail.com<span class="hint"><span class="c-copy"><Icon name="copy" /> Click to copy</span><span class="c-done"><Icon name="check" /> Copied to clipboard</span></span></a>
       <p class="alt"><a href="mailto:aryanpourabtin@gmail.com">Open in your mail app</a></p>
@@ -158,6 +70,7 @@ const person = {
   .w-name :global(.in) { padding: 34px 32px 30px; display: grid; gap: 26px; }
   .big { font: 400 clamp(42px, 7.8vw, 108px)/0.95 var(--mono); letter-spacing: -0.03em; text-wrap: wrap; }
   .lede { font-size: var(--t-lead); line-height: 1.45; max-width: 56ch; }
+  .teams { max-width: 68ch; }
   .seek { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
   .seek .lbl { font: 400 15px var(--mono); padding: 10px 14px; }
 
@@ -171,50 +84,6 @@ const person = {
   .index .nm { font: 400 30px/1 var(--mono); }
   .index .ln { font-size: 16px; }
   .index .st { font: 400 14px var(--mono); color: var(--mute); display: flex; align-items: center; gap: 8px; justify-self: end; white-space: nowrap; }
-
-  :global(.h) { font: 400 40px/1 var(--mono); letter-spacing: -0.02em; margin-bottom: 12px; }
-  .line { margin-bottom: 18px; font-size: 18px; }
-  .read { margin-bottom: 18px; }
-  .meta { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font: 400 14px var(--mono); color: var(--mute); margin-bottom: 18px; }
-  .meta > span { display: inline-flex; align-items: center; gap: 8px; }
-  .links { display: flex; flex-wrap: wrap; gap: 10px; }
-  figure { margin: 0; }
-  figure :global(img) { display: block; width: 100%; height: auto; }
-
-  .w-andon { grid-column: 1 / -1; }
-  .w-andon :global(.andon-in) { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 28px; }
-  .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
-  .specs figcaption { font: 400 12px var(--mono); color: var(--mute); margin-top: 4px; }
-
-  .w-stitch { grid-column: 1 / span 7; }
-  .w-lloyd { grid-column: 8 / span 5; }
-  .w-body { min-width: 0; }
-  .w-body { display: grid; gap: 14px; }
-  .w-body .read, .w-body .meta { margin-block: 0; }
-  .w-stitch :global(.fill), .w-lloyd :global(.fill) { display: grid; gap: 18px; }
-  @media (min-width: 901px) {
-    .w-stitch, .w-lloyd { --warg-media-height: clamp(275px, 34vw, 490px); display: grid; grid-row: span 6; grid-template-rows: subgrid; gap: 0; }
-    .w-stitch :global(.fill), .w-lloyd :global(.fill) { grid-row: span 5; grid-template-rows: subgrid; gap: 10px; }
-    .w-body { grid-row: span 4; grid-template-rows: subgrid; gap: inherit; }
-    .w-stitch:global(.min), .w-lloyd:global(.min) { display: block; align-self: start; }
-  }
-
-  .w-dose { grid-column: 1 / -1; }
-  .w-dose :global(.dose-in) { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 5fr); gap: 28px; align-items: start; }
-  .reads .read { margin: 0; }
-  .note { margin-top: 14px; color: var(--mute); font-size: 16px; }
-
-  .w-arch { grid-column: 1 / -1; }
-  .w-arch :global(.in) { padding: 14px; }
-  .arch { padding: 6px; }
-  table { width: 100%; border-collapse: collapse; font-size: 15px; }
-  thead th { text-align: left; font: 400 14px var(--mono); padding: 8px 10px; border-bottom: 2px solid var(--fg); }
-  td, tbody th { padding: 12px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; text-align: left; font-weight: 400; }
-  tbody tr:last-child > * { border-bottom: 0; }
-  .n { font: 400 20px var(--mono); white-space: nowrap; }
-  .y { font-family: var(--mono); }
-  tbody tr:hover { background: var(--fg); color: var(--panel); }
-  tbody tr:hover a { color: inherit; }
 
   .w-mail { grid-column: 1 / span 8; }
   .w-links { grid-column: 9 / span 4; }
@@ -236,13 +105,7 @@ const person = {
     .index .ln { grid-column: 2 / -1; }
     .index .st { grid-row: 1; grid-column: 3; }
     .index .nm { font-size: 24px; }
-    .w-andon :global(.andon-in), .w-dose :global(.dose-in) { grid-template-columns: 1fr; }
-    thead { display: none; }
-    tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; border-bottom: 1px solid var(--rule); padding: 8px 0; }
-    tbody tr:last-child { border-bottom: 0; }
-    td, tbody th { border: 0 !important; padding: 3px 10px; }
-    tbody .n { white-space: normal; overflow-wrap: anywhere; }
-    .what, .rec { grid-column: 1 / -1; }
+
   }
   @media (max-width: 359px) {
     .index .st { grid-row: auto; grid-column: 2 / -1; justify-self: start; }

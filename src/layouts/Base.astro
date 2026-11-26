@@ -6,7 +6,7 @@ import { featured } from '../data/projects';
 interface Props {
   title: string;
   description: string;
-  current?: 'home' | 'work' | 'about' | 'resume' | 'photography';
+  current?: 'home' | 'projects' | 'about' | 'resume' | 'photography';
   /** The featured project this page is about, so its taskbar tab shows pressed. */
   project?: string;
 }
@@ -14,15 +14,20 @@ const { title, description, current, project } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const is404 = Astro.url.pathname.startsWith('/404');
 const home = current === 'home';
-// One sharing image per page, made by scripts/og-images.mjs. Pages without one use the homepage's.
+const projectDesk = Astro.url.pathname === '/projects/';
+// One sharing image per page, made by scripts/og-images.mjs.
 const ogNames: Record<string, string> = {
-  '/': 'home', '/projects/andon/': 'andon', '/projects/image-stitcher/': 'image-stitcher',
+  '/': 'home', '/projects/': 'projects', '/projects/andon/': 'andon', '/projects/image-stitcher/': 'image-stitcher',
   '/projects/lloyd/': 'lloyd', '/projects/dose-coach/': 'dose-coach', '/tour/': 'tour',
   '/about/': 'about', '/resume/': 'resume', '/photography/': 'photography',
 };
-const ogImage = new URL(`/og/${ogNames[Astro.url.pathname] ?? 'home'}.jpg`, Astro.site);
+const ogName = is404 ? 'not-found' : ogNames[Astro.url.pathname] ?? 'home';
+const ogImage = new URL(`/og/${ogName}.jpg`, Astro.site);
+ogImage.searchParams.set('v', 'projects');
+const ogAlt = home ? 'Abtin Aryanpour’s Workstation portfolio, with the Andon fault replay and a simulated Image Stitcher map.'
+  : ogName === 'photography' ? 'A contact sheet of Abtin Aryanpour’s photography.' : `The top of the page: ${title}`;
 const nav = [
-  { href: '/#work', label: 'Work', key: 'work' },
+  { href: '/projects/', label: 'Projects', key: 'projects' },
   { href: '/about/', label: 'About', key: 'about' },
   { href: '/resume/', label: 'Resume', key: 'resume' },
   { href: '/photography/', label: 'Photography', key: 'photography' },
@@ -31,13 +36,13 @@ const nav = [
 const work = featured();
 const iconFor: Record<string, 'andon' | 'stitcher' | 'lloyd' | 'dose'> = { andon: 'andon', 'image-stitcher': 'stitcher', lloyd: 'lloyd', 'dose-coach': 'dose' };
 const iconLabel: Record<string, string> = { andon: 'Andon', 'image-stitcher': 'Stitcher', lloyd: 'Lloyd', 'dose-coach': 'Dose Coach' };
-// On the homepage, icons and tabs open the project's window there; elsewhere they go to its page.
-const target = (slug: string, href?: string) => (home ? `#${slug}` : href ?? `/#${slug}`);
+// Desktop shortcuts open project windows. Detail pages can switch directly between write-ups.
+const target = (slug: string, href?: string) => projectDesk ? `#${slug}` : (home ? `/projects/#${slug}` : href ?? `/projects/#${slug}`);
 const cmdk = [
   { k: 'Take the demo tour', d: 'Four project demos', h: '/tour/' },
-  ...work.map((p) => ({ k: p.name, d: p.team === 'warg' ? 'Project · WARG' : 'Project', h: p.href ?? `/#${p.slug}` })),
-  { k: 'All projects', d: 'Featured and Archive', h: '/#work' },
-  { k: 'Archive', d: 'Earlier projects', h: '/#archive' },
+  ...work.map((p) => ({ k: p.name, d: p.team === 'warg' ? 'Project · WARG' : 'Project', h: p.href ?? `/projects/#${p.slug}` })),
+  { k: 'All projects', d: 'Demos and Archive', h: '/projects/' },
+  { k: 'Archive', d: 'Earlier projects', h: '/projects/#archive' },
   { k: 'About', d: 'Page', h: '/about/' },
   { k: 'Resume', d: 'Page · PDF', h: '/resume/' },
   { k: 'Photography', d: 'Page', h: '/photography/' },
@@ -68,7 +73,7 @@ const segs = Array.from({ length: 20 });
   <meta property="og:image" content={ogImage} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content={`The top of the page: ${title}`} />
+  <meta property="og:image:alt" content={ogAlt} />
   <meta property="og:locale" content="en_CA" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="preload" href="/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
@@ -119,7 +124,7 @@ const segs = Array.from({ length: 20 });
   <div class="desk">
     <nav class="icons" aria-label="Desktop shortcuts">
       {work.map((p) => (
-        <a class="icon-link" href={target(p.slug, p.href)} data-open={home ? p.slug : undefined}><PixelIcon name={iconFor[p.slug] ?? 'monitor'} /><span>{iconLabel[p.slug] ?? p.name}</span></a>
+        <a class="icon-link" href={target(p.slug, p.href)} data-open={projectDesk ? p.slug : undefined}><PixelIcon name={iconFor[p.slug] ?? 'monitor'} /><span>{iconLabel[p.slug] ?? p.name}</span></a>
       ))}
       <a class="icon-link" href="/photography/"><PixelIcon name="photos" /><span>Photos</span></a>
       <a class="icon-link" href="/resume/Abtin-Aryanpour-Resume.pdf"><PixelIcon name="resume" /><span>Resume<wbr />.pdf</span></a>
@@ -147,7 +152,7 @@ const segs = Array.from({ length: 20 });
     <a class="btn startbtn nojs-home" href="/"><PixelIcon name="monitor" /><span class="sl">AbtinOS</span><span class="visually-hidden"> home</span></a>
     <nav class="tabs" aria-label="Project windows">
       {work.map((p) => (
-        <a class="btn tab" href={target(p.slug, p.href)} data-tab={p.slug} data-open={home ? p.slug : undefined}
+        <a class="btn tab" href={target(p.slug, p.href)} data-tab={p.slug} data-open={projectDesk ? p.slug : undefined}
           aria-current={project === p.slug ? 'page' : undefined}><i aria-hidden="true"></i><span class="tl"><span class="full">{p.name}</span><span class="short" aria-hidden="true">{p.short ?? p.name}</span></span></a>
       ))}
     </nav>
@@ -277,9 +282,9 @@ const segs = Array.from({ length: 20 });
     .icon-link span { padding-inline: 1px; }
     .topbar { flex-wrap: wrap; position: static; }
     .topbar nav { order: 3; width: 100%; }
-    .topbar nav ul { flex-wrap: wrap; }
-    .topbar .nav-btn { padding: 8px 7px; font-size: 13px; }
-    .topbar .nav-btn:active { padding: 9px 6px 7px 8px; }
+    .topbar nav ul { flex-wrap: wrap; gap: 3px; }
+    .topbar .nav-btn { padding: 8px 5px; font-size: 13px; }
+    .topbar .nav-btn:active { padding: 9px 4px 7px 6px; }
     .startbtn .sl, .tab i { display: none; }
     .tray .av-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .tabs { gap: 3px; padding-left: 3px; }
