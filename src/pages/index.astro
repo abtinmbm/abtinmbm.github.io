@@ -1,25 +1,21 @@
 ---
 import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import StarTrails from '../components/StarTrails.astro';
+import Win from '../components/Win.astro';
 import Icon from '../components/Icon.astro';
 import AndonReplay from '../components/AndonReplay.astro';
-import { projects, skyEntries } from '../data/projects';
-import { andon, stitcher, lloyd, dose, awards } from '../data/metrics';
-import StatusBadge from '../components/StatusBadge.astro';
-import lloydRun from '../data/lloyd-run.json';
-import { stepMarkup, viewBox as lloydBox, type LloydRun } from '../lib/lloyd';
-import '../styles/lloyd.css';
-const repo = (slug: string) => projects.find((x) => x.slug === slug)!.repo;
-import portrait from '../assets/photos/abtin-portrait.jpg';
-import mapStage from '../assets/stitcher/stages/stage-20.webp';
+import HomeStages from '../components/HomeStages.astro';
+import HomeLloyd from '../components/HomeLloyd.astro';
+import { projects, featured, archive, statusText } from '../data/projects';
+import { andon, stitcher, lloyd, dose } from '../data/metrics';
+import specNormal from '../assets/andon/spec-normal.webp';
+import specFault from '../assets/andon/spec-fault.webp';
 import doseTop from '../assets/dose/build-top.webp';
 
-// On the homepage, links to sections here stay on the page.
-const local = (l: string) => l.replace(/^\/#/, '#');
-const trailProjects = skyEntries().map(({ name, line, link, start, end }) => ({
-  name, line, link: local(link), start, end,
-}));
+const p = (slug: string) => projects.find((x) => x.slug === slug)!;
+const dot = (slug: string) => p(slug).status.replace(' ', '-');
+const work = featured();
+const old = archive();
 const person = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -37,274 +33,218 @@ const person = {
 <Base
   title="Abtin Aryanpour, Computer Engineering at Waterloo"
   description="First-year Computer Engineering student at the University of Waterloo. Looking for a co‑op, May to August 2027."
-  overlay
   current="home"
 >
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(person)} />
-  <section class="hero" aria-labelledby="hero-name">
-    <div class="sky">
-      <StarTrails projects={trailProjects} />
-    </div>
-    <div class="who">
-      <h1 id="hero-name" class="display">Abtin Aryanpour</h1>
-      <div class="who-text">
-        <p>First-year Computer Engineering student at the University of Waterloo.</p>
-        <p class="avail">Looking for a co&#8209;op, May to August 2027.</p>
+  <div class="tiles">
+    <Win title="abtin.aryanpour" name="About" id="hello" class="w-name" labelledby="hero-name">
+      <h1 id="hero-name" class="big">Abtin Aryanpour</h1>
+      <p class="lede">I’m a first-year Computer Engineering student at the University of Waterloo. I like learning by building projects, and I’m always looking for something new to try.</p>
+      <div class="seek"><span class="lbl sunken">Looking for a co&#8209;op, May to August 2027</span><a class="btn go" href="/tour/">Take the demo tour</a><a class="btn" href="#work">See the work</a><a class="btn" href="mailto:aryanpourabtin@gmail.com" data-copy="aryanpourabtin@gmail.com">Copy email</a></div>
+    </Win>
+
+    <Win title={`Featured — ${work.length} projects`} name="Featured" id="work" as="nav" class="w-index" label="Featured projects" bare>
+      <ol class="index">
+        {work.map((x, i) => (
+          <li><a href={x.href ?? `#${x.slug}`}>
+            <span class="n">{String(i + 1).padStart(2, '0')}</span>
+            <span class="nm">{x.name}</span>
+            <span class="ln">{x.line}</span>
+            <span class="st"><i class:list={['dot', dot(x.slug)]}></i>{statusText[x.status]}</span>
+          </a></li>
+        ))}
+      </ol>
+    </Win>
+
+    <div class="sec"><h2><small>// 01</small>Andon</h2><p>Solo project, October 2026 to now.</p></div>
+    <Win title="andon — replay" name="Andon" id="andon" as="article" class="w-andon" inClass="andon-in" label="Andon" reveal>
+      <div class="a-text">
+        <p class="line">Hears when a machine starts to sound wrong, after learning only from healthy recordings. On a Raspberry Pi Pico 2 it now hears a fault in a real fan and cuts the fan’s power by itself.</p>
+        <p class="read sunken"><b>{andon.meanAuc}</b><span>AUC on held-out test recordings, scored once (50% is a coin flip), against {andon.baselineAuc} for the challenge’s baseline.</span></p>
+        <p class="meta"><span><i class="dot in-progress"></i>{statusText['in progress']}</span><span>Python · PyTorch · C · Pico SDK</span></p>
+        <div class="links"><a class="btn go" href="/projects/andon/">Read about Andon</a><a class="btn" href={p('andon').repo}><Icon name="github" />Code<span class="visually-hidden"> for Andon on GitHub</span></a></div>
+        <div class="specs">
+          <figure><div class="sunken"><Picture src={specNormal} formats={['avif', 'webp']} fallbackFormat="webp" widths={[320, 640]} sizes="(max-width: 900px) 45vw, 16vw" alt="Spectrogram of a normal clip: steady bright bands in the low frequencies." /></div><figcaption>Normal</figcaption></figure>
+          <figure><div class="sunken"><Picture src={specFault} formats={['avif', 'webp']} fallbackFormat="webp" widths={[320, 640]} sizes="(max-width: 900px) 45vw, 16vw" alt="Spectrogram of a faulty clip from the same fan: the bands look almost the same." /></div><figcaption>Faulty, same fan</figcaption></figure>
+        </div>
       </div>
-    </div>
-  </section>
-
-  <section class="intro wrap grid" aria-labelledby="intro-h">
-    <Picture pictureAttributes={{ class: "portrait" }} src={portrait} alt="Abtin at a formal event in a suit and bow tie, pointing at the camera" widths={[360, 560, 820]} sizes="(max-width: 759px) 60vw, 40vw" formats={['avif', 'webp']} />
-    <div class="intro-text">
-      <h2 id="intro-h" class="head">About me</h2>
-      <p class="lead">I’m Abtin. I’m in first-year Computer Engineering at the University of Waterloo, on the autonomy software team at the Waterloo Aerial Robotics Group.</p>
-      <p><a href="/about/">More about me</a></p>
-    </div>
-  </section>
-
-  <section id="work" class="work" aria-labelledby="work-h">
-    <h2 id="work-h" class="visually-hidden">Projects</h2>
-
-    <article id="andon" class="p-andon wrap grid" aria-labelledby="andon-h">
-      <div class="p-text">
-        <h3 id="andon-h" class="head">Andon</h3>
-        <p class="lead">Hears when a machine starts to sound wrong, after learning only from healthy recordings.</p>
-        <p class="key"><span class="key-n">{andon.meanAuc}</span><span class="key-l">AUC on held-out test recordings, scored once (50% is a coin flip), against <b>{andon.baselineAuc}</b> for the challenge’s baseline.</span></p>
-        <p class="status"><b>In progress.</b> A solo project. The software works, and on a Raspberry Pi Pico 2 it now hears a fault in a real fan and cuts the fan’s power by itself.</p>
-        <p>Played a faulty recording and a healthy one it has never heard, it picks the faulty one {andon.meanAuc} of the time. Shrunk to {andon.int8Size}, it fits on a microcontroller.</p>
-        <p class="p-links"><a href="/projects/andon/">Read about Andon</a><a href={repo('andon')}>Code on GitHub<span class="visually-hidden"> for Andon</span></a></p>
-      </div>
-      <div class="p-media">
+      <div class="a-media">
         <AndonReplay captionId="andon-cap">
-          <figcaption id="andon-cap" class="small">A replay of one fan’s real scores, from the development test clips: two minutes of normal running, then a fault. This machine was picked to show how the light works.</figcaption>
+          <figcaption id="andon-cap" class="cap">One fan’s real scores from the development test clips: about two minutes of normal running, then a fault. This machine was picked to show how the light works.</figcaption>
         </AndonReplay>
       </div>
-    </article>
+    </Win>
 
-    <section id="warg" class="team wrap" aria-labelledby="warg-h">
-      <div class="team-head">
-        <h3 id="warg-h" class="head">Waterloo Aerial Robotics Group</h3>
-        <p class="lead">Autonomy Software Member since September 2026. Two tasks for the team’s drones so far.</p>
+    <div class="sec" id="warg"><h2><small>// 02</small>WARG</h2><p>Autonomy Software Member, Waterloo Aerial Robotics Group, since September 2026.</p></div>
+    <Win title="image-stitcher — simulated mission" name="Image Stitcher" id="image-stitcher" as="article" class="w-stitch" inClass="fill" labelledby="st-h" reveal>
+      <HomeStages />
+      <div class="w-body">
+        <div>
+          <h3 id="st-h" class="h">Image Stitcher</h3>
+          <p class="line">Merges out-of-order, GPS-tagged photos from several drones into one top-down map. Tested in simulation.</p>
+        </div>
+        <p class="read sm sunken"><b>{stitcher.missions}</b><span>simulated missions built one connected map, with photos lined up to {stitcher.alignment.replace(' ', ' ')} on average.</span></p>
+        <p class="meta"><span><i class="dot merged"></i>{statusText.merged} · PR #215, November 18, 2026</span></p>
+        <div class="links"><a class="btn" href="/projects/image-stitcher/">Read about the stitcher</a><a class="btn" href={p('image-stitcher').repo}><Icon name="github" />PR #215<span class="visually-hidden"> for the Image Stitcher</span></a></div>
       </div>
-      <div class="tasks">
-        <article id="image-stitcher" class="task" aria-labelledby="stitch-h">
-          <figure class="task-fig">
-            <Picture pictureAttributes={{ class: "fig-box" }} src={mapStage} fallbackFormat="webp" alt="A map stitched from the first 20 of 91 simulated drone photos. Its stepped outline shows where the photos landed, with gaps where photos haven’t arrived yet." widths={[600, 900, 1200]} sizes="(max-width: 759px) 100vw, 46vw" formats={['avif', 'webp']} />
-            <figcaption class="small">One simulated mission, after 20 of its {stitcher.photos} photos. Only the painted ground markers are kept inside.</figcaption>
-          </figure>
-          <div class="task-text">
-            <h4 id="stitch-h" class="head">Image Stitcher</h4>
-            <p>Merges out-of-order, GPS-tagged photos from several drones into one top-down map.</p>
-            <p class="status"><StatusBadge slug="image-stitcher" /> Pull request #215 merged into the team’s main branch on November 18, 2026.</p>
-            <p class="key key-sm"><span class="key-n">{stitcher.missions}</span><span class="key-l">simulated missions built one connected map, with photos lined up to <b>{stitcher.alignment}</b> on average.</span></p>
-            <p class="p-links"><a href="/projects/image-stitcher/">Read about the stitcher</a><a href={repo('image-stitcher')}>Code on GitHub (PR #215)<span class="visually-hidden"> for the Image Stitcher</span></a></p>
-          </div>
-        </article>
-        <article id="lloyd" class="task" aria-labelledby="lloyd-h">
-          <figure class="task-fig">
-            <svg class="fig-box" viewBox={lloydBox} preserveAspectRatio="xMinYMin meet" role="img" aria-label="Ten simulated drones spread evenly over an L-shaped field, each in its own cell, with the paths they flew from a bunched start." set:html={stepMarkup(lloydRun as LloydRun, (lloydRun as LloydRun).frames.length - 1)} />
-            <figcaption class="small">One simulated run: 10 drones spread out from a bunched start. Each shaded area is one drone’s cell.</figcaption>
-          </figure>
-          <div class="task-text">
-            <h4 id="lloyd-h" class="head">Lloyd’s algorithm</h4>
-            <p>Spreads a drone swarm evenly over any field with a GPS boundary.</p>
-            <p class="status"><StatusBadge slug="lloyd" /> Waiting for review on pull request #247.</p>
-            <p class="key key-sm"><span class="key-n">{lloyd.cvStart} → {lloyd.cvEnd}</span><span class="key-l">spacing unevenness in <b>{lloyd.runs}</b> simulated runs, where 0 is perfectly even.</span></p>
-            <p class="p-links"><a href="/projects/lloyd/">Read about it</a><a href={repo('lloyd')}>Code on GitHub (PR #247)<span class="visually-hidden"> for Lloyd’s algorithm</span></a></p>
-          </div>
-        </article>
+    </Win>
+    <Win title="lloyd — simulated run" name="Lloyd’s algorithm" id="lloyd" as="article" class="w-lloyd" inClass="fill" labelledby="ly-h" reveal>
+      <HomeLloyd />
+      <div class="w-body">
+        <div>
+          <h3 id="ly-h" class="h">Lloyd’s algorithm</h3>
+          <p class="line">Spreads a drone swarm evenly across a field with a GPS boundary.</p>
+        </div>
+        <p class="read sm sunken"><b>{lloyd.cvStart} → {lloyd.cvEnd}</b><span>median spacing unevenness in simulation. {lloyd.runs} runs converged. 0 is perfectly even.</span></p>
+        <p class="meta"><span><i class="dot in-review"></i>{statusText['in review']} · PR #247</span></p>
+        <div class="links"><a class="btn" href="/projects/lloyd/">Read about it</a><a class="btn" href={p('lloyd').repo}><Icon name="github" />PR #247<span class="visually-hidden"> for Lloyd’s algorithm</span></a></div>
       </div>
-    </section>
+    </Win>
 
-    <article id="dose-coach" class="p-dose wrap grid" aria-labelledby="dose-h">
-      <figure class="d-media">
-        <Picture src={doseTop} fallbackFormat="webp" alt="Dose Coach from above: a blue LCD reading “Bicep Curls, 0/5, Set 1/2”, an Arduino with a Grove shield, and a breadboard with two LEDs and three buttons, on a cardboard base." widths={[400, 700, 1040]} sizes="(max-width: 759px) 70vw, 34vw" formats={['avif', 'webp']} />
-      </figure>
-      <div class="p-text">
-        <h3 id="dose-h" class="head">Dose Coach</h3>
-        <p class="lead">A handheld coach for a supervised exercise class that judges every bicep curl from a sensor on the wrist.</p>
-        <p class="key key-sm"><span class="key-n">{dose.repsSorted}</span><span class="key-l">test reps sorted correctly as good, too fast, half or fast half, recorded after every rule was fixed.</span></p>
-        <p class="status"><StatusBadge slug="dose-coach" /> A first-year design project on a team of 4. I wrote the firmware, built the board and ran the tests.</p>
-        <p class="p-links"><a href="/projects/dose-coach/">Read about Dose Coach</a><a href={repo('dose-coach')}>Code on GitHub<span class="visually-hidden"> for Dose Coach</span></a></p>
+    <div class="sec"><h2><small>// 03</small>Dose Coach</h2><p>First-year design project, team of 4, November 2026.</p></div>
+    <Win title="dose-coach" name="Dose Coach" id="dose-coach" as="article" class="w-dose" inClass="dose-in" labelledby="dose-h" reveal>
+      <figure><div class="sunken"><Picture src={doseTop} fallbackFormat="webp" formats={['avif', 'webp']} widths={[400, 700, 1040]} sizes="(max-width: 900px) 100vw, 24vw" alt="Dose Coach from above: a blue LCD reading “Bicep Curls, 0/5, Set 1/2”, an Arduino with a Grove shield, and a breadboard with two LEDs and three buttons, on a cardboard base." /></div></figure>
+      <div>
+        <h3 id="dose-h" class="h">Dose Coach</h3>
+        <p class="line">A handheld coach for a supervised exercise class that judges every bicep curl from a sensor on the wrist.</p>
+        <p class="meta"><span><i class="dot finished"></i>{statusText.finished}</span></p>
+        <div class="links"><a class="btn go" href="/projects/dose-coach/">Read about Dose Coach</a><a class="btn" href={p('dose-coach').repo}><Icon name="github" />Code<span class="visually-hidden"> for Dose Coach on GitHub</span></a></div>
       </div>
-    </article>
-
-  </section>
-
-  <section id="earlier" class="earlier wrap" aria-labelledby="earlier-h">
-    <h2 id="earlier-h" class="head">High School Projects</h2>
-    <ul>
-      <li id="cybershield">
-        <h3>CyberShield</h3>
-        <p>A Django cybersecurity forum.</p>
-        <p class="dim">{awards.fblc2025}</p>
-        <a href="https://github.com/abtinmbm/cybershield">Code on GitHub<span class="visually-hidden"> for CyberShield</span></a>
-      </li>
-      <li id="school-partner-directory">
-        <h3>School Partner Directory</h3>
-        <p>A Django directory for linking a school with local partners, seeded with 25 sample organizations.</p>
-        <p class="dim">{awards.fbla2024}</p>
-        <a href="https://github.com/abtinmbm/FBLA2024">Code on GitHub<span class="visually-hidden"> for School Partner Directory</span></a>
-      </li>
-    </ul>
-  </section>
-
-  <section id="contact" class="contact" aria-labelledby="contact-h">
-    <div class="c-inner wrap grid">
-      <div class="c-side">
-        <h2 id="contact-h" class="head">Contact</h2>
-        <p>Looking for a co&#8209;op, May to August 2027.</p>
+      <div class="reads">
+        <p class="read sunken"><b>{dose.repsSorted}</b><span>test reps sorted correctly as good, too fast, half or fast half, recorded after every rule was fixed.</span></p>
+        <p class="note">I wrote the firmware, built the board and ran the tests.</p>
       </div>
-      <div class="c-main">
-        <a class="c-mail" href="mailto:aryanpourabtin@gmail.com" data-copy="aryanpourabtin@gmail.com">
-          <span class="c-addr">aryanpourabtin@gmail.com</span>
-          <span class="c-hint small"><span class="c-hint-copy"><Icon name="copy" /> Click to copy</span><span class="c-hint-done"><Icon name="check" /> Copied to clipboard</span></span>
-        </a>
-        <p class="c-alt small"><a href="mailto:aryanpourabtin@gmail.com">Open in your mail app</a></p>
-        <span class="visually-hidden" aria-live="polite" data-copy-status></span>
-        <ul class="c-links">
-          <li><a href="https://github.com/abtinmbm"><span class="c-name">GitHub</span><span class="c-sub small">github.com/abtinmbm</span></a></li>
-          <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><span class="c-name">LinkedIn</span><span class="c-sub small">in/abtin-aryanpour</span></a></li>
-          <li><a href="/resume/"><span class="c-name">Resume</span><span class="c-sub small">One page, with a PDF</span></a></li>
-        </ul>
+    </Win>
+
+    <div class="sec" id="archive"><h2><small>// 04</small>Archive</h2><p>Older and smaller projects. New ones join this table.</p></div>
+    <Win title={`archive — ${old.length} items`} name="Archive" id="archive-win" class="w-arch" label="Archive" reveal>
+      <div class="sunken arch">
+        <table>
+          <caption class="visually-hidden">Earlier projects</caption>
+          <thead><tr><th scope="col">Name</th><th scope="col">What it is</th><th scope="col">Year</th><th scope="col">Recognition</th><th scope="col"><span class="visually-hidden">Link</span></th></tr></thead>
+          <tbody>
+            {old.map((x) => (
+              <tr id={x.slug}>
+                <th scope="row" class="n">{x.name}</th>
+                <td class="what">{x.what ?? x.line}</td>
+                <td class="y num">{x.year}</td>
+                <td class="rec">{x.note}</td>
+                <td class="go"><a href={x.href ?? x.repo}>{x.href ? 'Read' : 'Code'}<span class="visually-hidden"> for {x.name}</span></a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </div>
-  </section>
+    </Win>
+
+    <div class="sec" id="contact"><h2><small>// 05</small>Contact</h2><p>Looking for a co&#8209;op, May to August 2027.</p></div>
+    <Win title="email" name="Email" id="email-win" class="w-mail" label="Email">
+      <a class="mail sunken" href="mailto:aryanpourabtin@gmail.com" data-copy="aryanpourabtin@gmail.com">aryanpourabtin@gmail.com<span class="hint"><span class="c-copy"><Icon name="copy" /> Click to copy</span><span class="c-done"><Icon name="check" /> Copied to clipboard</span></span></a>
+      <p class="alt"><a href="mailto:aryanpourabtin@gmail.com">Open in your mail app</a></p>
+    </Win>
+    <Win title="elsewhere" name="Elsewhere" id="links-win" class="w-links" inClass="links-in" label="Elsewhere">
+      <a class="btn" href="https://github.com/abtinmbm"><span><Icon name="github" /> GitHub</span><span aria-hidden="true">→</span></a>
+      <a class="btn" href="https://www.linkedin.com/in/abtin-aryanpour"><span><Icon name="linkedin" /> LinkedIn</span><span aria-hidden="true">→</span></a>
+      <a class="btn" href="/resume/"><span><Icon name="file" /> Resume</span><span aria-hidden="true">→</span></a>
+    </Win>
+  </div>
 </Base>
 
-<script>
-  // Clicking the address copies it. If the browser won't allow that, the link opens the mail app as usual.
-  const mail = document.querySelector<HTMLAnchorElement>('[data-copy]');
-  const status = document.querySelector('[data-copy-status]');
-  let t = 0;
-  mail?.addEventListener('click', async (e) => {
-    if (!navigator.clipboard) return;
-    e.preventDefault();
-    try {
-      await navigator.clipboard.writeText(mail.dataset.copy!);
-    } catch {
-      location.href = mail.href;
-      return;
-    }
-    mail.classList.add('copied');
-    if (status) status.textContent = 'Email address copied to the clipboard';
-    clearTimeout(t);
-    t = window.setTimeout(() => { mail.classList.remove('copied'); if (status) status.textContent = ''; }, 2200);
-  });
-</script>
-
 <style>
-  /* first screen */
-  /* The sky's glow and trails fade out toward the bottom, into the star field behind the page, with no edge. */
-  .hero { position: relative; height: 100svh; min-height: 820px; overflow: hidden; }
-  /* Only the glow and the trails fade; the labels stay at full strength wherever they land. */
-  .sky { position: absolute; inset: 0; --fade: linear-gradient(to bottom, #000 0%, #000 60%, rgb(0 0 0 / 0.38) 76%, rgb(0 0 0 / 0.12) 88%, transparent 100%); }
-  .sky::before { content: ""; position: absolute; inset: 0; background: radial-gradient(95% 75% at 35% 72%, rgb(13 34 87 / 0.85), rgb(6 16 49 / 0.55) 45%, transparent 82%); }
-  .sky::before, .sky :global(.sky-svg) { -webkit-mask-image: var(--fade); mask-image: var(--fade); }
-  .who { position: absolute; z-index: 3; left: var(--edge); right: var(--edge); bottom: var(--edge);
-    text-shadow: 0 0 6px var(--black), 0 0 18px var(--black); }
-  .who h1 { font-size: var(--t-name); line-height: 1; letter-spacing: 0; white-space: nowrap; margin-bottom: var(--s5); }
-  .who-text p { max-width: 46ch; }
-  .who .avail { margin-top: var(--s3); font-weight: 500; }
+  .tiles { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; align-content: start; }
+  .tiles > :global(.sec) { grid-column: 1 / -1; }
 
-  /* intro */
-  .intro { padding-block: var(--section); align-items: center; }
-  :global(.portrait) { grid-column: 1 / 6; display: block; }
-  :global(.portrait img) { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
-  .intro-text { grid-column: 7 / 13; display: grid; gap: var(--s4); max-width: 36em; }
-  .intro-text h2 { font-size: var(--t-h2); line-height: 1.05; }
-  .lead { font-size: var(--t-lead); line-height: 1.4; }
-  /* Section headings use the body face; the wide display face is kept for page titles. */
-  .head { font-weight: 500; letter-spacing: -0.015em; }
+  .w-name { grid-column: 1 / -1; }
+  .w-name :global(.in) { padding: 34px 32px 30px; display: grid; gap: 26px; }
+  .big { font: 400 clamp(42px, 7.8vw, 108px)/0.95 var(--mono); letter-spacing: -0.03em; text-wrap: wrap; }
+  .lede { font-size: var(--t-lead); line-height: 1.45; max-width: 56ch; }
+  .seek { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .seek .lbl { font: 400 15px var(--mono); padding: 10px 14px; }
 
-  /* projects */
-  .work { display: grid; gap: calc(var(--section) * 2); padding-bottom: var(--section); }
-  .p-text { display: grid; gap: var(--s4); align-content: start; }
-  .p-text h3 { font-size: var(--t-h2); line-height: 1.05; }
-  .status b { font-weight: 500; }
-  .status { color: var(--dim); }
-  .status b { color: var(--white); }
-  .p-links { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
+  .w-index { grid-column: 1 / -1; }
+  .index { list-style: none; margin: 0; padding: 3px; }
+  .index a { display: grid; grid-template-columns: 64px minmax(0, 2.2fr) minmax(0, 4.4fr) 130px; gap: 18px; align-items: baseline; padding: 14px 18px; text-decoration: none; border-bottom: 1px solid var(--rule); }
+  .index li:last-child a { border-bottom: 0; }
+  .index a:hover, .index a:focus-visible { background: var(--fg); color: var(--panel); }
+  .index a:hover .st, .index a:focus-visible .st, .index a:hover .n, .index a:focus-visible .n { color: inherit; }
+  .index .n { font: 400 15px var(--mono); color: var(--accent); }
+  .index .nm { font: 400 30px/1 var(--mono); }
+  .index .ln { font-size: 16px; }
+  .index .st { font: 400 14px var(--mono); color: var(--mute); display: flex; align-items: center; gap: 8px; justify-self: end; white-space: nowrap; }
 
-  .p-andon { align-items: center; }
-  .p-andon .p-text { grid-column: 1 / 6; }
-  .p-media { grid-column: 7 / 13; }
+  :global(.h) { font: 400 40px/1 var(--mono); letter-spacing: -0.02em; margin-bottom: 12px; }
+  .line { margin-bottom: 18px; font-size: 18px; }
+  .read { margin-bottom: 18px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font: 400 14px var(--mono); color: var(--mute); margin-bottom: 18px; }
+  .meta > span { display: inline-flex; align-items: center; gap: 8px; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  figure { margin: 0; }
+  figure :global(img) { display: block; width: 100%; height: auto; }
 
-  /* a hardware project: the photo first, the text beside it */
-  .p-dose { align-items: center; }
-  .d-media { grid-column: 1 / 6; margin: 0; }
-  .d-media :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 1040 / 1250; }
-  .p-dose .p-text { grid-column: 7 / 12; }
+  .w-andon { grid-column: 1 / -1; }
+  .w-andon :global(.andon-in) { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 28px; }
+  .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+  .specs figcaption { font: 400 12px var(--mono); color: var(--mute); margin-top: 4px; }
 
-  /* design-team work: the team as one project, its tasks side by side under it at the same size */
-  .team { display: grid; gap: var(--s7); }
-  .team-head { display: grid; gap: var(--s4); max-width: 46em; }
-  .team-head h3 { font-size: var(--t-h2); line-height: 1.05; }
-  .tasks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s8) var(--gap); }
-  .task { display: grid; grid-template-rows: auto 1fr; gap: var(--s5); align-content: start; }
-  .task-fig { margin: 0; display: grid; gap: var(--s3); }
-  /* both pictures sit in the same frame, so the two tasks line up */
-  .task-fig :global(.fig-box) { display: block; width: 100%; aspect-ratio: 4 / 3; }
-  .task-fig :global(.fig-box img) { width: 100%; height: 100%; object-fit: contain; object-position: left top; }
-  .task-fig :global(svg.fig-box) { overflow: visible; }
-  .task-fig figcaption { color: var(--dim); max-width: 56ch; }
-  .task-text { display: grid; gap: var(--s4); align-content: start; max-width: 36em; }
-  .task-text h4 { font-size: var(--t-h3); line-height: 1.15; }
+  .w-stitch { grid-column: 1 / span 7; }
+  .w-lloyd { grid-column: 8 / span 5; }
+  .w-body { min-width: 0; }
+  .w-body { display: grid; gap: 14px; }
+  .w-body .read, .w-body .meta { margin-block: 0; }
+  .w-stitch :global(.fill), .w-lloyd :global(.fill) { display: grid; gap: 18px; }
+  @media (min-width: 901px) {
+    .w-stitch, .w-lloyd { --warg-media-height: clamp(275px, 34vw, 490px); display: grid; grid-row: span 6; grid-template-rows: subgrid; gap: 0; }
+    .w-stitch :global(.fill), .w-lloyd :global(.fill) { grid-row: span 5; grid-template-rows: subgrid; gap: 10px; }
+    .w-body { grid-row: span 4; grid-template-rows: subgrid; gap: inherit; }
+    .w-stitch:global(.min), .w-lloyd:global(.min) { display: block; align-self: start; }
+  }
 
-  /* earlier work */
-  .earlier { padding-block: var(--section); border-top: 1px solid var(--line); }
-  .earlier h2 { font-size: var(--t-h2); line-height: 1.05; margin-bottom: var(--s6); }
-  .earlier ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7) var(--gap); }
-  .earlier li { display: grid; gap: var(--s2); align-content: start; max-width: 34em; }
-  .earlier h3 { font-size: 18px; }
+  .w-dose { grid-column: 1 / -1; }
+  .w-dose :global(.dose-in) { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 5fr); gap: 28px; align-items: start; }
+  .reads .read { margin: 0; }
+  .note { margin-top: 14px; color: var(--mute); font-size: 16px; }
 
-  /* contact: open to the star field behind the page */
-  .contact { position: relative; overflow: hidden; border-top: 1px solid var(--line); }
-  .c-inner { padding-block: var(--s9); row-gap: var(--s7); align-items: start; }
-  .c-side { grid-column: 1 / 5; display: grid; gap: var(--s4); }
-  .c-side h2 { font-size: var(--t-h2); line-height: 1.05; }
-  .c-main { grid-column: 5 / 13; display: grid; gap: var(--s3); min-width: 0; }
-  .c-mail { display: grid; gap: var(--s3); justify-items: start; text-decoration: none; width: fit-content; max-width: 100%; }
-  .c-addr { font-weight: 500; letter-spacing: -0.01em; font-size: clamp(20px, 2.8vw, 42px); line-height: 1.15; white-space: nowrap;
-    text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.16em; text-decoration-color: rgb(243 245 255 / 0.4); transition: text-decoration-color 160ms ease; }
-  .c-mail:hover .c-addr, .c-mail:focus-visible .c-addr { text-decoration-color: var(--white); }
-  .c-mail:focus-visible { outline: 2px solid var(--white); outline-offset: 6px; }
-  .c-hint { color: var(--dim); display: inline-grid; }
-  .c-hint > span { grid-area: 1 / 1; display: inline-flex; align-items: center; gap: 8px; transition: opacity 160ms ease; }
-  .c-hint-done { opacity: 0; color: var(--white); }
-  .c-mail.copied .c-hint-copy { opacity: 0; }
-  .c-mail.copied .c-hint-done { opacity: 1; }
-  .c-alt { color: var(--dim); }
-  .c-links { list-style: none; margin: var(--s7) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--gap); }
-  .c-links a { display: grid; gap: 2px; padding-top: var(--s3); border-top: 1px solid rgb(243 245 255 / 0.4); text-decoration: none; transition: border-color 160ms ease; }
-  .c-links a:hover { border-top-color: var(--white); }
-  .c-links a:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
-  .c-name { font-weight: 500; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.22em; }
-  .c-links a:hover .c-name { text-decoration-thickness: 2px; }
-  .c-sub { color: var(--dim); overflow-wrap: anywhere; }
+  .w-arch { grid-column: 1 / -1; }
+  .w-arch :global(.in) { padding: 14px; }
+  .arch { padding: 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  thead th { text-align: left; font: 400 14px var(--mono); padding: 8px 10px; border-bottom: 2px solid var(--fg); }
+  td, tbody th { padding: 12px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; text-align: left; font-weight: 400; }
+  tbody tr:last-child > * { border-bottom: 0; }
+  .n { font: 400 20px var(--mono); white-space: nowrap; }
+  .y { font-family: var(--mono); }
+  tbody tr:hover { background: var(--fg); color: var(--panel); }
+  tbody tr:hover a { color: inherit; }
 
-  @media (max-width: 759px) {
-    .hero { height: auto; min-height: 0; overflow: visible; }
-    .sky { position: relative; height: min(70svh, 520px); overflow: hidden; --fade: linear-gradient(to bottom, #000 0%, #000 74%, transparent 100%); }
-    .who { position: relative; left: auto; right: auto; bottom: auto; margin-top: -56px; padding: 0 var(--edge); }
-    .who h1 { font-size: clamp(22px, 7.6vw, 44px); margin-bottom: var(--s4); }
-    .intro { row-gap: var(--s5); }
-    :global(.portrait) { grid-column: 1 / 9; }
-    .intro { align-items: start; }
-    .intro-text { grid-column: 1 / 13; }
-    .earlier h2 { margin-bottom: var(--s5); }
-    .p-andon .p-text, .p-media { grid-column: 1 / 13; }
-    .p-media { margin-top: var(--s5); }
-    .d-media { grid-column: 1 / 10; }
-    .p-dose .p-text { grid-column: 1 / 13; margin-top: var(--s5); }
-    .earlier ul { grid-template-columns: 1fr; }
-    .tasks { grid-template-columns: 1fr; }
-    .c-inner { padding-block: var(--s8); row-gap: var(--s5); }
-    .c-side, .c-main { grid-column: 1 / -1; }
-    .c-addr { font-size: clamp(17px, 5.2vw, 28px); white-space: normal; overflow-wrap: anywhere; }
-    .c-links { grid-template-columns: 1fr; margin-top: var(--s5); }
-    .c-links a { grid-template-columns: auto 1fr; align-items: baseline; padding-block: var(--s3); }
-    .c-sub { justify-self: end; }
+  .w-mail { grid-column: 1 / span 8; }
+  .w-links { grid-column: 9 / span 4; }
+  .mail { display: block; text-decoration: none; padding: 26px 24px; font: 400 clamp(24px, 3.2vw, 50px)/1.1 var(--mono); overflow-wrap: anywhere; }
+  .mail .hint { display: flex; font: 450 15px var(--text); color: var(--mute); margin-top: 10px; }
+  .mail .hint span { display: inline-flex; align-items: center; gap: 6px; }
+  .mail .c-done { display: none !important; color: var(--accent); }
+  .mail:global(.copied) .c-done { display: inline-flex !important; }
+  .mail:global(.copied) .c-copy { display: none !important; }
+  .alt { margin-top: 12px; font-size: 14px; }
+  .w-links :global(.links-in) { display: grid; gap: 10px; align-content: start; }
+  .w-links .btn { justify-content: space-between; }
+  .w-links .btn span { display: inline-flex; align-items: center; gap: 8px; }
+
+  @media (max-width: 900px) {
+    .tiles > :global(*) { grid-column: 1 / -1 !important; }
+    .w-name :global(.in) { padding: 22px 18px; }
+    .index a { grid-template-columns: 26px minmax(0, 1fr) auto; gap: 4px 9px; padding: 14px 12px; }
+    .index .ln { grid-column: 2 / -1; }
+    .index .st { grid-row: 1; grid-column: 3; }
+    .index .nm { font-size: 24px; }
+    .w-andon :global(.andon-in), .w-dose :global(.dose-in) { grid-template-columns: 1fr; }
+    thead { display: none; }
+    tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; border-bottom: 1px solid var(--rule); padding: 8px 0; }
+    tbody tr:last-child { border-bottom: 0; }
+    td, tbody th { border: 0 !important; padding: 3px 10px; }
+    tbody .n { white-space: normal; overflow-wrap: anywhere; }
+    .what, .rec { grid-column: 1 / -1; }
+  }
+  @media (max-width: 359px) {
+    .index .st { grid-row: auto; grid-column: 2 / -1; justify-self: start; }
   }
 </style>

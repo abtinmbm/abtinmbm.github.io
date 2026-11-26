@@ -33,7 +33,7 @@ const pct = (v: number) => `${(((v - min) / (max - min)) * 100).toFixed(2)}%`;
   .b-row { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: 12px; align-items: center; }
   .b-label { color: var(--dim); }
   .b-track { position: relative; height: 14px; margin-right: 4.5em; }
-  .b-bar { position: absolute; top: 0; bottom: 0; min-width: 2px; background: #3b4f8f; }
+  .b-bar { position: absolute; top: 0; bottom: 0; min-width: 2px; background: var(--viz); }
   .b-bar.strong { background: var(--white); }
   .b-bar b { position: absolute; left: calc(100% + 8px); top: 50%; transform: translateY(-50%); white-space: nowrap; font-weight: 400; font-size: 12.5px; color: var(--dim); }
   .b-bar.strong b { color: var(--white); }

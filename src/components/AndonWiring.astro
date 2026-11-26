@@ -6,9 +6,9 @@ const pins = [
   [40, 'GP10'], [76, 'GP11'], [112, 'GP12'], [160, 'GP14'], [310, 'GP16'], [428, 'GP18'], [458, 'GP19'], [488, 'GP20'],
 ] as const;
 const leds = [
-  { y: 40, c: '#2e9d4f', name: 'Green' },
-  { y: 76, c: '#f2b705', name: 'Yellow' },
-  { y: 112, c: '#d62828', name: 'Red' },
+  { y: 40, c: 'var(--G)', name: 'Green' },
+  { y: 76, c: 'var(--Y)', name: 'Yellow' },
+  { y: 112, c: 'var(--R)', name: 'Red' },
 ];
 const X = 345; // the shared ground line for the light and the button
 ---
@@ -86,7 +86,7 @@ const X = 345; // the shared ground line for the light and the button
   .w { fill: none; stroke: var(--white); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
   .w.bg { fill: var(--black); }
   .r { fill: var(--black); stroke: var(--white); stroke-width: 1.25; }
-  .block { fill: rgb(59 79 143 / 0.25); stroke: var(--white); stroke-width: 1.25; }
+  .block { fill: var(--tint); stroke: var(--white); stroke-width: 1.25; }
   .fill, .dot { fill: var(--white); }
   .wiring .name { font-size: 18px; font-weight: 500; }
   .wiring .group { font-size: 15px; font-weight: 500; }

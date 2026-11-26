@@ -1,10 +1,8 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { skyEntries } from '../src/data/projects';
+import { featured } from '../src/data/projects';
 
-const sky = skyEntries();
-
-const pages = ['/', '/projects/andon/', '/projects/image-stitcher/', '/projects/lloyd/', '/about/', '/resume/', '/photography/', '/404'];
+const pages = ['/', '/tour/', '/projects/andon/', '/projects/image-stitcher/', '/projects/lloyd/', '/projects/dose-coach/', '/about/', '/resume/', '/photography/', '/404'];
 const widths = [320, 390, 768, 1280, 1920];
 
 for (const path of pages) {
@@ -12,7 +10,9 @@ for (const path of pages) {
     const errors: string[] = [];
     page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
     page.on('pageerror', (e) => errors.push(e.message));
-    await page.goto(path, { waitUntil: 'networkidle' });
+    const response = await page.goto(path, { waitUntil: 'load' });
+    expect(response?.status()).toBe(200);
+    await expect(page.locator('#boot')).toBeHidden();
     await expect(page.locator('h1')).toHaveCount(1);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
     expect(results.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
@@ -22,14 +22,15 @@ for (const path of pages) {
   for (const w of widths) {
     test(`${path} has no horizontal overflow at ${w}px`, async ({ page }) => {
       await page.setViewportSize({ width: w, height: 900 });
-      await page.goto(path, { waitUntil: 'networkidle' });
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      await page.evaluate(() => document.fonts.ready);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow).toBeLessThanOrEqual(0);
     });
   }
 
   test(`${path} can be worked through with the keyboard`, async ({ page }) => {
-    await page.goto(path, { waitUntil: 'networkidle' });
+    await page.goto(path, { waitUntil: 'domcontentloaded' });
     const links = await page.locator('a[href]:visible').count();
     const seen = new Set<string>();
     for (let i = 0; i < links + 2; i++) {
@@ -46,24 +47,96 @@ for (const path of pages) {
   });
 }
 
-test('star trails draw one labelled trail per recent project', async ({ page }) => {
+test('desktop shortcuts restore and focus Featured windows', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/', { waitUntil: 'networkidle' });
-  await expect(page.locator('.sky-labels a')).toHaveCount(sky.length);
-  await expect(page.locator('.sky-labels a', { hasText: 'Andon' })).toHaveAttribute('href', '/projects/andon/');
-  // WARG is one trail, pointing to its section.
-  await expect(page.locator('.sky-labels a', { hasText: 'WARG' })).toHaveAttribute('href', '#warg');
-  await expect(page.locator('.sky-labels a', { hasText: 'High School Projects' })).toHaveAttribute('href', '#earlier');
-  await expect(page.locator('.t-proj')).toHaveCount(sky.length);
+  await page.goto('/');
+  const taskbar = page.getByRole('navigation', { name: 'Project windows' });
+  await expect(taskbar.getByRole('link')).toHaveCount(featured().length);
+  const andon = page.locator('#andon[data-win]');
+  const toggle = andon.locator('[data-min]');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  const tab = taskbar.getByRole('link', { name: 'Andon' });
+  await tab.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(toggle).toBeFocused();
+  await expect(tab).toHaveAttribute('aria-current', 'location');
 });
 
-test('star trails still show a sky without JavaScript', async ({ browser }) => {
+test('the desktop and Featured projects are readable without JavaScript', async ({ browser }) => {
   const ctx = await browser.newContext({ javaScriptEnabled: false });
   const page = await ctx.newPage();
   await page.goto('/');
-  await expect(page.locator('.t-proj')).toHaveCount(sky.length);
-  await expect(page.locator('#work a[href="/projects/andon/"]')).toBeVisible();
+  await expect(page.locator('#boot')).toBeHidden();
+  await expect(page.getByRole('link', { name: 'Read about Andon' })).toBeVisible();
+  await expect(page.locator('#andon [data-min]')).toBeHidden();
   await ctx.close();
+});
+
+test('the boot fades into the desktop once, and following a page link uses a view transition', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.addInitScript(() => {
+    window.addEventListener('pagereveal', (event) => {
+      if (event.viewTransition) document.documentElement.dataset.pageTransition = 'active';
+    });
+  });
+  const start = new Date();
+  await page.clock.install({ time: start });
+  await page.clock.pauseAt(new Date(start.getTime() + 1000));
+  await page.goto('/');
+
+  const boot = page.locator('#boot');
+  await expect(boot).toBeVisible();
+  await page.clock.runFor(1250);
+  await expect(boot).not.toHaveClass(/out/);
+  await page.clock.runFor(750);
+  await expect(boot).toHaveClass(/out/);
+  await page.clock.runFor(250);
+  await expect(boot).toHaveCount(0);
+
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'About' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-page-transition', 'active');
+  await expect(boot).toHaveCount(0);
+});
+
+test('WARG windows share the same rows and the homepage map has a keyboard slider', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
+  const range = page.getByRole('slider', { name: 'Photos in the simulated map' });
+  await range.focus();
+  await page.keyboard.press('End');
+  await expect(range).toHaveAttribute('aria-valuetext', '91 of 91 photos');
+  await expect(page.locator('.hs-frame.on img')).toHaveAttribute('alt', /91 of 91/);
+  for (const selector of ['.h', '.read', '.meta', '.links']) {
+    const [left, right] = await page.locator(`.w-body ${selector}`).evaluateAll((items) => items.map((item) => item.getBoundingClientRect().top));
+    expect(Math.abs(left - right)).toBeLessThan(1);
+  }
+});
+
+test('the homepage taskbar follows hover and selection when both WARG windows are visible', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const stitcher = page.locator('[data-tab="image-stitcher"]');
+  const lloyd = page.locator('[data-tab="lloyd"]');
+  const highlighted = page.locator('[data-tab].in-view');
+
+  await stitcher.click();
+  await expect(stitcher).toHaveAttribute('aria-current', 'location');
+  await expect(highlighted).toHaveAttribute('data-tab', 'image-stitcher');
+  await page.locator('#lloyd > .tb .t').hover();
+  await expect(highlighted).toHaveAttribute('data-tab', 'lloyd');
+  await page.locator('#image-stitcher > .tb .t').hover();
+  await expect(highlighted).toHaveAttribute('data-tab', 'image-stitcher');
+
+  await lloyd.click();
+  await expect(lloyd).toHaveAttribute('aria-current', 'location');
+  await expect(highlighted).toHaveAttribute('data-tab', 'lloyd');
+  await stitcher.click();
+  await expect(highlighted).toHaveAttribute('data-tab', 'image-stitcher');
 });
 
 test('the Andon replay plays when motion is allowed and can be paused', async ({ page }) => {
@@ -80,6 +153,93 @@ test('the Andon replay plays when motion is allowed and can be paused', async ({
   await page.waitForTimeout(500);
   expect(await now.textContent()).toBe(paused);
 });
+
+test('the demo tour follows Featured order and silences Andon when leaving the slide', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Take the demo tour' }).click();
+  const audio = page.locator('[data-replay] audio');
+  const sound = page.getByRole('button', { name: 'Sound', exact: true });
+  const next = page.getByRole('button', { name: 'Next demo' });
+  await expect(page.getByRole('heading', { name: 'Can a fan tell you it’s failing?' })).toBeVisible();
+  await expect(sound).toHaveAttribute('aria-pressed', 'false');
+  await expect(audio).toHaveJSProperty('muted', true);
+  await expect(audio).toHaveJSProperty('paused', true);
+  await page.getByRole('button', { name: 'Jump to fault' }).click();
+  await sound.click();
+  await expect(sound).toHaveAttribute('aria-pressed', 'true');
+  await expect(audio).toHaveJSProperty('paused', false);
+  await expect.poll(() => audio.evaluate((el: HTMLAudioElement) => el.currentTime)).toBeGreaterThan(115);
+  const range = page.getByRole('slider', { name: 'Replay time' });
+  await expect.poll(async () => {
+    const playhead = await range.evaluate((el: HTMLInputElement) => el.valueAsNumber);
+    const playback = await audio.evaluate((el: HTMLAudioElement) => el.currentTime);
+    return Math.abs(playhead - playback);
+  }).toBeLessThan(0.5);
+  await next.click();
+  await expect(audio).toHaveJSProperty('paused', true);
+  await expect(page.getByRole('heading', { name: 'How do scattered photos become one map?' })).toBeVisible();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('heading', { name: 'How do drones spread out evenly?' })).toBeVisible();
+  await next.click();
+  await expect(page.getByRole('heading', { name: 'Can a wrist sensor coach a curl?' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Finish tour' })).toBeFocused();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page).toHaveURL(/#demo-lloyd$/);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'How do drones spread out evenly?' })).toBeVisible();
+});
+
+test('the demo tour shows each project and its full write-up link without JavaScript', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  try {
+    const page = await context.newPage();
+    await page.goto('/tour/');
+    for (const project of featured()) {
+      await expect(page.getByRole('link', { name: `Read about ${project.name}` })).toBeVisible();
+    }
+  } finally {
+    await context.close();
+  }
+});
+
+for (const path of ['/tour/', '/projects/andon/']) {
+  test(`${path} can seek with sound on and preserves sound on pause and resume`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(path);
+    const replay = page.locator('[data-replay]');
+    const sound = replay.getByRole('button', { name: 'Sound', exact: true });
+    const audio = replay.locator('audio');
+    const position = () => audio.evaluate((el: HTMLAudioElement) => el.currentTime);
+    const timeline = replay.getByRole('slider', { name: 'Replay time' });
+
+    await sound.click();
+    await expect(audio).toHaveJSProperty('paused', false);
+    await timeline.focus();
+    await page.keyboard.press('Home');
+    await expect.poll(position).toBeLessThan(5);
+    await replay.getByRole('button', { name: 'Jump to fault' }).click();
+    await expect.poll(position).toBeGreaterThan(115);
+    await expect.poll(() => timeline.evaluate((el: HTMLInputElement) => el.valueAsNumber)).toBeGreaterThan(115);
+
+    await timeline.scrollIntoViewIfNeeded();
+    const bounds = (await timeline.boundingBox())!;
+    await page.mouse.move(bounds.x + bounds.width * 0.75, bounds.y + bounds.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(bounds.x + bounds.width * 0.4, bounds.y + bounds.height / 2, { steps: 8 });
+    await page.mouse.up();
+    await expect.poll(position).toBeLessThan(70);
+    await expect.poll(position).toBeGreaterThan(50);
+
+    await replay.getByRole('button', { name: 'Pause replay' }).click();
+    await expect(audio).toHaveJSProperty('paused', true);
+    await expect(sound).toHaveAttribute('aria-pressed', 'true');
+    await replay.getByRole('button', { name: 'Play replay' }).click();
+    await expect(audio).toHaveJSProperty('paused', false);
+    await expect(audio).toHaveJSProperty('muted', false);
+    await expect.poll(position).toBeGreaterThan(50);
+  });
+}
 
 test('the stitcher map grows with the slider and the keyboard', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -107,9 +267,10 @@ test('the stitcher page shows the finished map without JavaScript', async ({ bro
   await ctx.close();
 });
 
-test('every page has its own sharing image, and the sitemap lists the pages', async ({ page, request }) => {
+test('sharing images load and the sitemap lists every content page', async ({ page, request }) => {
   const seen = new Set<string>();
-  for (const path of pages.filter((p) => p !== '/404')) {
+  const sharePages = pages.filter((p) => p !== '/404');
+  for (const path of sharePages) {
     await page.goto(path);
     const img = await page.locator('meta[property="og:image"]').getAttribute('content');
     expect(img).toBeTruthy();
@@ -118,7 +279,7 @@ test('every page has its own sharing image, and the sitemap lists the pages', as
     seen.add(img!);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://abtinmbm.github.io${path}`);
   }
-  expect(seen.size).toBe(pages.length - 1);
+  expect(seen.size).toBe(sharePages.length);
   const map = await (await request.get('/sitemap.xml')).text();
   for (const path of pages.filter((p) => p !== '/404')) expect(map).toContain(`https://abtinmbm.github.io${path}<`);
   expect((await request.get('/robots.txt')).status()).toBe(200);
@@ -210,6 +371,8 @@ test('the Lloyd run shows the finished swarm when motion is reduced, and replays
 
 test('status badges read from the project list', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('#image-stitcher .badge')).toHaveText('Merged');
-  await expect(page.locator('#lloyd .badge')).toHaveText('In review');
+  const stitcher = featured().find((project) => project.slug === 'image-stitcher')!;
+  const lloyd = featured().find((project) => project.slug === 'lloyd')!;
+  await expect(page.locator('#image-stitcher .meta')).toContainText(new RegExp(stitcher.status, 'i'));
+  await expect(page.locator('#lloyd .meta')).toContainText(new RegExp(lloyd.status, 'i'));
 });

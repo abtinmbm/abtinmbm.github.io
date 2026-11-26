@@ -2,14 +2,19 @@
 import trace from '../data/andon-replay.json';
 import { chartSvg, redDelay, STATE_TEXT } from '../lib/replay';
 
-interface Props { captionId: string; }
-const { captionId } = Astro.props;
+interface Props { captionId: string; autoplay?: boolean; }
+const { captionId, autoplay = true } = Astro.props;
 const n = trace.t.length;
 // First paint and the no-JS view show the finished replay.
 const initial = chartSvg(trace, n, 880, 340);
 const label = `Anomaly score over two and a half minutes of one fan's sound. During normal running it stays mostly under both limits. A few windows go over, which turns the light yellow briefly, but never three in a row over the control limit. After the fault starts it jumps above the control limit, and the light turns red ${redDelay(trace).toFixed(1)} seconds later.`;
 ---
-<figure class="replay" data-replay aria-describedby={captionId}>
+<figure class="replay" data-replay data-autoplay={autoplay ? '' : undefined} aria-describedby={captionId}>
+  <div class="rp-bar" hidden>
+    <button type="button" class="btn sm rp-toggle">Play replay</button>
+    <button type="button" class="btn sm rp-jump">Jump to fault</button>
+    <button type="button" class="btn sm rp-sound" aria-pressed="false">Sound <span aria-hidden="true">off</span></button>
+  </div>
   <div class="rp-stage">
     <div class="rp-light">
       <span class="rp-lamps" aria-hidden="true"><i data-l="R" class="on"></i><i data-l="Y"></i><i data-l="G"></i></span>
@@ -17,56 +22,62 @@ const label = `Anomaly score over two and a half minutes of one fan's sound. Dur
     </div>
     <svg class="rp-chart" viewBox="0 0 880 340" role="img" aria-label={label} set:html={initial} />
   </div>
-  <div class="rp-bar">
-    <button type="button" class="rp-toggle" hidden>Play replay</button>
-    <span class="rp-now small dim num" aria-hidden="true"></span>
+  <div class="rp-controls" hidden>
+    <div class="rp-scrub">
+      <label for={`${captionId}-time`}>Replay time</label>
+      <input id={`${captionId}-time`} type="range" min="0" max={trace.faultEnd} step="any" value={trace.faultEnd} />
+      <span class="rp-now small dim num" aria-hidden="true"></span>
+    </div>
+    <details class="rp-credit">
+      <summary>Recording source</summary>
+      <p>Fan audio from the <a href="https://zenodo.org/records/3678171">DCASE 2020 Task 2 development set</a> (Koizumi et al., MIMII recordings by Purohit et al.). Clips joined, padded and encoded as MP3 under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+    </details>
+    <span class="visually-hidden rp-message" role="status"></span>
+    <audio src="/audio/andon-fan-replay.mp3" preload="none" muted></audio>
   </div>
   <slot />
 </figure>
 
 <style is:global>
   .replay { margin: 0; }
-  .replay { --rp-col: 128px; --rp-gap: 64px; }
-  .rp-stage { display: grid; grid-template-columns: var(--rp-col) minmax(0, 1fr); gap: var(--rp-gap); align-items: center; }
-  .rp-light { display: grid; justify-items: start; gap: var(--s4); }
-  .rp-lamps { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 40px; }
-  .rp-lamps i { width: 34px; height: 34px; border-radius: 50%; background: rgb(243 245 255 / 0.07); }
-  .rp-lamps i.on[data-l="R"] { background: #d62828; }
-  .rp-lamps i.on[data-l="Y"] { background: #f2b705; }
-  .rp-lamps i.on[data-l="G"] { background: #2e9d4f; }
-  .rp-state { font-size: 14px; color: var(--dim); line-height: 1.3; min-height: 2.6em; }
-  .rp-chart { display: block; width: 100%; height: auto; overflow: visible; }
-  .rp-grid { stroke: var(--line); stroke-width: 1; }
-  .rp-tick { font-size: 12px; fill: var(--dim); font-variant-numeric: tabular-nums; }
-  .rp-note { font-size: 13px; fill: var(--dim); }
-  .rp-strong { fill: var(--white); font-weight: 500; }
+  .rp-stage { box-shadow: var(--bevel-in); background: var(--well); padding: 2px; }
+  .rp-light { display: flex; align-items: center; gap: 14px; padding: 10px 12px; }
+  .rp-lamps { display: flex; gap: 4px; }
+  .rp-lamps i { width: 30px; height: 14px; background: var(--lamp-off); box-shadow: inset 1px 1px 0 var(--lo2), inset -1px -1px 0 var(--hi); }
+  .rp-lamps i.on[data-l="R"] { background: var(--R); }
+  .rp-lamps i.on[data-l="Y"] { background: var(--Y); }
+  .rp-lamps i.on[data-l="G"] { background: var(--G); }
+  .rp-state { font: 400 15px var(--mono); }
+  .rp-chart { display: block; width: 100%; height: auto; overflow: visible; padding: 4px 12px 12px; box-sizing: border-box; }
+  .rp-grid { stroke: var(--rule); stroke-width: 1; }
+  .rp-tick { font: 400 11px var(--mono); fill: var(--mute); font-variant-numeric: tabular-nums; }
+  .rp-note { font: 400 11px var(--mono); fill: var(--mute); }
+  .rp-strong { fill: var(--accent); }
   .rp-limit { stroke-width: 1.4; stroke-dasharray: 6 5; }
-  .rp-fault { stroke: var(--white); stroke-opacity: 0.55; stroke-width: 1; stroke-dasharray: 2 4; }
-  .rp-ghost { fill: none; stroke: var(--white); stroke-opacity: 0.22; stroke-width: 1.2; stroke-linejoin: round; }
-  .rp-score { fill: none; stroke: var(--white); stroke-width: 1.6; stroke-linejoin: round; }
-  .rp-bar { display: flex; align-items: baseline; gap: var(--s5); margin-top: var(--s4); padding-left: calc(var(--rp-col) + var(--rp-gap)); min-height: 1.6em; }
-  .rp-toggle { font: inherit; font-size: 15px; color: var(--white); background: none; border: 0; padding: 4px 0; cursor: pointer;
-    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
-  .rp-toggle:hover, .rp-toggle:focus-visible { text-decoration-thickness: 2px; }
-  .replay figcaption { margin-top: var(--s3); padding-left: calc(var(--rp-col) + var(--rp-gap)); color: var(--dim); max-width: calc(64ch + var(--rp-col) + var(--rp-gap)); }
-  @media (max-width: 599px) {
-    .rp-stage { grid-template-columns: 1fr; gap: var(--s5); }
-    .rp-light { grid-auto-flow: column; justify-content: start; align-items: center; }
-    .rp-lamps { grid-auto-flow: column; padding: 8px; }
-    .rp-lamps i { width: 26px; height: 26px; }
-    .rp-state { min-height: 0; }
-    .rp-bar, .replay figcaption { padding-left: 0; }
-  }
+  .rp-fault { stroke: var(--fg); stroke-opacity: 0.55; stroke-width: 1; stroke-dasharray: 2 4; }
+  .rp-ghost { fill: none; stroke: var(--fg); stroke-opacity: 0.16; stroke-width: 1.2; stroke-linejoin: round; }
+  .rp-score { fill: none; stroke: var(--fg); stroke-width: 1.6; stroke-linejoin: round; }
+  .rp-controls { display: grid; gap: 9px; margin-top: 12px; }
+  .rp-controls[hidden], .rp-bar[hidden] { display: none; }
+  .rp-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .rp-sound { gap: 5px; }
+  .rp-scrub { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+  .rp-scrub label { font-size: 13px; }
+  .rp-scrub input { margin: 0; flex: 1 1 6rem; min-width: 0; accent-color: var(--accent); }
+  .rp-now { font: 400 12px var(--mono); color: var(--mute); }
+  .rp-credit { color: var(--mute); font-size: 12.5px; }
+  .rp-credit summary { cursor: pointer; }
+  .replay figcaption { margin-top: 10px; color: var(--mute); font-size: 13.5px; line-height: 1.45; max-width: 70ch; }
 </style>
 
 <script>
-  import { chartSvg, type Trace } from '../lib/replay';
+  import { chartSvg, STATE_TEXT, type Trace } from '../lib/replay';
   import data from '../data/andon-replay.json';
-  import { STATE_TEXT } from '../lib/replay';
 
   const tr = data as Trace;
   const N = tr.t.length;
-  const HOLD = 24; // windows' worth of pause on the final state, 3 s at 8 per second
+  const end = tr.faultEnd;
+  const beforeFault = Math.max(0, tr.faultStart - 5);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   for (const fig of document.querySelectorAll<HTMLElement>('[data-replay]')) {
@@ -75,34 +86,137 @@ const label = `Anomaly score over two and a half minutes of one fan's sound. Dur
     const state = fig.querySelector<HTMLElement>('.rp-state')!;
     const now = fig.querySelector<HTMLElement>('.rp-now')!;
     const btn = fig.querySelector<HTMLButtonElement>('.rp-toggle')!;
-    let n = N, timer = 0, playing = false, visible = false, wanted = !reduce;
+    const soundBtn = fig.querySelector<HTMLButtonElement>('.rp-sound')!;
+    const soundLabel = soundBtn.querySelector('span')!;
+    const range = fig.querySelector<HTMLInputElement>('input')!;
+    const audio = fig.querySelector<HTMLAudioElement>('audio')!;
+    const message = fig.querySelector<HTMLElement>('.rp-message')!;
+    let time = end, timer = 0, visible = false, wanted = fig.hasAttribute('data-autoplay') && !reduce;
+    let sound = false, hold = 0, scrubbing = false;
+    let pendingSeek: number | null = null;
 
     const render = () => {
       const W = Math.round(svg.clientWidth) || 880;
       const H = W < 520 ? Math.round(W * 0.78) : Math.round(Math.min(380, Math.max(300, W * 0.4)));
       svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      const next = tr.t.findIndex((point) => point > time);
+      const n = next === -1 ? N : next;
       svg.innerHTML = chartSvg(tr, n, W, H);
       const l = (n ? tr.light[n - 1] : 'G') as keyof typeof STATE_TEXT;
       lamps.forEach((i) => i.classList.toggle('on', i.dataset.l === l));
       state.textContent = STATE_TEXT[l];
-      now.textContent = `${(n ? tr.t[n - 1] : 0).toFixed(1)} s of ${tr.t[N - 1].toFixed(0)} s, at 8× speed`;
+      const elapsed = `${time.toFixed(1)} s of ${end.toFixed(0)} s`;
+      if (!scrubbing) range.valueAsNumber = time;
+      range.setAttribute('aria-valuetext', `${elapsed}, ${STATE_TEXT[l]}`);
+      now.textContent = `${elapsed} · ${sound ? '1×' : '8×'}`;
     };
-    let hold = 0;
+    const setSound = (on: boolean) => {
+      sound = on;
+      audio.muted = !on;
+      soundBtn.setAttribute('aria-pressed', String(on));
+      soundLabel.textContent = on ? 'on' : 'off';
+    };
+    const readAudioTime = () => {
+      if (pendingSeek === null && !audio.seeking) time = Math.min(end, audio.currentTime);
+    };
     const tick = () => {
-      if (n < N) n++;
-      else if (++hold > HOLD) { n = 1; hold = 0; }
+      if (sound) readAudioTime();
+      else if (time < end) time = Math.min(end, time + 1);
+      else if (++hold > 24) { time = 0; hold = 0; }
       render();
     };
     const sync = () => {
       const run = wanted && visible;
-      if (run && !playing) { if (n >= N) { n = 0; hold = 0; } timer = window.setInterval(tick, 125); playing = true; }
-      if (!run && playing) { clearInterval(timer); playing = false; }
+      if (run && !timer) timer = window.setInterval(tick, 125);
+      if (!run && timer) { clearInterval(timer); timer = 0; }
       btn.textContent = wanted ? 'Pause replay' : 'Play replay';
     };
+    const pause = () => {
+      if (sound && !audio.ended) readAudioTime();
+      wanted = false;
+      audio.pause();
+      sync();
+      render();
+    };
+    const seekAudio = () => {
+      if (Math.abs(audio.currentTime - time) < 0.01 && !audio.seeking) return;
+      pendingSeek = time;
+      audio.currentTime = time;
+    };
+    const seek = (position: number) => {
+      time = position;
+      hold = 0;
+      if (sound) seekAudio();
+      render();
+    };
+    const playAudio = async () => {
+      message.textContent = '';
+      seekAudio();
+      try { await audio.play(); }
+      catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setSound(false);
+        pendingSeek = null;
+        pause();
+        message.textContent = 'The fan recording could not play.';
+      }
+    };
 
-    btn.hidden = false;
-    btn.addEventListener('click', () => { wanted = !wanted; sync(); });
-    new IntersectionObserver(([e]) => { visible = e.isIntersecting; sync(); }, { threshold: 0.35 }).observe(fig);
+    fig.querySelector<HTMLElement>('.rp-controls')!.hidden = false;
+    fig.querySelector<HTMLElement>('.rp-bar')!.hidden = false;
+    btn.addEventListener('click', () => {
+      if (wanted) { pause(); return; }
+      if (time >= end) seek(0);
+      wanted = true;
+      sync();
+      if (sound) void playAudio();
+    });
+    fig.querySelector('.rp-jump')!.addEventListener('click', () => {
+      if (!sound) pause();
+      seek(beforeFault);
+    });
+    range.addEventListener('pointerdown', () => { scrubbing = true; });
+    const endScrub = () => { if (scrubbing) { scrubbing = false; render(); } };
+    window.addEventListener('pointerup', endScrub);
+    window.addEventListener('pointercancel', endScrub);
+    range.addEventListener('input', () => {
+      if (!sound) { wanted = false; sync(); }
+      seek(range.valueAsNumber);
+    });
+    soundBtn.addEventListener('click', () => {
+      if (sound) {
+        readAudioTime();
+        setSound(false);
+        audio.pause();
+        pendingSeek = null;
+        render();
+        return;
+      }
+      if (time >= end) seek(beforeFault);
+      wanted = true;
+      setSound(true);
+      sync();
+      render();
+      void playAudio();
+    });
+    audio.addEventListener('seeked', () => {
+      if (pendingSeek !== null && Math.abs(audio.currentTime - pendingSeek) < 0.25) pendingSeek = null;
+    });
+    audio.addEventListener('ended', () => { time = end; pendingSeek = null; pause(); });
+    audio.addEventListener('pause', () => { if (sound && wanted && audio.paused && !audio.ended) pause(); });
+    audio.addEventListener('play', () => {
+      for (const other of document.querySelectorAll('audio')) if (other !== audio) other.pause();
+    });
+    document.addEventListener('play', (event) => {
+      if (sound && wanted && event.target instanceof HTMLMediaElement && event.target !== audio) pause();
+    }, true);
+    document.addEventListener('visibilitychange', () => { if (document.hidden && sound && wanted) pause(); });
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (!visible && sound && wanted) pause();
+      if (visible && wanted && time >= end) seek(0);
+      sync();
+    }).observe(fig);
     let raf = 0;
     new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(render); }).observe(svg);
     render();

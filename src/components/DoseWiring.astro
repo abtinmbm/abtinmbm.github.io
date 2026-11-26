@@ -7,7 +7,7 @@ const pins = [
   [362, 'A0'], [392, 'A1'], [422, 'A2'], [482, 'A4'], [512, 'A5'],
 ] as const;
 const buttons = [{ y: 40, n: 'A' }, { y: 76, n: 'B' }, { y: 112, n: 'C' }];
-const leds = [{ y: 172, c: '#d62828', name: 'Red' }, { y: 208, c: '#f2b705', name: 'Yellow' }];
+const leds = [{ y: 172, c: 'var(--R)', name: 'Red' }, { y: 208, c: 'var(--Y)', name: 'Yellow' }];
 const X = 345;
 ---
 <svg class="dwiring" viewBox="0 0 440 540" role="img"
@@ -75,7 +75,7 @@ const X = 345;
   .w { fill: none; stroke: var(--white); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
   .w.bg { fill: var(--black); }
   .r { fill: var(--black); stroke: var(--white); stroke-width: 1.25; }
-  .block { fill: rgb(59 79 143 / 0.25); stroke: var(--white); stroke-width: 1.25; }
+  .block { fill: var(--tint); stroke: var(--white); stroke-width: 1.25; }
   .fill, .dot { fill: var(--white); }
   .dwiring .name { font-size: 18px; font-weight: 500; }
   .dwiring .group { font-size: 15px; font-weight: 500; }

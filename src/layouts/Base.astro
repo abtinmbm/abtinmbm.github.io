@@ -1,21 +1,23 @@
 ---
 import '../styles/global.css';
-import Backdrop from '../components/Backdrop.astro';
+import PixelIcon from '../components/PixelIcon.astro';
+import { featured } from '../data/projects';
 
 interface Props {
   title: string;
   description: string;
-  /** Header sits over the first screen instead of above it. */
-  overlay?: boolean;
   current?: 'home' | 'work' | 'about' | 'resume' | 'photography';
+  /** The featured project this page is about, so its taskbar tab shows pressed. */
+  project?: string;
 }
-const { title, description, overlay = false, current } = Astro.props;
+const { title, description, current, project } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const is404 = Astro.url.pathname.startsWith('/404');
+const home = current === 'home';
 // One sharing image per page, made by scripts/og-images.mjs. Pages without one use the homepage's.
 const ogNames: Record<string, string> = {
   '/': 'home', '/projects/andon/': 'andon', '/projects/image-stitcher/': 'image-stitcher',
-  '/projects/lloyd/': 'lloyd',
+  '/projects/lloyd/': 'lloyd', '/projects/dose-coach/': 'dose-coach', '/tour/': 'tour',
   '/about/': 'about', '/resume/': 'resume', '/photography/': 'photography',
 };
 const ogImage = new URL(`/og/${ogNames[Astro.url.pathname] ?? 'home'}.jpg`, Astro.site);
@@ -26,6 +28,25 @@ const nav = [
   { href: '/photography/', label: 'Photography', key: 'photography' },
   { href: '/#contact', label: 'Contact', key: 'contact' },
 ];
+const work = featured();
+const iconFor: Record<string, 'andon' | 'stitcher' | 'lloyd' | 'dose'> = { andon: 'andon', 'image-stitcher': 'stitcher', lloyd: 'lloyd', 'dose-coach': 'dose' };
+const iconLabel: Record<string, string> = { andon: 'Andon', 'image-stitcher': 'Stitcher', lloyd: 'Lloyd', 'dose-coach': 'Dose Coach' };
+// On the homepage, icons and tabs open the project's window there; elsewhere they go to its page.
+const target = (slug: string, href?: string) => (home ? `#${slug}` : href ?? `/#${slug}`);
+const cmdk = [
+  { k: 'Take the demo tour', d: 'Four project demos', h: '/tour/' },
+  ...work.map((p) => ({ k: p.name, d: p.team === 'warg' ? 'Project · WARG' : 'Project', h: p.href ?? `/#${p.slug}` })),
+  { k: 'All projects', d: 'Featured and Archive', h: '/#work' },
+  { k: 'Archive', d: 'Earlier projects', h: '/#archive' },
+  { k: 'About', d: 'Page', h: '/about/' },
+  { k: 'Resume', d: 'Page · PDF', h: '/resume/' },
+  { k: 'Photography', d: 'Page', h: '/photography/' },
+  { k: 'Copy email address', d: 'aryanpourabtin@gmail.com', act: 'copy' },
+  { k: 'Switch light / dark', d: 'Theme', act: 'theme' },
+  { k: 'GitHub', d: 'github.com/abtinmbm', h: 'https://github.com/abtinmbm' },
+  { k: 'LinkedIn', d: 'in/abtin-aryanpour', h: 'https://www.linkedin.com/in/abtin-aryanpour' },
+];
+const segs = Array.from({ length: 20 });
 ---
 <!doctype html>
 <html lang="en-CA">
@@ -35,8 +56,9 @@ const nav = [
   <title>{title}</title>
   <meta name="description" content={description} />
   {!is404 && <link rel="canonical" href={canonical} />}
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="theme-color" content="#01030a" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=workstation" />
+  <meta name="theme-color" content="#e6e4dd" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#141517" media="(prefers-color-scheme: dark)" />
   <meta name="google-site-verification" content="tYC3K6RqLe2dFVx2zk4D99fqNt62pnjfqGGguYiFm7s" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Abtin Aryanpour" />
@@ -49,47 +71,226 @@ const nav = [
   <meta property="og:image:alt" content={`The top of the page: ${title}`} />
   <meta property="og:locale" content="en_CA" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="preload" href="/fonts/Panchang-Medium.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="/fonts/Switzer-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/Satoshi-Variable.woff2" as="font" type="font/woff2" crossorigin />
+  <script is:inline>
+    (() => {
+      const r = document.documentElement;
+      let t, b;
+      try { t = localStorage.getItem('theme'); b = sessionStorage.getItem('booted'); } catch (e) {}
+      r.dataset.theme = t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      if (b || matchMedia('(prefers-reduced-motion: reduce)').matches) r.classList.add('no-boot');
+      r.classList.add('js');
+    })();
+  </script>
   <slot name="head" />
 </head>
 <body>
-  <Backdrop />
+  <div id="boot" aria-hidden="true">
+    <div class="boot-box">
+      <div class="tb">AbtinOS</div>
+      <div class="bi">
+        <PixelIcon name="monitor" />
+        <div><p class="boot-name">Abtin Aryanpour</p><p data-boot-status>Starting up…</p></div>
+        <div class="segs sunken">{segs.map(() => <i data-seg></i>)}</div>
+        <p class="boot-skip">Press any key or tap to skip</p>
+      </div>
+    </div>
+  </div>
+
   <a class="skip" href="#main">Skip to content</a>
-  <header class:list={['site-head', { overlay }]}>
-    <a class="site-name" href="/" aria-current={current === 'home' ? 'page' : undefined}>Abtin Aryanpour</a>
+  <header class="topbar raised">
+    <a class="brand" href="/" aria-current={home ? 'page' : undefined}><PixelIcon name="monitor" />Abtin Aryanpour</a>
     <nav aria-label="Main">
       <ul>
         {nav.map((n) => (
-          <li><a href={n.href} aria-current={current === n.key ? 'page' : undefined}>{n.label}</a></li>
+          <li><a class="btn nav-btn" href={n.href} aria-current={current === n.key ? 'page' : undefined}>{n.label}</a></li>
         ))}
       </ul>
     </nav>
+    <span class="sp"></span>
+    <div class="tools">
+      <button type="button" class="btn sm" data-cmdk aria-keyshortcuts="Control+K Meta+K" hidden>Ctrl K<span class="visually-hidden"> Quick jump</span></button>
+      <button type="button" class="rocker" data-sfx-toggle aria-pressed="false" hidden><span class="r-a">SFX off</span><span class="r-b">on</span><span class="visually-hidden"> (sound effects)</span></button>
+      <button type="button" class="rocker" data-theme-toggle aria-pressed="false" hidden><span class="r-a">Light</span><span class="r-b">Dark</span><span class="visually-hidden"> theme</span></button>
+    </div>
   </header>
-  <main id="main">
-    <slot />
-  </main>
-  <footer class="site-foot wrap">
-    <p>Abtin Aryanpour, 2026</p>
-    <p class="foot-links"><a href="/photography/">Photography</a>{current !== 'home' && <a href="mailto:aryanpourabtin@gmail.com">aryanpourabtin@gmail.com</a>}</p>
+
+  <div class="desk">
+    <nav class="icons" aria-label="Desktop shortcuts">
+      {work.map((p) => (
+        <a class="icon-link" href={target(p.slug, p.href)} data-open={home ? p.slug : undefined}><PixelIcon name={iconFor[p.slug] ?? 'monitor'} /><span>{iconLabel[p.slug] ?? p.name}</span></a>
+      ))}
+      <a class="icon-link" href="/photography/"><PixelIcon name="photos" /><span>Photos</span></a>
+      <a class="icon-link" href="/resume/Abtin-Aryanpour-Resume.pdf"><PixelIcon name="resume" /><span>Resume<wbr />.pdf</span></a>
+    </nav>
+    <main id="main">
+      <slot />
+    </main>
+  </div>
+
+  <div id="start-menu" class="raised" hidden>
+    <span class="side" aria-hidden="true">AbtinOS</span>
+    <ul aria-label="Menu">
+      <li><a href="/">Home</a></li>
+      {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+      <li><a href="/resume/Abtin-Aryanpour-Resume.pdf">Resume PDF</a></li>
+      <li role="presentation"><hr /></li>
+      <li><button type="button" data-cmdk>Quick jump <small>Ctrl K</small></button></li>
+      <li><button type="button" data-theme-toggle>Light / dark</button></li>
+      <li><button type="button" data-sfx-toggle>Sound effects</button></li>
+    </ul>
+  </div>
+
+  <footer class="taskbar raised">
+    <button type="button" class="btn startbtn" data-start aria-expanded="false" aria-controls="start-menu" hidden><PixelIcon name="monitor" /><span class="sl">AbtinOS</span><span class="visually-hidden"> menu</span></button>
+    <a class="btn startbtn nojs-home" href="/"><PixelIcon name="monitor" /><span class="sl">AbtinOS</span><span class="visually-hidden"> home</span></a>
+    <nav class="tabs" aria-label="Project windows">
+      {work.map((p) => (
+        <a class="btn tab" href={target(p.slug, p.href)} data-tab={p.slug} data-open={home ? p.slug : undefined}
+          aria-current={project === p.slug ? 'page' : undefined}><i aria-hidden="true"></i><span class="tl"><span class="full">{p.name}</span><span class="short" aria-hidden="true">{p.short ?? p.name}</span></span></a>
+      ))}
+    </nav>
+    <div class="tray sunken">
+      <span class="avail"><i aria-hidden="true"></i><span class="av-t">Open to co&#8209;op · May–Aug 2027</span></span>
+      <time data-time aria-label="Time in Waterloo"></time>
+    </div>
   </footer>
+
+  <dialog id="cmdk" aria-label="Quick jump">
+    <div class="tb">Quick jump</div>
+    <input type="text" placeholder="Jump to…" aria-label="Jump to" role="combobox" aria-expanded="true" aria-controls="ck-list" aria-autocomplete="list" />
+    <ul id="ck-list" role="listbox" aria-label="Results"></ul>
+  </dialog>
+  <span class="visually-hidden" aria-live="polite" data-copy-status></span>
+  <script type="application/json" id="cmdk-items" set:html={JSON.stringify(cmdk)} />
+  <script is:inline>document.querySelectorAll('[data-cmdk][hidden],[data-sfx-toggle][hidden],[data-theme-toggle][hidden],[data-start][hidden]').forEach(function (b) { b.hidden = false; });</script>
+  <script>import '../scripts/os';</script>
 </body>
 </html>
 
-<style>
-  .site-head { position: relative; z-index: 10; display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 22px var(--edge); font-size: 15px; font-weight: 500; }
-  .site-head.overlay { position: absolute; top: 0; left: 0; right: 0; }
-  .site-head a { text-decoration: none; }
-  .site-head a:hover, .site-head a:focus-visible, .site-head a[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
-  .site-head ul { display: flex; gap: clamp(14px, 2vw, 24px); margin: 0; padding: 0; list-style: none; }
-  .site-foot { flex-wrap: wrap; }
-  .site-foot > p:first-child { white-space: nowrap; }
-  .foot-links { display: flex; flex-wrap: wrap; gap: 8px 24px; }
-  .site-foot { display: flex; justify-content: space-between; gap: 16px; padding-block: 32px 40px; border-top: 1px solid var(--line); font-size: 14px; color: var(--dim); }
-  /* On a phone the name gets its own row, so the five links have room. */
-  @media (max-width: 599px) {
-    .site-head { flex-direction: column; align-items: flex-start; gap: 10px; padding-block: 16px; }
-    .site-head ul { gap: 4px 16px; flex-wrap: wrap; }
+<style is:global>
+  /* ---------- top bar ---------- */
+  .topbar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-bottom: 1px solid var(--fg); }
+  .topbar .brand { font: 400 15px var(--mono); padding: 0 12px 0 6px; text-decoration: none; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .topbar .brand .px-icon { width: 18px; height: 18px; }
+  .topbar nav ul { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
+  .topbar .nav-btn { padding: 8px 12px; box-shadow: none; background: none; }
+  .topbar .nav-btn:hover { background: var(--fg); color: var(--panel); }
+  .topbar .nav-btn[aria-current] { box-shadow: var(--bevel-press), 0 0 0 1px var(--fg); background: var(--well); }
+  .topbar .nav-btn:active { padding: 9px 11px 7px 13px; }
+  .topbar .sp { flex: 1; }
+  .topbar .tools { display: flex; gap: 6px; align-items: center; }
+  .rocker { display: inline-flex; border: 0; padding: 0; cursor: pointer; background: none; font: 400 13px var(--mono); color: var(--fg); box-shadow: 0 0 0 1px var(--fg); }
+  .rocker[hidden] { display: none; }
+  .rocker span:not(.visually-hidden) { padding: 8px 10px; background: var(--panel); box-shadow: inset 1px 1px 0 var(--hi), inset -1px -1px 0 var(--lo); }
+  .rocker[aria-pressed="false"] .r-a, .rocker[aria-pressed="true"] .r-b { background: var(--fg); color: var(--panel); box-shadow: inset 2px 2px 0 var(--shadow); }
+
+  /* ---------- desktop ---------- */
+  .desk { max-width: 1480px; margin: 0 auto; padding: 14px 14px 28px; display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 12px; }
+  .desk > main { min-width: 0; }
+  .icons { display: grid; gap: 12px; align-content: start; padding-top: 6px; position: sticky; top: 64px; align-self: start; }
+  .icon-link { display: grid; justify-items: center; gap: 6px; text-decoration: none; font: 400 12px/1.2 var(--mono); text-align: center; padding: 6px 2px; }
+  .icon-link .px-icon { width: 36px; height: 36px; }
+  .icon-link span { padding: 1px 4px; }
+  .icon-link:hover span, .icon-link:focus-visible span { background: var(--accent); color: var(--on-accent); }
+  .icon-link:focus-visible { outline: 1px dotted var(--fg); outline-offset: 0; }
+  .icon-link:active .px-icon { transform: translate(1px, 1px); }
+
+  /* ---------- taskbar ---------- */
+  .taskbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; height: 44px; display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-top: 1px solid var(--fg); }
+  .startbtn { gap: 8px; padding: 7px 12px; flex: none; }
+  .startbtn .px-icon { width: 16px; height: 16px; }
+  .startbtn[hidden] { display: none; }
+  .js .nojs-home { display: none; }
+  .startbtn[aria-expanded="true"] { box-shadow: var(--bevel-press), 0 0 0 1px var(--fg); background: var(--fg); color: var(--panel); }
+  .startbtn[aria-expanded="true"] .px-icon path[fill="var(--well)"] { fill: var(--panel); }
+  .tabs { display: flex; gap: 6px; flex: 1; min-width: 0; padding-left: 6px; border-left: 1px solid var(--rule); }
+  .tab { flex: 0 1 180px; min-width: 0; justify-content: flex-start; font-size: 13px; padding: 7px 10px; white-space: nowrap; overflow: hidden; }
+  .tab .tl { overflow: hidden; text-overflow: ellipsis; }
+  .tab i { width: 8px; height: 8px; box-shadow: 0 0 0 1px currentColor; flex: none; }
+  .tab.in-view i { background: var(--accent); box-shadow: 0 0 0 1px var(--fg); }
+  .tab[aria-current]:not([aria-current="false"]) { box-shadow: var(--bevel-press), 0 0 0 1px var(--fg); background: var(--well); }
+  .tab[aria-current="page"] i { background: var(--accent); }
+  .tab.is-min { color: var(--mute); }
+  .tab.is-min .tl::after { content: " (min)"; }
+  .tab .short { display: none; }
+  .tray { display: flex; align-items: center; gap: 12px; padding: 7px 12px; font: 400 13px var(--mono); white-space: nowrap; flex: none; }
+  .tray .avail { display: inline-flex; align-items: center; gap: 8px; }
+  .tray .avail i { width: 9px; height: 9px; background: var(--G); box-shadow: 0 0 0 1px var(--fg); }
+  .tray time { font-variant-numeric: tabular-nums; }
+  .tray time:empty { display: none; }
+
+  #start-menu { position: fixed; left: 6px; bottom: 48px; z-index: 40; width: 270px; padding: 3px; box-shadow: var(--bevel), 0 0 0 1px var(--fg), 6px 6px 0 var(--shadow); display: grid; grid-template-columns: 30px 1fr; }
+  #start-menu[hidden] { display: none; }
+  #start-menu .side { background: var(--accent); color: var(--on-accent); writing-mode: vertical-rl; transform: rotate(180deg); font: 400 15px var(--mono); padding: 10px 6px; }
+  #start-menu ul { list-style: none; margin: 0; padding: 4px; }
+  #start-menu li a, #start-menu li button { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 9px 10px; font: 400 14px var(--mono); color: var(--fg); text-decoration: none; background: none; border: 0; cursor: pointer; text-align: left; }
+  #start-menu li a:hover, #start-menu li button:hover, #start-menu li a:focus-visible, #start-menu li button:focus-visible { background: var(--fg); color: var(--panel); outline: none; }
+  #start-menu li small { color: inherit; opacity: 0.75; font: inherit; }
+  #start-menu hr { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; }
+
+  /* ---------- boot ---------- */
+  #boot { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: var(--desk) var(--wall) repeat; transition: opacity 220ms ease-out; }
+  #boot.out { opacity: 0; pointer-events: none; }
+  .no-boot #boot, html:not(.js) #boot { display: none; }
+  .boot-box { width: min(440px, calc(100vw - 32px)); padding: 3px; background: var(--panel); box-shadow: var(--bevel), 6px 6px 0 var(--shadow); transition: transform 220ms ease-out; }
+  #boot.out .boot-box { transform: translateY(-6px) scale(0.98); }
+  .boot-box .tb { height: 30px; background: var(--bar-on); color: var(--bar-on-text); display: flex; align-items: center; padding: 0 10px; font: 400 14px var(--mono); }
+  .boot-box .bi { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; align-items: center; padding: 20px; }
+  .boot-box .px-icon { width: 64px; height: 64px; }
+  .boot-name { margin: 0 0 4px; font: 400 24px var(--mono); }
+  .boot-box p { font: 400 14px var(--mono); color: var(--mute); }
+  .boot-box .boot-name { color: var(--fg); font-size: 24px; }
+  .segs { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(20, 1fr); gap: 2px; padding: 4px; }
+  .segs i { height: 16px; }
+  .segs i.on { background: var(--accent); }
+  .boot-skip { grid-column: 1 / -1; font-size: 12px !important; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @view-transition { navigation: auto; }
+
+    ::view-transition-old(root), ::view-transition-new(root) {
+      animation-duration: 200ms;
+      animation-timing-function: ease-out;
+    }
   }
-  @media (max-width: 380px) { .site-head { font-size: 14px; } .site-head ul { gap: 4px 12px; } }
+
+  /* ---------- quick jump ---------- */
+  #cmdk { border: 0; padding: 3px; width: min(580px, calc(100vw - 24px)); background: var(--panel); color: var(--fg); margin-top: 14vh; box-shadow: var(--bevel), 0 0 0 1px var(--fg), 8px 8px 0 var(--shadow); }
+  #cmdk::backdrop { background: rgb(20 21 23 / 0.3); }
+  #cmdk .tb { height: 30px; background: var(--bar-on); color: var(--bar-on-text); font: 400 14px var(--mono); display: flex; align-items: center; padding: 0 10px; }
+  #cmdk input { width: calc(100% - 16px); margin: 8px; font: 400 20px var(--mono); padding: 12px; border: 0; color: inherit; background: var(--well); outline: none; box-shadow: var(--bevel-press); }
+  #cmdk ul { list-style: none; margin: 0 8px 8px; padding: 0; max-height: 50vh; overflow: auto; }
+  #cmdk li { display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px; cursor: pointer; }
+  #cmdk li small { color: var(--mute); font-family: var(--mono); }
+  #cmdk li[aria-selected="true"] { background: var(--fg); color: var(--panel); }
+  #cmdk li[aria-selected="true"] small { color: inherit; }
+
+  /* ---------- phone ---------- */
+  @media (max-width: 900px) {
+    html { scroll-padding-top: 12px; }
+    .desk { grid-template-columns: minmax(0, 1fr); padding: 8px 8px 20px; }
+    .icons { position: static; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2px; padding: 4px 0 2px; }
+    .icon-link { font-size: 11px; padding: 4px 0; }
+    .icon-link .px-icon { width: 30px; height: 30px; }
+    .icon-link span { padding-inline: 1px; }
+    .topbar { flex-wrap: wrap; position: static; }
+    .topbar nav { order: 3; width: 100%; }
+    .topbar nav ul { flex-wrap: wrap; }
+    .topbar .nav-btn { padding: 8px 7px; font-size: 13px; }
+    .topbar .nav-btn:active { padding: 9px 6px 7px 8px; }
+    .startbtn .sl, .tab i { display: none; }
+    .tray .av-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .tabs { gap: 3px; padding-left: 3px; }
+    .tab { flex: 1 1 0; justify-content: center; padding: 7px 3px; font-size: 11px; }
+    .tab .full { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .tab .short { display: inline; }
+    .tab.is-min .tl::after { content: ""; }
+    .tray { padding: 7px 8px; gap: 8px; }
+  }
+  @media (max-width: 380px) { .tray time { display: none; } }
+  @media (max-width: 359px) {
+    .icons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
 </style>

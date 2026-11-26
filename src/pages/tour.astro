@@ -1,0 +1,160 @@
+---
+import Base from '../layouts/Base.astro';
+import Win from '../components/Win.astro';
+import AndonReplay from '../components/AndonReplay.astro';
+import HomeStages from '../components/HomeStages.astro';
+import HomeLloyd from '../components/HomeLloyd.astro';
+import { featured } from '../data/projects';
+
+const stories = {
+  andon: {
+    question: 'Can a fan tell you it’s failing?',
+    action: 'Jump to the fault, then turn sound on. Hear the fan before and after the fault, and watch the score trigger a stop decision.',
+  },
+  'image-stitcher': {
+    question: 'How do scattered photos become one map?',
+    action: 'Drag the slider to add photos as they arrive from multiple drones. Watch the map take shape during one simulated mission.',
+  },
+  lloyd: {
+    question: 'How do drones spread out evenly?',
+    action: 'Run the simulation again to see each drone move toward the center of its own region as the regions update around it.',
+  },
+  'dose-coach': {
+    question: 'Can a wrist sensor coach a curl?',
+    action: 'Play the hardware demo. Watch the screen ask for a higher curl when the movement is short and flag a rep that’s too fast.',
+  },
+} as const;
+const slides = featured().flatMap((p) => {
+  const story = stories[p.slug as keyof typeof stories];
+  return story ? [{ ...p, ...story }] : [];
+});
+---
+<Base title="Project demo tour | Abtin Aryanpour" description="Explore working demos of Andon, Image Stitcher, Lloyd’s algorithm and Dose Coach at your own pace." current="work">
+  <Win title="Project demo tour" name="Demo tour" class="tour" labelledby="tour-title">
+    <div class="tour-body" data-tour>
+      <header class="tour-head">
+        <h1 id="tour-title" class="display">Demo tour</h1>
+        <a href="/#work">Exit tour</a>
+      </header>
+
+      <nav class="tour-steps" aria-label="Tour projects">
+        {slides.map((p) => <a class="btn sm" href={`#demo-${p.slug}`}>{p.name}</a>)}
+      </nav>
+
+      <div class="tour-controls" hidden>
+        <button type="button" class="btn sm" data-tour-back>Back</button>
+        <p class="tour-count" aria-live="polite" aria-atomic="true"></p>
+        <button type="button" class="btn sm go" data-tour-next>Next demo</button>
+        <a class="btn sm go" href="/#work" data-tour-finish hidden>Finish tour</a>
+      </div>
+
+      {slides.map((p) => (
+        <section class="tour-slide" id={`demo-${p.slug}`} aria-labelledby={`heading-${p.slug}`} data-tour-slide>
+          <div class="tour-copy">
+            <h2 id={`heading-${p.slug}`}>{p.question}</h2>
+            <p>{p.action}</p>
+            <a href={p.href}>Read about {p.name}</a>
+          </div>
+          <div class="tour-demo">
+            {p.slug === 'andon' && <AndonReplay captionId="tour-replay-cap" autoplay={false}>
+              <figcaption id="tour-replay-cap">Fan test recordings with factory noise. The light turns red once the score stays above its stop limit.</figcaption>
+            </AndonReplay>}
+            {p.slug === 'image-stitcher' && <HomeStages />}
+            {p.slug === 'lloyd' && <HomeLloyd />}
+            {p.slug === 'dose-coach' && <figure class="dose-demo">
+              <video class="sunken" controls playsinline muted preload="none" poster="/video/dose-coaching.jpg" width="720" height="1072" aria-label="Dose Coach giving feedback on short and fast curls, no sound">
+                <source src="/video/dose-coaching.mp4" type="video/mp4" />
+              </video>
+              <figcaption>The real prototype’s display during short and fast curls.</figcaption>
+            </figure>}
+          </div>
+        </section>
+      ))}
+    </div>
+  </Win>
+</Base>
+
+<style>
+  .tour { max-width: 70rem; margin-inline: auto; }
+  .tour-body { display: grid; gap: var(--s4); }
+  .tour-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+  .tour-head h1 { font-size: clamp(34px, 6vw, 82px); letter-spacing: -0.03em; line-height: 1; }
+  .tour-head a { font-size: 15px; }
+  .tour-steps { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tour-steps a[aria-current="step"] { background: var(--well); box-shadow: var(--bevel-press), 0 0 0 1px var(--fg); }
+  .tour-controls { display: flex; align-items: center; gap: var(--s3); padding-block: var(--s3); border-block: 1px solid var(--rule); }
+  .tour-controls[hidden], .tour-controls [hidden], .tour-slide[hidden] { display: none; }
+  .tour-controls :disabled { opacity: 0.55; cursor: default; }
+  .tour-count { flex: 1; font: 400 13px/1.35 var(--mono); color: var(--mute); }
+  .tour-slide { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: var(--s5); align-items: start; padding-block: var(--s2); }
+  .tour-slide + .tour-slide:not([hidden]) { border-top: 1px solid var(--rule); }
+  .tour-controls:not([hidden]) ~ .tour-slide { border-top: 0; }
+  .tour-copy { display: grid; gap: var(--s3); align-content: start; }
+  .tour-copy h2 { font: 400 clamp(25px, 3vw, 43px)/1.05 var(--mono); }
+  .tour-copy a { justify-self: start; }
+  .tour-demo { min-width: 0; }
+  .tour-demo :global(.hl) { width: min(100%, 26rem); margin-inline: auto; }
+  .dose-demo { display: grid; justify-items: center; gap: var(--s2); margin: 0; }
+  .dose-demo video { width: auto; max-height: 420px; }
+  .dose-demo figcaption { font-size: 14px; color: var(--mute); }
+  .tour-slide.enter { animation: slide-enter 180ms ease-out; }
+  @keyframes slide-enter { from { opacity: 0.65; transform: translateY(4px); } }
+  @media (max-width: 900px) {
+    .tour-slide { grid-template-columns: minmax(0, 1fr); gap: var(--s4); }
+    .tour-copy { max-width: 56ch; }
+    .tour :global(.in) { padding: var(--s4); }
+  }
+</style>
+
+<script>
+  const tour = document.querySelector<HTMLElement>('[data-tour]')!;
+  const slides = [...tour.querySelectorAll<HTMLElement>('[data-tour-slide]')];
+  const links = [...tour.querySelectorAll<HTMLAnchorElement>('.tour-steps a')];
+  const controls = tour.querySelector<HTMLElement>('.tour-controls')!;
+  const back = tour.querySelector<HTMLButtonElement>('[data-tour-back]')!;
+  const next = tour.querySelector<HTMLButtonElement>('[data-tour-next]')!;
+  const finish = tour.querySelector<HTMLAnchorElement>('[data-tour-finish]')!;
+  const count = tour.querySelector<HTMLElement>('.tour-count')!;
+  let current = -1;
+
+  function show(index: number, updateUrl = false) {
+    if (index < 0 || index >= slides.length || index === current) return;
+    slides[current]?.querySelectorAll('audio, video').forEach((media) => (media as HTMLMediaElement).pause());
+    slides.forEach((slide, i) => {
+      slide.hidden = index !== i;
+      slide.classList.toggle('enter', current !== -1 && index === i);
+      if (index === i) links[i].setAttribute('aria-current', 'step');
+      else links[i].removeAttribute('aria-current');
+    });
+    current = index;
+    count.textContent = `${index + 1} of ${slides.length} · ${links[index].textContent}`;
+    const last = index === slides.length - 1;
+    const focusNext = document.activeElement === next;
+    const focusFinish = document.activeElement === finish;
+    back.disabled = index === 0;
+    next.hidden = last;
+    finish.hidden = !last;
+    if (last && focusNext) finish.focus();
+    else if (!last && focusFinish) next.focus();
+    else if (back.disabled && document.activeElement === back) next.focus();
+    if (updateUrl) history.replaceState(history.state, '', `#${slides[index].id}`);
+  }
+
+  controls.hidden = false;
+  const fromHash = () => show(Math.max(0, slides.findIndex((slide) => `#${slide.id}` === location.hash)));
+  fromHash();
+  window.addEventListener('hashchange', fromHash);
+  links.forEach((link, index) => link.addEventListener('click', (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    show(index, true);
+  }));
+  back.addEventListener('click', () => show(current - 1, true));
+  next.addEventListener('click', () => show(current + 1, true));
+  tour.addEventListener('keydown', (event) => {
+    if (!(event.target instanceof Element) || event.target.closest('input, video') || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    show(current + (event.key === 'ArrowRight' ? 1 : -1), true);
+  });
+</script>

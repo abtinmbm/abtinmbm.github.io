@@ -1,0 +1,21 @@
+---
+// A window: a title bar with a working minimize button, then the content.
+// `name` is what the minimize button and the taskbar call it.
+interface Props {
+  title: string;
+  name?: string;
+  id?: string;
+  as?: 'section' | 'article' | 'aside' | 'nav' | 'div' | 'header';
+  class?: string;
+  inClass?: string;
+  reveal?: boolean;
+  label?: string;
+  labelledby?: string;
+  bare?: boolean;
+}
+const { title, name = title, id, as: Tag = 'section', class: cls, inClass, reveal = false, label, labelledby, bare = false, ...attrs } = Astro.props;
+---
+<Tag {...attrs} class:list={['tile', cls]} id={id} data-win={name} data-reveal={reveal ? '' : undefined} aria-label={label} aria-labelledby={labelledby}>
+  <div class="tb"><span class="t">{title}</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label={`Minimize ${name}`}><i></i></button></div>
+  {bare ? <slot /> : <div class:list={['in', inClass]}><slot /></div>}
+</Tag>
