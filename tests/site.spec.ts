@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { featured } from '../src/data/projects';
 
-const pages = ['/', '/tour/', '/projects/andon/', '/projects/image-stitcher/', '/projects/lloyd/', '/projects/dose-coach/', '/about/', '/resume/', '/photography/', '/404'];
+const pages = ['/', '/tour/', '/projects/', '/projects/andon/', '/projects/image-stitcher/', '/projects/lloyd/', '/projects/dose-coach/', '/about/', '/resume/', '/photography/', '/404'];
 const widths = [320, 390, 768, 1280, 1920];
 
 for (const path of pages) {
@@ -50,7 +50,7 @@ for (const path of pages) {
 test('desktop shortcuts restore and focus Featured windows', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/');
+  await page.goto('/projects/');
   const taskbar = page.getByRole('navigation', { name: 'Project windows' });
   await expect(taskbar.getByRole('link')).toHaveCount(featured().length);
   const andon = page.locator('#andon[data-win]');
@@ -69,6 +69,8 @@ test('the desktop and Featured projects are readable without JavaScript', async 
   const page = await ctx.newPage();
   await page.goto('/');
   await expect(page.locator('#boot')).toBeHidden();
+  await expect(page.getByRole('navigation', { name: 'Featured projects' }).getByRole('link')).toHaveCount(featured().length);
+  await page.getByRole('link', { name: 'See projects' }).click();
   await expect(page.getByRole('link', { name: 'Read about Andon' })).toBeVisible();
   await expect(page.locator('#andon [data-min]')).toBeHidden();
   await ctx.close();
@@ -94,16 +96,17 @@ test('the boot fades into the desktop once, and following a page link uses a vie
   await expect(boot).toHaveClass(/out/);
   await page.clock.runFor(250);
   await expect(boot).toHaveCount(0);
+  await page.clock.resume();
 
   await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'About' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-page-transition', 'active');
   await expect(boot).toHaveCount(0);
 });
 
-test('WARG windows share the same rows and the homepage map has a keyboard slider', async ({ page }) => {
+test('WARG windows share the same rows and the Projects map has a keyboard slider', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/');
+  await page.goto('/projects/');
   await page.evaluate(() => document.fonts.ready);
   const range = page.getByRole('slider', { name: 'Photos in the simulated map' });
   await range.focus();
@@ -116,10 +119,10 @@ test('WARG windows share the same rows and the homepage map has a keyboard slide
   }
 });
 
-test('the homepage taskbar follows hover and selection when both WARG windows are visible', async ({ page }) => {
+test('the Projects taskbar follows hover and selection when both WARG windows are visible', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/');
+  await page.goto('/projects/');
   const stitcher = page.locator('[data-tab="image-stitcher"]');
   const lloyd = page.locator('[data-tab="lloyd"]');
   const highlighted = page.locator('[data-tab].in-view');
@@ -137,6 +140,22 @@ test('the homepage taskbar follows hover and selection when both WARG windows ar
   await expect(highlighted).toHaveAttribute('data-tab', 'lloyd');
   await stitcher.click();
   await expect(highlighted).toHaveAttribute('data-tab', 'image-stitcher');
+});
+
+test('Home features the projects and hands off to the Projects tab with the demos and Archive', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await expect(page.getByRole('navigation', { name: 'Featured projects' }).getByRole('link')).toHaveCount(featured().length);
+  await expect(page.getByText(/WARG.*Autonomy subteam.*UW Formula Electric firmware subteam/)).toBeVisible();
+  const mainNav = page.getByRole('navigation', { name: 'Main' });
+  await expect(mainNav.getByRole('link', { name: 'Projects' })).toHaveAttribute('href', '/projects/');
+  await page.getByRole('link', { name: 'See projects' }).click();
+  await expect(page).toHaveURL(/\/projects\/$/);
+  await expect(mainNav.getByRole('link', { name: 'Projects' })).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByRole('heading', { name: 'WARG' })).toBeVisible();
+  await expect(page.getByRole('table', { name: 'Earlier projects' })).toBeVisible();
+  await mainNav.getByRole('link', { name: 'About' }).click();
+  await expect(page.getByText(/WARG.*Autonomy subteam.*UW Formula Electric firmware subteam/)).toBeVisible();
 });
 
 test('the Andon replay plays when motion is allowed and can be paused', async ({ page }) => {
@@ -269,17 +288,16 @@ test('the stitcher page shows the finished map without JavaScript', async ({ bro
 
 test('sharing images load and the sitemap lists every content page', async ({ page, request }) => {
   const seen = new Set<string>();
-  const sharePages = pages.filter((p) => p !== '/404');
-  for (const path of sharePages) {
+  for (const path of pages) {
     await page.goto(path);
     const img = await page.locator('meta[property="og:image"]').getAttribute('content');
     expect(img).toBeTruthy();
     const res = await request.get(new URL(img!).pathname);
     expect(res.status(), img!).toBe(200);
     seen.add(img!);
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://abtinmbm.github.io${path}`);
+    if (path !== '/404') await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://abtinmbm.github.io${path}`);
   }
-  expect(seen.size).toBe(sharePages.length);
+  expect(seen.size).toBe(pages.length);
   const map = await (await request.get('/sitemap.xml')).text();
   for (const path of pages.filter((p) => p !== '/404')) expect(map).toContain(`https://abtinmbm.github.io${path}<`);
   expect((await request.get('/robots.txt')).status()).toBe(200);
@@ -300,6 +318,33 @@ test('the photo viewer moves with the buttons, the keyboard and the film strip',
   await expect(page).toHaveURL(/#p10$/);
   await page.keyboard.press('ArrowLeft');
   await expect(count).toHaveText('9');
+});
+
+test('the contact sheet opens photos in the viewer and restores a linked selection', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('/photography/');
+  const toggle = page.getByRole('button', { name: 'Contact sheet' });
+  const viewer = page.locator('.track');
+  const grid = page.getByRole('navigation', { name: 'All photos' });
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(viewer).toBeHidden();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(results.violations.map((violation) => violation.id)).toEqual([]);
+  await grid.getByRole('link', { name: /^Photo 01:/ }).press('Enter');
+  await expect(viewer).toBeFocused();
+  await expect(page).toHaveURL(/\/photography\/#p1$/);
+
+  await page.goto('/photography/?view=contact-sheet#p10');
+  const photo = grid.getByRole('link', { name: /^Photo 10:/ });
+  await expect(photo).toHaveAttribute('aria-current', 'true');
+  await photo.click();
+  await expect(page.locator('.count b')).toHaveText('10');
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  await expect(page).toHaveURL(/\/photography\/#p10$/);
 });
 
 test('the stitcher map builds itself once when it comes into view', async ({ page }) => {
@@ -370,7 +415,7 @@ test('the Lloyd run shows the finished swarm when motion is reduced, and replays
 });
 
 test('status badges read from the project list', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/projects/');
   const stitcher = featured().find((project) => project.slug === 'image-stitcher')!;
   const lloyd = featured().find((project) => project.slug === 'lloyd')!;
   await expect(page.locator('#image-stitcher .meta')).toContainText(new RegExp(stitcher.status, 'i'));

@@ -29,12 +29,12 @@ const slides = featured().flatMap((p) => {
   return story ? [{ ...p, ...story }] : [];
 });
 ---
-<Base title="Project demo tour | Abtin Aryanpour" description="Explore working demos of Andon, Image Stitcher, Lloyd’s algorithm and Dose Coach at your own pace." current="work">
+<Base title="Project demo tour | Abtin Aryanpour" description="Explore working demos of Andon, Image Stitcher, Lloyd’s algorithm and Dose Coach at your own pace." current="projects">
   <Win title="Project demo tour" name="Demo tour" class="tour" labelledby="tour-title">
     <div class="tour-body" data-tour>
       <header class="tour-head">
         <h1 id="tour-title" class="display">Demo tour</h1>
-        <a href="/#work">Exit tour</a>
+        <a href="/projects/">Exit tour</a>
       </header>
 
       <nav class="tour-steps" aria-label="Tour projects">
@@ -45,7 +45,7 @@ const slides = featured().flatMap((p) => {
         <button type="button" class="btn sm" data-tour-back>Back</button>
         <p class="tour-count" aria-live="polite" aria-atomic="true"></p>
         <button type="button" class="btn sm go" data-tour-next>Next demo</button>
-        <a class="btn sm go" href="/#work" data-tour-finish hidden>Finish tour</a>
+        <a class="btn sm go" href="/projects/" data-tour-finish hidden>Finish tour</a>
       </div>
 
       {slides.map((p) => (
