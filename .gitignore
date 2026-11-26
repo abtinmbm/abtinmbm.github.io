@@ -10,3 +10,16 @@ npm-debug.log*
 /public/fonts/
 test-results/
 playwright-report/
+/AGENTS.md
+/CLAUDE.md
+/CLAUDE_LAST_SESSION.jsonl
+/DESIGN.md
+/START_HERE.md
+/.claude/
+/.mcp.json
+/.s.tmp.mjs
+/.s2.tmp.mjs
+/docs/
+/references/
+/assets/
+/directions/

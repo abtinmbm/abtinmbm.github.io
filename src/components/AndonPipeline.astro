@@ -49,13 +49,13 @@ const layers = [[0, 56], [30, 44], [56, 32], [78, 20], [96, 10]] as const;
   .pipe-spec :global(img) { width: 100%; height: 100%; object-fit: cover; display: block; }
   .pl { fill: none; stroke: var(--white); stroke-width: 1.2; }
   .pt { fill: var(--dim); font-size: 13px; }
-  .pc { stroke: #d62828; stroke-width: 1.2; stroke-dasharray: 4 3; }
-  .pk { stroke: #f2b705; stroke-width: 1.2; stroke-dasharray: 4 3; }
+  .pc { stroke: var(--R); stroke-width: 1.2; stroke-dasharray: 4 3; }
+  .pk { stroke: var(--Y); stroke-width: 1.2; stroke-dasharray: 4 3; }
   .ps { fill: none; stroke: var(--white); stroke-width: 1.1; stroke-linejoin: round; }
   .ps.faint { opacity: 0.3; }
   .pipe-lamps { display: inline-grid; gap: 5px; padding: 6px; border: 1px solid var(--line); border-radius: 20px; justify-self: start; }
-  .pipe-lamps i { width: 12px; height: 12px; border-radius: 50%; background: rgb(243 245 255 / 0.07); }
-  .pipe-lamps i.r { background: #d62828; }
+  .pipe-lamps i { width: 12px; height: 12px; border-radius: 50%; background: var(--lamp-off); }
+  .pipe-lamps i.r { background: var(--R); }
   @media (max-width: 599px) {
     /* One step per row on a phone: the label, then its picture at full size. */
     .pipe-row { grid-template-columns: 1fr; gap: var(--s3); }

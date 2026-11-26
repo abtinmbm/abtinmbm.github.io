@@ -1,7 +1,6 @@
 ---
 import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
-import ProjectTrail from '../../components/ProjectTrail.astro';
 import Icon from '../../components/Icon.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import MatchPair from '../../components/MatchPair.astro';
@@ -41,24 +40,27 @@ const first = 0;
   title="Image Stitcher: one map from several drones | Abtin Aryanpour"
   description="Merges out-of-order, GPS-tagged drone photos into one georeferenced map, for the Waterloo Aerial Robotics Group. Tested in simulation; merged."
   current="work"
+  project="image-stitcher"
 >
   <article class="proj">
-    <header class="top">
-      <div class="top-sky"><ProjectTrail slug="image-stitcher" /></div>
-      <div class="top-in col">
+    <header class="top tile" data-win="Image Stitcher" id="top-win">
+      <div class="tb"><span class="t">image-stitcher — readme</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Image Stitcher"><i></i></button></div>
+      <div class="top-in in">
         <h1 class="display">Image Stitcher</h1>
-        <p class="lead">Merges out-of-order photos from several drones, each tagged with a GPS (Global Positioning System) position, into one top-down map that sits in the right place on the Earth.</p>
+        <p class="lead">Combines shuffled photos from several drones into one top-down map, using GPS coordinates to place it on Earth.</p>
         <p class="key"><span class="key-n">{stitcher.missions}</span><span class="key-l">simulated missions built one connected map, with photos lined up to <b>{stitcher.alignment}</b> on average. Tested in simulation only.</span></p>
         <dl class="facts">
-          <div><dt>Status</dt><dd><StatusBadge slug="image-stitcher" /> Merged into the team’s main branch on November 18, 2026, after four rounds of review. The last round shortened the code and tightened refinement and the GPS checks.</dd></div>
-          <div><dt>Role</dt><dd>Built for the autonomy software team at the Waterloo Aerial Robotics Group, from October 2026. I wrote the whole pull request: the stitcher, the simulator that makes test missions with known true positions, the {stitcher.tests} tests and the evaluation script.</dd></div>
+          <div><dt>Status</dt><dd><StatusBadge slug="image-stitcher" /> November 18, 2026, after four rounds of review.</dd></div>
+          <div><dt>Role</dt><dd>Autonomy software, Waterloo Aerial Robotics Group.</dd></div>
           <div><dt>Code</dt><dd><a class="code-link" href={p.repo}><Icon name="github" /> Pull request #215</a></dd></div>
         </dl>
         <nav class="toc" aria-label="On this page"><span>On this page</span><a href="#how">How it works</a><a href="#data">The data</a><a href="#results">Results</a><a href="#hard">What was hard</a><a href="#limits">Limits</a></nav>
       </div>
     </header>
 
-    <section class="part first col" aria-labelledby="why-h">
+    <section class="part tile first" aria-labelledby="why-h" data-win="Overview">
+      <div class="tb"><span class="t">// 01 · overview</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Overview"><i></i></button></div>
+      <div class="in col">
       <h2 id="why-h" class="visually-hidden">Why it exists</h2>
       <p class="intro">Drones fly back and forth over a field taking photos, and each one reaches the ground laptop whenever its drone sends it. The photos arrive shuffled, from several drones, with GPS that’s metres off.</p>
       <p>GPS finds which photos should overlap, image matching lines them up, and all the GPS readings together place the finished map on the Earth.</p>
@@ -85,9 +87,13 @@ const first = 0;
         <figcaption class="small">One simulated mission, saved after 20, 40, 60, 80 and all 91 photos, each drawn in the same GPS frame. The stepped outline is the edge of the stitched photos, and only the painted ground markers are kept inside it.</figcaption>
         </div>
       </figure>
+      <p>I built this for the Waterloo Aerial Robotics Group’s autonomy team, starting in October 2026. I wrote the stitcher, the simulator that makes test missions with known true positions, the {stitcher.tests} tests and the evaluation script. The last review round shortened the code and tightened the refinement and GPS checks.</p>
+      </div>
     </section>
 
-    <section id="how" class="part col" aria-labelledby="how-h">
+    <section id="how" class="part tile" aria-labelledby="how-h" data-win="How it works" data-reveal>
+      <div class="tb"><span class="t">// 02 · how it works</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize How it works"><i></i></button></div>
+      <div class="in col">
       <h2 id="how-h">From shuffled photos to one map</h2>
       <div class="fig"><ArrivalMap /></div>
       <ol class="steps">
@@ -98,9 +104,12 @@ const first = 0;
         <li><p><b>Refine.</b> A least-squares solver nudges every photo at once until the total mismatch between overlaps is as small as it can be. It works like bundle adjustment, the standard way mapping software corrects many photos together.</p></li>
         <li><p><b>Place.</b> All the GPS readings together put the finished map in the right place on the Earth. A cluster is only fitted to GPS once both GPS and the images show its photos are spread out.</p></li>
       </ol>
+      </div>
     </section>
 
-    <section id="data" class="part col" aria-labelledby="data-h">
+    <section id="data" class="part tile" aria-labelledby="data-h" data-win="The data" data-reveal>
+      <div class="tb"><span class="t">// 03 · the data</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize The data"><i></i></button></div>
+      <div class="in col">
       <h2 id="data-h">The data and the method</h2>
       <dl class="defs">
         <div><dt>Where the photos came from</dt><dd>There are no real drone photos yet. I wrote a simulator that makes every test mission. It draws a random {stitcher.simField} field of blobs, rectangles, lines and noise, and cuts photos out of it as a camera {stitcher.simAltitude} up would see them, lens distortion included, using the calibration of a {stitcher.simCamera} Arducam camera. Three drones fly back and forth in rows. The simulator adds the errors a real flight has: GPS 1 or 3 m off, altitude and heading slightly off, compass error, and photos arriving shuffled. Because it made the photos, it knows where each one truly was.</dd></div>
@@ -108,9 +117,12 @@ const first = 0;
         <div><dt>What kind of method it is</dt><dd>It isn’t a model trained for this project. XFeat is a neural network its authors already trained, used as-is with their published weights, only to find matching points. Everything after it is fixed geometry: RANSAC throws out matches that don’t agree, and a least-squares solver lines all the photos up. The photo checks are hand-set limits on blur, exposure and tilt.</dd></div>
         <div><dt>What it outputs</dt><dd>A map image, with a file giving its GPS corners and how many metres each pixel covers, plus a list of rejected photos and why. To score a simulated mission, each placed photo’s corners are compared with where they truly are. That gives the alignment and map-position rows below. A mission counts as one connected map when every placed photo ends up in a single group.</dd></div>
       </dl>
+      </div>
     </section>
 
-    <section id="results" class="part col" aria-labelledby="results-h">
+    <section id="results" class="part tile" aria-labelledby="results-h" data-win="Results" data-reveal>
+      <div class="tb"><span class="t">// 04 · results</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Results"><i></i></button></div>
+      <div class="in col">
       <h2 id="results-h">One connected map in {stitcher.missions} simulated missions</h2>
       <p>The simulator knows where every photo really was, so each run can be scored against the truth instead of by eye. Alignment is how far photos sit from their true positions relative to each other, averaged over each mission. Map position is how far the whole map sits from where it should be on the Earth.</p>
       <table class="facts-table">
@@ -127,9 +139,12 @@ const first = 0;
         </tbody>
       </table>
       <p class="aside">The connected-map, alignment, map-position and speed rows rerun with one command from the pull request.</p>
+      </div>
     </section>
 
-    <section id="hard" class="part col" aria-labelledby="hard-h">
+    <section id="hard" class="part tile" aria-labelledby="hard-h" data-win="What was hard" data-reveal>
+      <div class="tb"><span class="t">// 05 · what was hard</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize What was hard"><i></i></button></div>
+      <div class="in col">
       <h2 id="hard-h">What was hard</h2>
 
       <h3>Rows wouldn’t connect</h3>
@@ -191,18 +206,25 @@ const first = 0;
         </div>
         <figcaption class="small">The same patch of one simulated photo, enlarged 8×, with its sharpness score. The limit is {blur.limit.toFixed(2)}. The two blurs are the smallest the check has to catch.</figcaption>
       </figure>
+      </div>
     </section>
 
-    <section id="limits" class="part col" aria-labelledby="short-h">
+    <section id="limits" class="part tile" aria-labelledby="short-h" data-win="Limits" data-reveal>
+      <div class="tb"><span class="t">// 06 · limits</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Limits"><i></i></button></div>
+      <div class="in col">
       <h2 id="short-h">Where it still falls short</h2>
       <p>Every result is from simulation. There are no real flight photos yet: the drone’s camera software doesn’t log roll, pitch or yaw yet, so its photos are rejected for now, and the lens calibration still has to be checked against the camera actually flown.</p>
       <p>Neither the yaw convention nor the camera mounting has been confirmed against real drone output. The accuracy figures come from simulated east-west flights. It assumes flat ground and a camera pointing straight down, the blur limits are tuned on synthetic photos, and it isn’t connected to live drone comms.</p>
+      </div>
     </section>
 
-    <nav class="onward col" aria-label="Code and next project">
+    <nav class="onward tile" data-win="Next project" aria-label="Code and next project">
+      <div class="tb"><span class="t">// end · code and next project</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Next project"><i></i></button></div>
+      <div class="in">
       <p class="built">Built with Python, PyTorch, OpenCV, NumPy and pytest.</p>
       <a href={p.repo}><Icon name="github" /> The stitcher’s code on GitHub (pull request #215)</a>
       <a href="/projects/lloyd/">Next project: Lloyd’s algorithm</a>
+      </div>
     </nav>
   </article>
 </Base>
@@ -212,7 +234,7 @@ const first = 0;
   .sep-row > div { display: grid; gap: var(--s3); align-content: start; }
   .sep-row svg { display: block; width: 100%; height: auto; overflow: visible; }
   .sep-row span { color: var(--dim); }
-  .sep-p { fill: rgb(59 79 143 / 0.45); stroke: var(--white); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .sep-p { fill: var(--tint); stroke: var(--white); stroke-width: 1; vector-effect: non-scaling-stroke; }
   .sep-fit { fill: none; stroke: var(--white); stroke-opacity: 0.7; stroke-width: 1; stroke-dasharray: 5 5; vector-effect: non-scaling-stroke; }
   .sep-g { fill: var(--white); }
   .blur-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
@@ -236,8 +258,8 @@ const first = 0;
   #grow-range { width: 100%; margin: 0; height: 24px; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
   #grow-range::-webkit-slider-runnable-track { height: 2px; background: var(--line); }
   #grow-range::-moz-range-track { height: 2px; background: var(--line); }
-  #grow-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px; border-radius: 50%; background: var(--white); border: 0; box-shadow: 0 0 0 6px rgb(159 180 255 / 0.18); }
-  #grow-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--white); border: 0; box-shadow: 0 0 0 6px rgb(159 180 255 / 0.18); }
+  #grow-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px; border-radius: 50%; background: var(--white); border: 0; box-shadow: 0 0 0 6px var(--tint); }
+  #grow-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--white); border: 0; box-shadow: 0 0 0 6px var(--tint); }
   #grow-range:focus-visible { outline: none; }
   #grow-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--black), 0 0 0 5px var(--white); }
   #grow-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--black), 0 0 0 5px var(--white); }

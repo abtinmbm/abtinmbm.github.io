@@ -1,6 +1,7 @@
 ---
 import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import Win from '../components/Win.astro';
 import portrait from '../assets/photos/abtin-portrait.jpg';
 import { awards } from '../data/metrics';
 ---
@@ -9,14 +10,13 @@ import { awards } from '../data/metrics';
   description="Abtin Aryanpour, first-year Computer Engineering at Waterloo, on the Waterloo Aerial Robotics Group's autonomy team. Looking for a co-op, May to August 2027."
   current="about"
 >
-  <article class="about wrap grid">
-    <div class="side">
-      <Picture pictureAttributes={{ class: 'about-photo' }} src={portrait} alt="Abtin at a formal event in a suit and bow tie, pointing at the camera" widths={[400, 640, 900]} sizes="(max-width: 759px) 70vw, 34vw" formats={['avif', 'webp']} loading="eager" fetchpriority="high" />
-    </div>
-
-    <div class="main">
-      <h1 class="display">About</h1>
+  <article class="about">
+    <Win title="About — Abtin Aryanpour" name="About" class="bio" inClass="bio-in" labelledby="about-h">
+      <div class="bio-copy">
+      <h1 id="about-h" class="display">About</h1>
       <p class="lead">I’m in my first term of Computer Engineering at the University of Waterloo, in the co&#8209;op program, and I’m looking for a co&#8209;op from May to August 2027.</p>
+      </div>
+      <Picture pictureAttributes={{ class: 'about-photo sunken' }} src={portrait} alt="Abtin at a formal event in a suit and bow tie, pointing at the camera" widths={[400, 640, 900]} sizes="(max-width: 900px) 14rem, 16rem" formats={['avif', 'webp']} loading="eager" fetchpriority="high" />
 
       <div class="body">
         <p>At Waterloo I’m on the autonomy software team at the Waterloo Aerial Robotics Group, where I built the <a href="/projects/image-stitcher/">image stitcher</a> that turns drone photos into one map. On my own I’ve been building <a href="/projects/andon/">Andon</a> since October.</p>
@@ -25,16 +25,17 @@ import { awards } from '../data/metrics';
         <p>I take photos on a Canon EOS 90D. In high school I was a photographer for the yearbook, the athletic council and Bayview TV, and I still shoot for fun. <a href="/photography/">See my photography</a></p>
         <p>Outside engineering, I play sports like basketball and pickleball, watch TV shows, movies and anime, read comics and manga, and play video and board games. Someday I want to travel and get to know more of the world and its cultures.</p>
       </div>
+    </Win>
 
-      <section aria-labelledby="edu-h">
+      <Win title="Education" labelledby="edu-h" class="education">
         <h2 id="edu-h">Education</h2>
         <dl class="list">
           <div><dt>University of Waterloo</dt><dd>BASc in Computer Engineering, Co-op. September 2026 to April 2031, expected.</dd></div>
           <div><dt>Bayview Secondary School</dt><dd>2022 to 2026</dd></div>
         </dl>
-      </section>
+      </Win>
 
-      <section aria-labelledby="awards-h">
+      <Win title="Awards" labelledby="awards-h" class="awards">
         <h2 id="awards-h">Awards</h2>
         <ul class="list">
           <li>{awards.fblc2025}</li>
@@ -42,41 +43,41 @@ import { awards } from '../data/metrics';
           <li>Euclid (86/100) and Hypatia (33/40) Honour Roll, and Fermat and CSMC Distinction, University of Waterloo math contests, 2025 to 2026</li>
           <li>Excellence in Mathematics, Bayview Secondary School Mathematics Department, 2025 and 2026</li>
         </ul>
-      </section>
+      </Win>
 
-      <section aria-labelledby="else-h">
+      <Win title="Interests" labelledby="else-h" class="interests">
         <h2 id="else-h">A few other things</h2>
         <ul class="list">
           <li>My best Rubik’s cube solve is <span class="num">14.21</span> seconds.</li>
           <li>I love blowing my money on collectibles, especially ones I get to build, like LEGO and Gunpla. My favourites so far are the really big LEGO Technic <i>2 Fast 2 Furious</i> Nissan Skyline and the MG 1/100 MSN-06S Sinanju.</li>
           <li>I’ve had a turtle, a cat and parakeets. I have a dog now, and I’d like guinea pigs next.</li>
         </ul>
-      </section>
-
-      <p class="more"><a href="/resume/">Read my resume</a> <span class="dim">or email</span> <a href="mailto:aryanpourabtin@gmail.com">aryanpourabtin@gmail.com</a></p>
-    </div>
+        <p class="more"><a href="/resume/">Read my resume</a> <span class="dim">or email</span> <a href="mailto:aryanpourabtin@gmail.com">aryanpourabtin@gmail.com</a></p>
+      </Win>
   </article>
 </Base>
 
 <style>
-  .about { padding-block: var(--page-top) var(--page-end); align-items: start; }
-  .side { grid-column: 1 / 6; position: sticky; top: var(--s6); }
-  :global(.about-photo) { display: block; }
+  .about { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 14px; max-width: 59rem; margin-inline: auto; padding-bottom: var(--s6); }
+  .bio, .interests { grid-column: 1 / -1; }
+  .bio :global(.bio-in) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 16rem); gap: var(--s6); align-items: center; max-width: 50rem; margin-inline: auto; }
+  .bio-copy { display: grid; gap: var(--s5); }
+  :global(.about-photo) { display: block; width: min(100%, 16rem); }
   :global(.about-photo img) { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
-  .main { grid-column: 7 / 13; display: grid; gap: var(--s5); max-width: 36em; }
-  h1 { font-size: var(--t-title); line-height: 0.95; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(48px, 7vw, 96px); line-height: 0.95; letter-spacing: -0.03em; }
   .lead { font-size: var(--t-lead); line-height: 1.4; }
-  .body { display: grid; gap: var(--s4); }
-  section, .more { margin-top: calc(var(--group) - var(--s5)); }
-  h2 { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; margin-bottom: var(--s4); }
-  .list { margin: 0; padding: 0; list-style: none; display: grid; }
+  .body { grid-column: 1 / -1; display: grid; gap: var(--s4); }
+  .interests :global(.in) { max-width: 50rem; margin-inline: auto; }
+  .more { margin-top: var(--s5); overflow-wrap: anywhere; }
+  h2 { font: 400 var(--t-h3)/1.25 var(--mono); margin-bottom: var(--s4); }
+  .list { margin: 0; padding: 0; list-style: none; display: grid; max-width: 65ch; }
   .list > div, .list > li { padding-block: var(--s3); border-top: 1px solid var(--line); }
   .list dt { font-weight: 500; }
   .list dd { margin: 0; color: var(--dim); }
   .more .dim { margin-inline: 0.3em; }
-  @media (max-width: 759px) {
-    .about { row-gap: var(--s6); }
-    .side { grid-column: 1 / 13; position: static; }
-    .main { grid-column: 1 / 13; }
+  @media (max-width: 900px) {
+    .about, .bio :global(.bio-in) { grid-template-columns: minmax(0, 1fr); }
+    .bio :global(.bio-in) { gap: var(--s4); }
+    :global(.about-photo) { width: min(100%, 14rem); }
   }
 </style>

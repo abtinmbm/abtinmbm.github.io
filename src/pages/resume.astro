@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Win from '../components/Win.astro';
 import Icon from '../components/Icon.astro';
 import { Picture } from 'astro:assets';
 import pdfPage from '../assets/resume/resume-page.png';
@@ -47,7 +48,7 @@ const experience: Entry[] = [
     tasks: [{
     title: 'Groundside image stitcher', href: '/projects/image-stitcher/', repo: 'https://github.com/UWARG/autonomy-monorepo/pull/215', pr: 'Pull request #215 (merged)',
     points: [
-      'Built a Python stitcher (PyTorch, OpenCV, XFeat, RANSAC) that merges out-of-order, GPS-tagged photos from 3 drones into one georeferenced map. Sole developer, merged with 130 tests.',
+      'Built a Python stitcher (PyTorch, OpenCV, XFeat, RANSAC) that merges out-of-order, GPS-tagged photos from 3 simulated drones into one georeferenced map. Sole developer, merged with 130 tests.',
       'Designed a least-squares pose refinement that cut mean simulated misalignment from 13.6–69.8 cm to 4.0–8.3 cm.',
       'Solved feature matching across 180° row turns, then used drone yaw to extract features once per photo, cutting simulated time per photo from 0.42–0.75 s to 0.13–0.19 s.',
       'Implemented lens undistortion and blur, exposure and tilt checks that keep unusable photos out of the map.',
@@ -83,26 +84,26 @@ const skills = [
   description="The resume of Abtin Aryanpour, first-year Computer Engineering at the University of Waterloo: projects, experience, skills and awards, with a PDF to download."
   current="resume"
 >
-  <div class="cv wrap grid">
-    <header class="cv-side">
+  <div class="cv">
+    <Win as="header" title="Resume.pdf" name="Resume details" class="cv-side" inClass="resume-details">
       <h1 class="display">Resume</h1>
       <p class="who">Abtin Aryanpour<br /><span class="dim">Computer Engineering, University of Waterloo</span></p>
-      <p class="get"><a href={pdf} target="_blank" rel="noopener">Open the PDF in a new tab</a><a class="small" href={pdf} download>Download it (one page, 127&nbsp;KB)</a></p>
+      <p class="get"><a class="btn go" href={pdf} target="_blank" rel="noopener">Open PDF</a><a class="btn" href={pdf} download>Download PDF</a></p>
       <ul class="reach">
         <li><a href="mailto:aryanpourabtin@gmail.com"><Icon name="mail" />aryanpourabtin@gmail.com</a></li>
         <li><a href="https://www.linkedin.com/in/abtin-aryanpour"><Icon name="linkedin" />linkedin.com/in/abtin-aryanpour</a></li>
         <li><a href="https://github.com/abtinmbm"><Icon name="github" />github.com/abtinmbm</a></li>
       </ul>
-    </header>
+    </Win>
 
     <div class="cv-main">
       <div class="views" role="tablist" aria-label="How to read the resume" hidden>
-        <button type="button" role="tab" id="tab-web" aria-controls="view-web" aria-selected="true">Web version</button>
-        <button type="button" role="tab" id="tab-pdf" aria-controls="view-pdf" aria-selected="false" tabindex="-1">PDF version</button>
+        <button class="btn" type="button" role="tab" id="tab-web" aria-controls="view-web" aria-selected="true">Web version</button>
+        <button class="btn" type="button" role="tab" id="tab-pdf" aria-controls="view-pdf" aria-selected="false" tabindex="-1">PDF version</button>
       </div>
 
       <div class="view" id="view-web" role="tabpanel" aria-labelledby="tab-web">
-      <section aria-labelledby="edu">
+      <Win title="Education" labelledby="edu" inClass="cv-section">
         <h2 id="edu">Education</h2>
         {education.map((e) => (
           <div class="entry">
@@ -111,16 +112,16 @@ const skills = [
             {e.text && <p>{e.text}</p>}
           </div>
         ))}
-      </section>
+      </Win>
 
-      <section aria-labelledby="skills">
+      <Win title="Technical skills" labelledby="skills" inClass="cv-section">
         <h2 id="skills">Technical skills</h2>
         <dl class="skills">
           {skills.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
         </dl>
-      </section>
+      </Win>
 
-      <section aria-labelledby="exp">
+      <Win title="Experience" labelledby="exp" inClass="cv-section">
         <h2 id="exp">Experience</h2>
         {experience.map((e) => (
           <div class="entry">
@@ -135,9 +136,9 @@ const skills = [
             ))}
           </div>
         ))}
-      </section>
+      </Win>
 
-      <section aria-labelledby="projects">
+      <Win title="Projects" labelledby="projects" inClass="cv-section">
         <h2 id="projects">Projects</h2>
         {projectEntries.map((e) => (
           <div class="entry">
@@ -146,20 +147,22 @@ const skills = [
             <ul>{e.points!.map((pt) => <li>{pt}</li>)}</ul>
           </div>
         ))}
-      </section>
+      </Win>
 
-      <section aria-labelledby="awards">
+      <Win title="Awards" labelledby="awards" inClass="cv-section">
         <h2 id="awards">Awards</h2>
         <ul>{awards.map((a) => <li>{a}</li>)}</ul>
-      </section>
+      </Win>
       </div>
 
       <div class="view view-pdf" id="view-pdf" role="tabpanel" aria-labelledby="tab-pdf">
-        <a class="sheet" href={pdf} target="_blank" rel="noopener">
+        <Win title="Resume — PDF preview" name="PDF preview" inClass="pdf-preview">
+        <a class="sheet sunken" href={pdf} target="_blank" rel="noopener">
           <Picture src={pdfPage} formats={['avif', 'webp']} fallbackFormat="webp" widths={[700, 1100, 1700]} sizes="(max-width: 899px) 100vw, 60vw"
             alt="The one-page resume PDF: education, technical skills, experience (Waterloo Aerial Robotics Group and Spirit of Math), projects (Andon, Dose Coach and CyberShield) and awards." loading="lazy" />
         </a>
         <p class="small dim">The same page as the PDF. Click it to open the PDF, where the links work.</p>
+        </Win>
       </div>
 
     </div>
@@ -195,31 +198,25 @@ const skills = [
 </script>
 
 <style>
-  .cv { padding-block: var(--page-top) var(--page-end); align-items: start; }
-  /* The left column stays in view while the resume scrolls past it. */
-  .cv-side { grid-column: 1 / 4; position: sticky; top: var(--s6); display: grid; gap: var(--s5); }
-  h1 { font-size: var(--t-h2); line-height: 1; letter-spacing: 0.01em; }
+  .cv { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 14px; align-items: start; max-width: 1180px; padding-bottom: var(--s6); }
+  .cv-side { position: sticky; top: 56px; }
+  .cv-side :global(.resume-details), .cv-main :global(.cv-section) { display: grid; gap: var(--s5); }
+  h1 { font-size: clamp(36px, 4vw, 60px); line-height: 1; letter-spacing: -0.03em; }
   .who { line-height: 1.5; }
-  .get { display: grid; gap: var(--s2); justify-items: start; }
-  .get a { font-weight: 500; }
+  .get { display: flex; flex-wrap: wrap; gap: var(--s2); }
   .reach { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); font-size: 15px; }
   .reach a { display: inline-flex; align-items: center; gap: var(--s3); overflow-wrap: anywhere; }
-  .reach :global(.icon) { color: var(--dim); width: 17px; height: 17px; }
+  .reach :global(.icon) { color: var(--dim); width: 17px; height: 17px; flex: none; }
 
-  .cv-main { grid-column: 5 / 13; display: grid; gap: var(--group); max-width: 54rem; }
-  .view { display: grid; gap: var(--group); }
+  .cv-main, .view { display: grid; gap: 14px; min-width: 0; }
   .view[hidden] { display: none; }
-  .views { display: inline-flex; justify-self: start; padding: 4px; gap: 4px; border: 1px solid var(--line); border-radius: 999px; }
+  .views { display: inline-flex; flex-wrap: wrap; justify-self: start; gap: 8px; }
   .views[hidden] { display: none; }
-  .views button { font: inherit; font-size: 15px; font-weight: 500; color: var(--dim); background: none; border: 0; border-radius: 999px; padding: 8px 18px; cursor: pointer; transition: color 160ms ease, background-color 160ms ease; }
-  .views button:hover { color: var(--white); }
-  .views button[aria-selected="true"] { background: var(--white); color: var(--black); }
-  .views button:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
-  .view-pdf { gap: var(--s4); }
-  .sheet { display: block; background: #fff; box-shadow: 0 30px 80px -30px rgb(13 34 87 / 0.9); }
+  .views button[aria-selected="true"] { background: var(--well); box-shadow: var(--bevel-press), 0 0 0 1px var(--fg); }
+  .view-pdf :global(.pdf-preview) { display: grid; gap: var(--s4); }
+  .sheet { display: block; }
   .sheet :global(img) { width: 100%; height: auto; }
-  section { display: grid; gap: var(--s5); }
-  h2 { font-size: 15px; font-weight: 500; color: var(--dim); padding-bottom: var(--s3); border-bottom: 1px solid var(--line); }
+  h2 { font: 400 var(--t-h3)/1.25 var(--mono); padding-bottom: var(--s3); border-bottom: 1px solid var(--rule); }
   .entry { display: grid; gap: 4px; }
   .entry + .entry { margin-top: var(--s4); }
   .e-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px var(--s5); }
@@ -233,13 +230,12 @@ const skills = [
   ul { margin: var(--s2) 0 0; padding-left: 1.1em; display: grid; gap: var(--s2); max-width: 36em; }
   li::marker { color: var(--dim); }
   .skills { margin: 0; display: grid; gap: var(--s3); }
-  .skills div { display: grid; grid-template-columns: 13em 1fr; gap: var(--s4); }
+  .skills div { display: grid; grid-template-columns: minmax(8rem, 1fr) minmax(0, 2fr); gap: var(--s4); }
   .skills dt { font-weight: 500; }
   .skills dd { margin: 0; color: var(--dim); }
 
-  @media (max-width: 899px) {
-    .cv { row-gap: var(--s6); }
-    .cv-side, .cv-main { grid-column: 1 / -1; }
+  @media (max-width: 900px) {
+    .cv { grid-template-columns: minmax(0, 1fr); }
     .cv-side { position: static; }
   }
   @media (max-width: 599px) {

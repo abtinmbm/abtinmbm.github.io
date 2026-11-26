@@ -25,7 +25,7 @@ export function chartSvg(tr: Trace, n: number, W: number, H: number): string {
   const small = W < 520;
   // On wide screens the y labels hang left of the plot, so the plot, the axis title,
   // the button and the caption share one left edge.
-  const pad = { l: small ? 40 : 0, r: small ? 8 : 12, t: 34, b: 28 };
+  const pad = { l: 40, r: small ? 8 : 12, t: 34, b: 28 };
   const lo = Math.log10(Math.max(Math.min(...tr.s), 1e-4) / 2);
   const hi = Math.log10(Math.max(Math.max(...tr.s), tr.control) * 3);
   const tEnd = tr.t[tr.t.length - 1];

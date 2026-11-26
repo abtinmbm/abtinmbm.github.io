@@ -27,20 +27,20 @@ const drones = [1, 2, 3];
 <style>
   .arr { margin: 0; display: grid; gap: var(--s3); }
   .arr-svg { display: block; width: 100%; height: auto; }
-  .arr-field { fill: rgb(6 16 49 / 0.6); stroke: var(--line); stroke-width: 0.3; }
+  .arr-field { fill: var(--well); stroke: var(--line); stroke-width: 0.3; }
   .arr-p { fill: none; vector-effect: non-scaling-stroke; stroke-width: 1; transition: fill 400ms ease; }
-  .arr-p.d1 { stroke: #f3f5ff; }
-  .arr-p.d2 { stroke: #8296dc; stroke-dasharray: 5 3; }
-  .arr-p.d3 { stroke: #5574d4; stroke-dasharray: 1.5 2.5; }
+  .arr-p.d1 { stroke: var(--fg); }
+  .arr-p.d2 { stroke: var(--accent); stroke-dasharray: 5 3; }
+  .arr-p.d3 { stroke: var(--mute); stroke-dasharray: 1.5 2.5; }
   .arr-p.off { visibility: hidden; }
-  .arr-p.new { fill: rgb(243 245 255 / 0.28); }
+  .arr-p.new { fill: var(--tint); }
   .arr-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2) var(--s4); }
   .arr-key { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--s4); color: var(--dim); }
   .arr-key li { display: inline-flex; align-items: center; gap: 6px; }
   .arr-key i { width: 18px; border-top: 2px solid; }
-  .arr-key i.d1 { border-color: #f3f5ff; }
-  .arr-key i.d2 { border-color: #8296dc; border-top-style: dashed; }
-  .arr-key i.d3 { border-color: #5574d4; border-top-style: dotted; }
+  .arr-key i.d1 { border-color: var(--fg); }
+  .arr-key i.d2 { border-color: var(--accent); border-top-style: dashed; }
+  .arr-key i.d3 { border-color: var(--mute); border-top-style: dotted; }
   .arr-play { font: inherit; font-size: 14px; color: var(--white); background: none; border: 0; padding: 4px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.3em; }
   .arr-play:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
   .arr-now { margin: 0; min-height: 1.5em; color: var(--dim); }
@@ -72,8 +72,8 @@ const drones = [1, 2, 3];
       btn.hidden = false;
       const io = new IntersectionObserver((entries) => {
         if (entries.some((e) => e.isIntersecting)) { io.disconnect(); play(); }
-      }, { threshold: 0.5 });
-      io.observe(fig);
+      }, { threshold: 0.25 });
+      io.observe(fig.querySelector('svg') ?? fig);
     }
   }
 </script>

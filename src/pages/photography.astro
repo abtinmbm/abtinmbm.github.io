@@ -2,6 +2,7 @@
 import { Picture } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import Base from '../layouts/Base.astro';
+import Win from '../components/Win.astro';
 import list from '../data/photos.json';
 
 const files = import.meta.glob<{ default: ImageMetadata }>('../assets/photography/*.webp', { eager: true });
@@ -13,19 +14,22 @@ const order = [1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 30, 11, 12, 13, 14, 47, 15, 16, 38
 if (new Set(order).size !== all.length || order.length !== all.length) throw new Error('photography: every photo must appear exactly once');
 const photos = order.map((n) => all[n - 1]);
 const total = photos.length;
+const contactSheetPreview = import.meta.env.DEV;
 ---
 <Base
   title="Photography | Abtin Aryanpour"
   current="photography"
   description="Photos by Abtin Aryanpour, taken on a Canon EOS 90D: cities at night, school sports, fire performers, mountains and a few cats."
 >
-  <header class="ph-head wrap">
-    <h1 class="display">Photography</h1>
+  <Win title="Photography — photo viewer" name="Photo viewer" class="photo-window" labelledby="photo-heading">
+  <header class="ph-head">
+    <h1 id="photo-heading" class="display">Photography</h1>
     <p class="lead">I take photos on a Canon EOS 90D, for school and for fun.</p>
   </header>
 
-  <section class="viewer wrap" aria-label="Photos" data-viewer>
-    <div class="track" tabindex="0" role="group" aria-label="Photo viewer. Use the arrow keys to move between photos.">
+  <section class="viewer" aria-label="Photos" data-viewer>
+    {contactSheetPreview && <button type="button" class="btn sm sheet-toggle" data-sheet-toggle aria-pressed="false" hidden>Contact sheet</button>}
+    <div class="track sunken" tabindex="0" role="group" aria-label="Photo viewer. Use the arrow keys to move between photos.">
       {photos.map((p, k) => (
         <figure class="slide" id={`p${k + 1}`} aria-label={`Photo ${k + 1} of ${total}`}>
           <Picture src={p.src} alt={p.alt} formats={['avif', 'webp']} fallbackFormat="webp"
@@ -37,36 +41,39 @@ const total = photos.length;
     </div>
 
     <div class="controls" hidden>
-      <button type="button" class="step" data-step="-1" aria-label="Previous photo">
+      <button type="button" class="step btn" data-step="-1" aria-label="Previous photo">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
       </button>
       <p class="count num" aria-live="polite"><b>1</b> of {total}</p>
-      <button type="button" class="step" data-step="1" aria-label="Next photo">
+      <button type="button" class="step btn" data-step="1" aria-label="Next photo">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
       </button>
     </div>
 
     <nav class="strip" aria-label="All photos">
       {photos.map((p, k) => (
-        <a href={`#p${k + 1}`} class="thumb" aria-label={`Photo ${k + 1}`} aria-current={k === 0 ? 'true' : undefined} style={`--ta:${p.a.toFixed(3)}`}>
+        <a href={`#p${k + 1}`} class="thumb" aria-label={contactSheetPreview ? `Photo ${k + 1}: ${p.alt}` : `Photo ${k + 1}`} aria-current={k === 0 ? 'true' : undefined} style={`--ta:${p.a.toFixed(3)}`}>
           <Picture src={p.src} alt="" formats={['avif', 'webp']} fallbackFormat="webp"
-            widths={[Math.round(64 * p.a), Math.round(128 * p.a)]} sizes={`${Math.round(64 * p.a)}px`} loading="lazy" />
+            widths={contactSheetPreview ? [160, 320] : [Math.round(64 * p.a), Math.round(128 * p.a)]}
+            sizes={contactSheetPreview ? '(max-width: 759px) 30vw, 160px' : `${Math.round(64 * p.a)}px`} loading="lazy" />
+          {contactSheetPreview && <span class="sheet-number" aria-hidden="true">{String(k + 1).padStart(2, '0')}</span>}
         </a>
       ))}
     </nav>
   </section>
+  </Win>
 </Base>
 
 <style>
-  .ph-head { padding-block: var(--page-top) var(--s6); display: grid; justify-items: center; text-align: center; gap: var(--s3); }
-  h1 { font-size: var(--t-h2); line-height: 1; letter-spacing: 0.01em; }
+  .photo-window { max-width: 1180px; }
+  .ph-head { margin-bottom: var(--s5); display: grid; gap: var(--s3); }
+  h1 { font-size: clamp(30px, 6vw, 84px); line-height: 1; letter-spacing: -0.03em; }
   .lead { line-height: 1.4; color: var(--dim); }
 
-  .viewer { --stage: clamp(320px, calc(100svh - 360px), 860px); padding-bottom: var(--page-end); scroll-margin-top: 16px; }
+  .viewer { --stage: clamp(320px, calc(100svh - 470px), 860px); scroll-margin-top: 16px; }
   /* One photo per screen width. Without JavaScript this still scrolls and snaps by swipe or trackpad. */
-  .track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; padding: 0; }
   .track::-webkit-scrollbar { display: none; }
-  .track:focus-visible { outline: 2px solid var(--white); outline-offset: 4px; }
   .slide { flex: 0 0 100%; height: var(--stage); margin: 0; display: grid; place-items: center; scroll-snap-align: center; scroll-snap-stop: always; }
   .slide :global(picture) { display: contents; }
   .slide :global(source) { display: none; }
@@ -74,30 +81,37 @@ const total = photos.length;
 
   .controls { display: flex; justify-content: center; align-items: center; gap: var(--s5); margin-top: var(--s4); }
   .controls[hidden] { display: none; }
-  .count { min-width: 6.5em; text-align: center; color: var(--dim); }
-  .count b { color: var(--white); font-weight: 500; }
-  .step { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: none; color: var(--white); cursor: pointer; transition: border-color 160ms ease, background-color 160ms ease; }
+  .count { min-width: 6.5em; text-align: center; color: var(--mute); font-family: var(--mono); }
+  .count b { color: var(--fg); font-weight: 400; }
+  .step { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; }
   .step svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-  .step:hover { border-color: var(--white); }
-  .step:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
-  .step:active { background: rgb(243 245 255 / 0.12); }
-  .step:disabled { opacity: 0.3; cursor: default; border-color: var(--line); }
+  .step.btn:active { padding: 1px 0 0 1px; }
+  .step:disabled { opacity: 0.45; cursor: default; }
 
   /* The film strip: every photo, the current one bright and outlined. */
   .strip { display: flex; justify-content: safe center; gap: 6px; margin-top: var(--s4); overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
   .thumb { flex: 0 0 auto; display: block; height: 64px; aspect-ratio: var(--ta); opacity: 0.45; outline: 1px solid transparent; outline-offset: 2px; transition: opacity 160ms ease, outline-color 160ms ease; }
   .thumb :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
   .thumb:hover { opacity: 0.8; }
-  .thumb:focus-visible { opacity: 1; outline: 2px solid var(--white); }
-  .thumb[aria-current="true"] { opacity: 1; outline-color: var(--white); }
+  .thumb:focus-visible { opacity: 1; outline: 2px dashed var(--accent); }
+  .thumb[aria-current="true"] { opacity: 1; outline-color: var(--accent); }
+
+  .sheet-toggle { margin-bottom: var(--s3); }
+  .sheet-toggle[hidden], .track[hidden], .sheet-number { display: none; }
+  .sheet-open .strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 0; overflow: visible; padding: 12px; background: var(--well); box-shadow: var(--bevel-in); }
+  .sheet-open .thumb { display: grid; grid-template-rows: auto auto; height: auto; aspect-ratio: auto; padding: 5px; opacity: 1; outline-offset: 0; background: var(--panel); box-shadow: var(--bevel); text-decoration: none; }
+  .sheet-open .thumb :global(img) { aspect-ratio: 4 / 3; object-fit: contain; background: var(--desk); }
+  .sheet-open .thumb :global(picture) { min-width: 0; }
+  .sheet-open .sheet-number { display: block; padding: 5px 3px 2px; color: var(--mute); font: 400 12px var(--mono); }
 
   @media (max-width: 759px) {
     .viewer { --stage: clamp(280px, calc(100svh - 360px), 560px); padding-inline: 0; }
-    .controls, .strip { padding-inline: var(--edge); }
+    .photo-window > :global(.in) { padding-inline: 14px; }
     .thumb { height: 48px; }
     /* On a phone the frame fits the current photo, so a panorama doesn't float in an empty box. */
     .track { align-items: flex-start; overflow-y: hidden; transition: height 200ms ease; }
     .slide { height: auto; }
+    .sheet-open .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 6px; }
   }
 </style>
 
@@ -110,6 +124,7 @@ const total = photos.length;
     const controls = root.querySelector<HTMLElement>('.controls')!;
     const [prev, next] = root.querySelectorAll<HTMLButtonElement>('.step');
     const count = root.querySelector('.count b')!;
+    const sheetToggle = root.querySelector<HTMLButtonElement>('[data-sheet-toggle]');
     const smooth = matchMedia('(prefers-reduced-motion: no-preference)').matches ? 'smooth' : 'auto';
     controls.hidden = false;
     let cur = 0;
@@ -138,12 +153,25 @@ const total = photos.length;
       track.scrollTo({ left: slides[k].offsetLeft - track.offsetLeft, behavior });
       if (k !== cur) show(k);
     };
+    const setSheet = (open: boolean) => {
+      if (!sheetToggle) return;
+      root.classList.toggle('sheet-open', open);
+      track.hidden = open;
+      controls.hidden = open;
+      sheetToggle.setAttribute('aria-pressed', String(open));
+      const url = new URL(location.href);
+      if (open) url.searchParams.set('view', 'contact-sheet');
+      else url.searchParams.delete('view');
+      history.replaceState(history.state, '', url);
+      if (!open) go(cur, 'auto');
+    };
 
     // Swipes and trackpad scrolls land on a slide; keep the counter and strip in step.
     let timer = 0;
     track.addEventListener('scroll', () => {
       clearTimeout(timer);
       timer = window.setTimeout(() => {
+        if (track.hidden || !track.clientWidth) return;
         const k = Math.round(track.scrollLeft / track.clientWidth);
         if (k !== cur) show(k);
       }, 80);
@@ -151,9 +179,18 @@ const total = photos.length;
 
     prev.addEventListener('click', () => go(cur - 1));
     next.addEventListener('click', () => go(cur + 1));
-    thumbs.forEach((t, j) => t.addEventListener('click', (e) => { e.preventDefault(); go(j); }));
+    thumbs.forEach((t, j) => t.addEventListener('click', (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      if (!track.hidden) { go(j); return; }
+      setSheet(false);
+      go(j, 'auto');
+      track.focus({ preventScroll: true });
+      track.scrollIntoView({ block: 'nearest' });
+    }));
     document.addEventListener('keydown', (e) => {
-      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.altKey || e.ctrlKey || e.metaKey || track.hidden) return;
+      if (document.querySelector('dialog[open]') || (e.target instanceof Element && e.target.closest('#start-menu'))) return;
       const map: Record<string, number> = { ArrowLeft: cur - 1, ArrowRight: cur + 1, Home: 0, End: slides.length - 1 };
       if (!(e.key in map)) return;
       if ((e.key === 'Home' || e.key === 'End') && !root.contains(document.activeElement)) return;
@@ -165,6 +202,11 @@ const total = photos.length;
     const m = /^#p(\d+)$/.exec(location.hash);
     if (m) requestAnimationFrame(() => { go(Number(m[1]) - 1, 'auto'); window.scrollTo(0, 0); });
     else show(0, false);
-    new ResizeObserver(() => { fit(); go(cur, 'auto'); }).observe(track);
+    if (sheetToggle) {
+      sheetToggle.hidden = false;
+      sheetToggle.addEventListener('click', () => setSheet(!track.hidden));
+      if (new URL(location.href).searchParams.get('view') === 'contact-sheet') setSheet(true);
+    }
+    new ResizeObserver(() => { if (!track.hidden) { fit(); go(cur, 'auto'); } }).observe(track);
   }
 </script>

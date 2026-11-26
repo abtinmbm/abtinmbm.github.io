@@ -1,7 +1,6 @@
 ---
 import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
-import ProjectTrail from '../../components/ProjectTrail.astro';
 import Icon from '../../components/Icon.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import DoseCurls from '../../components/DoseCurls.astro';
@@ -18,11 +17,12 @@ const p = projects.find((x) => x.slug === 'dose-coach')!;
   title="Dose Coach: a handheld coach for rehab exercise | Abtin Aryanpour"
   description="An Arduino exercise coach for a supervised rehab class. It walks each person through their plan, judges every bicep curl from a wrist sensor, and logs each set. A first-year design project."
   current="work"
+  project="dose-coach"
 >
   <article class="proj">
-    <header class="top">
-      <div class="top-sky"><ProjectTrail slug="dose-coach" /></div>
-      <div class="top-in col">
+    <header class="top tile" data-win="Dose Coach" id="top-win">
+      <div class="tb"><span class="t">dose-coach — readme</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Dose Coach"><i></i></button></div>
+      <div class="top-in in">
         <h1 class="display">Dose Coach</h1>
         <p class="lead">A handheld coach for a supervised exercise class. It walks each person through their plan, judges every bicep curl from a sensor on the wrist, and logs each set.</p>
         <p class="key"><span class="key-n">{dose.repsSorted}</span><span class="key-l">test reps sorted correctly as good, too fast, half or fast half, {dose.repsEach} of each from {dose.testers} people. They were recorded after every rule was fixed.</span></p>
@@ -35,7 +35,9 @@ const p = projects.find((x) => x.slug === 'dose-coach')!;
       </div>
     </header>
 
-    <section class="part first col" aria-labelledby="why-h">
+    <section class="part tile first" aria-labelledby="why-h" data-win="Overview">
+      <div class="tb"><span class="t">// 01 · overview</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Overview"><i></i></button></div>
+      <div class="in col">
       <h2 id="why-h" class="visually-hidden">Why it exists</h2>
       <p class="intro">In the course’s design brief, one instructor runs an exercise class of 10 to 12 cancer and stroke survivors. Paper logs record that someone exercised, but not how much or how well, so a rep done too fast or cut short goes unseen.</p>
       <p>The client was a scenario set by the course. The device was tested by me and a friend, not in a real class.</p>
@@ -44,9 +46,12 @@ const p = projects.find((x) => x.slug === 'dose-coach')!;
         <Picture src={wrist} formats={['avif', 'webp']} fallbackFormat="webp" widths={[520, 1040]} sizes="(max-width: 599px) 92vw, 34rem" alt="The wrist sensor strapped to a forearm: a small blue accelerometer board on a cardboard plate, held by a black velcro strap, with its wires looping back to the device on the desk." />
         <figcaption class="small">The finished build, and the accelerometer on its velcro wrist strap. One cable carries the sensor’s power and readings back to the board.</figcaption>
       </figure>
+      </div>
     </section>
 
-    <section id="how" class="part col" aria-labelledby="how-h">
+    <section id="how" class="part tile" aria-labelledby="how-h" data-win="How it works" data-reveal>
+      <div class="tb"><span class="t">// 02 · how it works</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize How it works"><i></i></button></div>
+      <div class="in col">
       <h2 id="how-h">From a plan to a logged set</h2>
       <ol class="steps">
         <li><p><b>Plan.</b> A plan file lists each exercise with its reps or seconds, sets and rest. It’s uploaded with the firmware. Curls are judged by the wrist sensor, other exercises are counted with taps, and holds are timed.</p></li>
@@ -82,9 +87,12 @@ const p = projects.find((x) => x.slug === 'dose-coach')!;
           <tr><th scope="row">Under {dose.topDeg}, at a normal speed</th><td>Go higher</td><td>No</td></tr>
         </tbody>
       </table>
+      </div>
     </section>
 
-    <section id="data" class="part col" aria-labelledby="data-h">
+    <section id="data" class="part tile" aria-labelledby="data-h" data-win="The data" data-reveal>
+      <div class="tb"><span class="t">// 03 · the data</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize The data"><i></i></button></div>
+      <div class="in col">
       <h2 id="data-h">The data and the method</h2>
       <dl class="defs">
         <div><dt>Where the data came from</dt><dd>Readings from the wrist accelerometer, recorded by me and a friend with a test program that prints the angle {dose.readingsPerSec} times a second. The sensor feels the arm’s movement as well as gravity, so a fast curl that brakes at the top reads {dose.fastLow} low, and a loose strap adds wobble.</dd></div>
@@ -92,9 +100,12 @@ const p = projects.find((x) => x.slug === 'dose-coach')!;
         <div><dt>What kind of method it is</dt><dd>It isn’t machine learning or a trained model. It’s a set of fixed rules, chosen by hand, applied to an angle worked out from the direction of gravity.</dd></div>
         <div><dt>What it outputs</dt><dd>A label for each movement: Good, Too fast, Go higher, or nothing for a bump. The {dose.repsSorted} result compares that label with the kind of rep the tester was asked to do.</dd></div>
       </dl>
+      </div>
     </section>
 
-    <section id="results" class="part col" aria-labelledby="results-h">
+    <section id="results" class="part tile" aria-labelledby="results-h" data-win="Results" data-reveal>
+      <div class="tb"><span class="t">// 04 · results</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Results"><i></i></button></div>
+      <div class="in col">
       <h2 id="results-h">Every test rep sorted correctly</h2>
       <p>Each tester did {dose.repsEach} reps of each of {dose.repTypes} kinds: good, too fast, half, and fast half. The device put all {dose.repsSorted.split(' / ')[1]} in the right group. The other tests checked the parts against a simple reference.</p>
       <table class="facts-table">
@@ -109,9 +120,12 @@ const p = projects.find((x) => x.slug === 'dose-coach')!;
         </tbody>
       </table>
       <p>The failures were unplugging and replugging the wrist sensor mid-set, unplugging the screen, resting a hand on the pad, moving during the zero, a double tap at the end of a set, and a tap after the workout ends. With the sensor unplugged, the screen says “Sensor?” and taps take over the counting.</p>
+      </div>
     </section>
 
-    <section id="hard" class="part col" aria-labelledby="hard-h">
+    <section id="hard" class="part tile" aria-labelledby="hard-h" data-win="What was hard" data-reveal>
+      <div class="tb"><span class="t">// 05 · what was hard</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize What was hard"><i></i></button></div>
+      <div class="in col">
       <h2 id="hard-h">What was hard</h2>
       <h3>The screen library froze the board</h3>
       <p>On this board the screen’s clock line has no working pull-up resistor, and Arduino’s standard I2C library timed out and hung. So the firmware drives the screen’s two I2C lines itself. It also notices when the screen is unplugged and reconnects within {dose.lcdRetry}.</p>
@@ -119,26 +133,36 @@ const p = projects.find((x) => x.slug === 'dose-coach')!;
       <p>When a fast curl brakes at the top, the sensor feels the braking as extra tilt and reads {dose.fastLow} low, so fast curls were judged as half curls. Speed fixed it: a curl that stays under {dose.topDeg} but moves faster than {dose.fastSpeed} is called Too fast, since the height can’t be trusted and “slow down” is the right advice either way.</p>
       <h3>The strap wobbled during the zero</h3>
       <p>Tapping the pad shakes the arm, so the stillness check kept failing and asking for another tap. Now it ignores the first 0.3&nbsp;s after the tap, then waits up to 4&nbsp;s for half a second of stillness.</p>
+      </div>
     </section>
 
-    <section id="hardware" class="part col" aria-labelledby="hw-h">
+    <section id="hardware" class="part tile" aria-labelledby="hw-h" data-win="Hardware" data-reveal>
+      <div class="tb"><span class="t">// 06 · hardware</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Hardware"><i></i></button></div>
+      <div class="in col">
       <h2 id="hw-h">The circuit</h2>
       <p>An Arduino UNO R4 Minima with a Grove Base Shield, powered by a laptop over USB. The screen, buzzer and touch pad plug into the shield, and the LEDs and buttons sit on a breadboard.</p>
       <figure class="dwiring-fig">
         <DoseWiring />
         <figcaption class="small">The circuit, drawn from the pin list in the firmware. The buttons need no resistors because the board’s own pull-ups hold each pin high until it’s pressed.</figcaption>
       </figure>
+      </div>
     </section>
 
-    <section id="limits" class="part col" aria-labelledby="short-h">
+    <section id="limits" class="part tile" aria-labelledby="short-h" data-win="Limits" data-reveal>
+      <div class="tb"><span class="t">// 07 · limits</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Limits"><i></i></button></div>
+      <div class="in col">
       <h2 id="short-h">Where it still falls short</h2>
       <p>Only bicep curls are judged; other exercises are counted by taps. The sensor sees forearm tilt only, so swinging the body or turning the arm goes unnoticed, and fast reps read low. The angle reads {dose.angleLow} low, which a calibration factor would mostly fix. A cable ties the wrist to the device, and the log needs a laptop. It was tested on {dose.testers} people, never in a real class.</p>
+      </div>
     </section>
 
-    <nav class="onward col" aria-label="Code and next project">
+    <nav class="onward tile" data-win="Next project" aria-label="Code and next project">
+      <div class="tb"><span class="t">// end · code and next project</span><button type="button" class="wbtn" data-min aria-expanded="true" aria-label="Minimize Next project"><i></i></button></div>
+      <div class="in">
       <p class="built">Built with C++ on Arduino.</p>
       <a href={p.repo}><Icon name="github" /> Dose Coach’s code on GitHub</a>
       <a href="/projects/image-stitcher/">Next project: Image Stitcher</a>
+      </div>
     </nav>
   </article>
 </Base>

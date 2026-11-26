@@ -1,0 +1,62 @@
+---
+// The stitcher's map growing from 20 to 91 photos, for the homepage window. One simulated
+// mission (PR #215 demo), saved at five points. Without JavaScript the first stage shows.
+import { Picture } from 'astro:assets';
+import s20 from '../assets/stitcher/stages/stage-20.webp';
+import s40 from '../assets/stitcher/stages/stage-40.webp';
+import s60 from '../assets/stitcher/stages/stage-60.webp';
+import s80 from '../assets/stitcher/stages/stage-80.webp';
+import s91 from '../assets/stitcher/stages/stage-91.webp';
+const stages = [[20, s20], [40, s40], [60, s60], [80, s80], [91, s91]] as const;
+---
+<figure class="hs" data-hs>
+  <div class="hs-stack sunken">
+    {stages.map(([n, img], k) => (
+      <div class:list={['hs-frame', { on: k === 0 }]} aria-hidden={k === 0 ? undefined : 'true'}>
+        <Picture src={img} fallbackFormat="webp" formats={['avif', 'webp']} widths={[600, 900, 1200]} sizes="(max-width: 900px) 100vw, 52vw"
+          loading="lazy" alt={`The simulated map after ${n} of 91 photos. Its stepped outline shows where the photos landed.`} />
+      </div>
+    ))}
+  </div>
+  <div class="hs-bar" hidden>
+    <input type="range" min="0" max={stages.length - 1} value="0" data-stages={stages.map(([n]) => n).join(',')}
+      aria-label="Photos in the simulated map" aria-valuetext="20 of 91 photos" />
+    <span class="hs-count num"><b>20</b> / 91 photos</span>
+  </div>
+  <figcaption class="cap">One simulated mission. Photos arrive out of order from three drones, and the map grows as they land.</figcaption>
+</figure>
+
+<style>
+  .hs { margin: 0; }
+  .hs-stack { display: grid; }
+  .hs-frame { grid-area: 1 / 1; visibility: hidden; }
+  .hs-frame.on { visibility: visible; }
+  .hs-frame :global(img) { display: block; width: 100%; height: var(--warg-media-height, auto); object-fit: contain; }
+  .hs-bar { display: flex; align-items: center; gap: 12px; margin-top: 12px; min-height: 31px; }
+  .hs-bar[hidden] { display: none; }
+  .hs-bar input { flex: 1; min-width: 0; margin: 0; accent-color: var(--accent); cursor: pointer; }
+  .hs-count { font: 400 14px var(--mono); white-space: nowrap; }
+  .hs-count b { font-weight: 400; color: var(--accent); }
+  .cap { margin-top: 10px; font-size: 13.5px; color: var(--mute); line-height: 1.45; }
+</style>
+
+<script>
+  for (const fig of document.querySelectorAll<HTMLElement>('[data-hs]')) {
+    const frames = [...fig.querySelectorAll<HTMLElement>('.hs-frame')];
+    const range = fig.querySelector<HTMLInputElement>('input[type="range"]')!;
+    const counts = range.dataset.stages!.split(',');
+    const count = fig.querySelector('.hs-count b')!;
+    const bar = fig.querySelector<HTMLElement>('.hs-bar')!;
+    bar.hidden = false;
+    range.addEventListener('input', () => {
+      const k = range.valueAsNumber;
+      frames.forEach((frame, j) => {
+        frame.classList.toggle('on', j === k);
+        if (j === k) frame.removeAttribute('aria-hidden');
+        else frame.setAttribute('aria-hidden', 'true');
+      });
+      count.textContent = counts[k];
+      range.setAttribute('aria-valuetext', `${counts[k]} of ${counts.at(-1)} photos`);
+    });
+  }
+</script>

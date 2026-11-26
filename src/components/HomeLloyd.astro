@@ -1,0 +1,54 @@
+---
+// The Lloyd's algorithm run for the homepage window: 10 simulated drones spreading over an
+// L-shaped field (PR #247, seed 0). The finished run is drawn on the server; the steps load
+// only when the window comes into view, so they don't weigh on the first paint.
+import run from '../data/lloyd-run.json';
+import { stepMarkup, viewBox, type LloydRun } from '../lib/lloyd';
+import '../styles/lloyd.css';
+const r = run as LloydRun;
+const last = r.frames.length - 1;
+---
+<figure class="hl" data-hl>
+  <div class="sunken">
+    <svg class="ly-map" viewBox={viewBox} role="img" aria-label="Ten simulated drones spread evenly over an L-shaped field, each in its own cell, with the paths they flew from a bunched start." set:html={stepMarkup(r, last)} />
+  </div>
+  <div class="hl-bar">
+    <button type="button" class="btn sm" hidden>Run again</button>
+    <span class="hl-step num">Step {last} of {last}</span>
+  </div>
+</figure>
+
+<style>
+  .hl { margin: 0; }
+  .hl :global(.ly-map) { width: 100%; height: var(--warg-media-height, auto); display: block; }
+  .hl-bar { display: flex; align-items: center; gap: 10px; margin-top: 12px; min-height: 31px; }
+  .hl-step { font: 400 13px var(--mono); color: var(--mute); }
+</style>
+
+<script>
+  import runUrl from '../data/lloyd-run.json?url';
+  import { stepMarkup, type LloydRun } from '../lib/lloyd';
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (const fig of document.querySelectorAll<HTMLElement>('[data-hl]')) {
+    const svg = fig.querySelector('svg')!;
+    const btn = fig.querySelector('button')!;
+    const step = fig.querySelector('.hl-step')!;
+    let r: LloydRun | null = null, timer = 0;
+    const load = async () => (r ??= await (await fetch(runUrl)).json());
+    const show = (k: number) => { svg.innerHTML = stepMarkup(r!, k); step.textContent = `Step ${k} of ${r!.frames.length - 1}`; };
+    const play = async () => {
+      await load();
+      clearInterval(timer);
+      const last = r!.frames.length - 1;
+      let k = 0; show(0);
+      timer = window.setInterval(() => { k++; show(k); if (k >= last) clearInterval(timer); }, 110);
+    };
+    btn.hidden = false;
+    btn.addEventListener('click', play);
+    if (!reduce) {
+      const io = new IntersectionObserver((e) => { if (e.some((x) => x.isIntersecting)) { io.disconnect(); play(); } }, { threshold: 0.5 });
+      io.observe(fig);
+    }
+  }
+</script>
