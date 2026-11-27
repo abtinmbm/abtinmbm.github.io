@@ -28,7 +28,7 @@ function sfx(kind: keyof typeof SFX) {
 }
 const paintSfx = () => $$('[data-sfx-toggle]').forEach((b) => b.setAttribute('aria-pressed', String(sfxOn)));
 paintSfx();
-const pressable = 'button, .btn, .icon-link';
+const pressable = 'button, .btn';
 document.addEventListener('pointerdown', (e) => { if ((e.target as Element).closest(pressable)) sfx('press'); });
 document.addEventListener('pointerup', (e) => { if ((e.target as Element).closest(pressable)) sfx('release'); });
 
@@ -188,7 +188,15 @@ sm?.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowUp') { items[(i - 1 + items.length) % items.length].focus(); e.preventDefault(); }
 });
 
-/* ---------- clock: Waterloo time ---------- */
+/* ---------- system tray ---------- */
+const trayFace = document.querySelector<HTMLButtonElement>('[data-tray-face]');
+if (trayFace) {
+  trayFace.addEventListener('click', () => {
+    trayFace.setAttribute('aria-pressed', String(trayFace.getAttribute('aria-pressed') !== 'true'));
+  });
+  trayFace.hidden = false;
+}
+
 const clock = document.querySelector('[data-time]');
 if (clock) {
   const fmt = new Intl.DateTimeFormat('en-CA', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Toronto' });

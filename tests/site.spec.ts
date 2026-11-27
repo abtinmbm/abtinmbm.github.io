@@ -47,7 +47,7 @@ for (const path of pages) {
   });
 }
 
-test('desktop shortcuts restore and focus Featured windows', async ({ page }) => {
+test('taskbar tabs restore and focus Featured windows', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/projects/');
@@ -62,6 +62,25 @@ test('desktop shortcuts restore and focus Featured windows', async ({ page }) =>
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
   await expect(toggle).toBeFocused();
   await expect(tab).toHaveAttribute('aria-current', 'location');
+});
+
+test('the narrow taskbar fits its shortcuts and clock and the pixel face toggles with the keyboard', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.clock.setFixedTime(new Date('2026-01-01T17:59:00Z'));
+  await page.goto('/');
+  const bar = page.locator('.taskbar');
+  const clock = bar.locator('time');
+  await expect(clock).toHaveText(/12:59/);
+  await expect(bar.getByRole('link', { name: 'Photos' })).toHaveCount(0);
+  await expect(bar.getByRole('link', { name: 'Resume PDF' })).toHaveAttribute('href', /\.pdf$/);
+  const face = bar.getByRole('button', { name: 'Surprise the pixel face' });
+  await expect(face).toHaveAttribute('aria-pressed', 'false');
+  await face.press('Space');
+  await expect(face).toHaveAttribute('aria-pressed', 'true');
+  await expect(face.locator('.gasp')).toBeVisible();
+  await face.press('Space');
+  await expect(face.locator('.smile')).toBeVisible();
+  expect(await bar.evaluate((el) => el.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
 test('the desktop and Featured projects are readable without JavaScript', async ({ browser }) => {

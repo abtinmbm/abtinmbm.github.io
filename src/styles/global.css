@@ -34,6 +34,7 @@
 
   --edge: 16px;
   --gap: 20px;
+  --taskbar-height: 52px;
   --section: var(--s7); --group: var(--s6); --page-top: var(--s6); --page-end: var(--s7);
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 144px;
 
@@ -55,14 +56,14 @@
 
 /* ---------- base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-padding-top: 64px; scroll-padding-bottom: 56px; background: var(--desk); }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 64px; scroll-padding-bottom: calc(var(--taskbar-height) + 12px); background: var(--desk); }
 body {
   margin: 0; min-height: 100svh;
   background: var(--desk) var(--wall) repeat;
   color: var(--fg);
   font: 450 17px/1.55 var(--text);
   font-feature-settings: "kern", "liga";
-  padding-bottom: 48px;
+  padding-bottom: calc(var(--taskbar-height) + 4px);
 }
 ::selection { background: var(--accent); color: var(--on-accent); }
 h1, h2, h3, h4 { margin: 0; text-wrap: balance; font-weight: 400; }

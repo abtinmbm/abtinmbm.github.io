@@ -16,8 +16,8 @@ const p = (slug: string) => projects.find((x) => x.slug === slug)!;
 const old = archive();
 ---
 <Base title="Projects | Abtin Aryanpour" description="Explore Abtin Aryanpour’s individual and design-team projects, interactive demos, and archive." current="projects">
+  <h1 class="visually-hidden">Projects</h1>
   <div class="tiles">
-    <header class="project-heading"><h1 class="display">Projects</h1></header>
     <div class="sec"><h2><small>// 01</small>Andon</h2><p>Solo project, October 2026 to now.</p></div>
     <Win title="andon — replay" name="Andon" id="andon" as="article" class="w-andon" inClass="andon-in" label="Andon" reveal>
       <div class="a-text">
@@ -104,9 +104,6 @@ const old = archive();
 <style>
   .tiles { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; align-content: start; }
   .tiles > :global(.sec) { grid-column: 1 / -1; }
-
-  .project-heading { grid-column: 1 / -1; padding: 16px 6px 4px; }
-  .project-heading h1 { font-size: clamp(48px, 7vw, 96px); letter-spacing: -0.03em; line-height: 1; }
 
   .h { font: 400 40px/1 var(--mono); letter-spacing: -0.02em; margin-bottom: 12px; }
   .line { margin-bottom: 18px; font-size: 18px; }
