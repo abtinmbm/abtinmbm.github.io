@@ -23,7 +23,7 @@ const ogNames: Record<string, string> = {
 };
 const ogName = is404 ? 'not-found' : ogNames[Astro.url.pathname] ?? 'home';
 const ogImage = new URL(`/og/${ogName}.jpg`, Astro.site);
-ogImage.searchParams.set('v', 'projects');
+ogImage.searchParams.set('v', ogName === 'home' ? 'projects' : 'desktop');
 const ogAlt = home ? 'Abtin Aryanpour’s Workstation portfolio, with the Andon fault replay and a simulated Image Stitcher map.'
   : ogName === 'photography' ? 'A contact sheet of Abtin Aryanpour’s photography.' : `The top of the page: ${title}`;
 const nav = [
@@ -34,9 +34,8 @@ const nav = [
   { href: '/#contact', label: 'Contact', key: 'contact' },
 ];
 const work = featured();
-const iconFor: Record<string, 'andon' | 'stitcher' | 'lloyd' | 'dose'> = { andon: 'andon', 'image-stitcher': 'stitcher', lloyd: 'lloyd', 'dose-coach': 'dose' };
-const iconLabel: Record<string, string> = { andon: 'Andon', 'image-stitcher': 'Stitcher', lloyd: 'Lloyd', 'dose-coach': 'Dose Coach' };
-// Desktop shortcuts open project windows. Detail pages can switch directly between write-ups.
+const projectIcon: Partial<Record<string, 'andon' | 'stitcher' | 'lloyd' | 'dose'>> = { andon: 'andon', 'image-stitcher': 'stitcher', lloyd: 'lloyd', 'dose-coach': 'dose' };
+// Taskbar tabs open project windows. Detail pages can switch directly between write-ups.
 const target = (slug: string, href?: string) => projectDesk ? `#${slug}` : (home ? `/projects/#${slug}` : href ?? `/projects/#${slug}`);
 const cmdk = [
   { k: 'Take the demo tour', d: 'Four project demos', h: '/tour/' },
@@ -121,18 +120,9 @@ const segs = Array.from({ length: 20 });
     </div>
   </header>
 
-  <div class="desk">
-    <nav class="icons" aria-label="Desktop shortcuts">
-      {work.map((p) => (
-        <a class="icon-link" href={target(p.slug, p.href)} data-open={projectDesk ? p.slug : undefined}><PixelIcon name={iconFor[p.slug] ?? 'monitor'} /><span>{iconLabel[p.slug] ?? p.name}</span></a>
-      ))}
-      <a class="icon-link" href="/photography/"><PixelIcon name="photos" /><span>Photos</span></a>
-      <a class="icon-link" href="/resume/Abtin-Aryanpour-Resume.pdf"><PixelIcon name="resume" /><span>Resume<wbr />.pdf</span></a>
-    </nav>
-    <main id="main">
-      <slot />
-    </main>
-  </div>
+  <main class="desk" id="main">
+    <slot />
+  </main>
 
   <div id="start-menu" class="raised" hidden>
     <span class="side" aria-hidden="true">AbtinOS</span>
@@ -153,11 +143,25 @@ const segs = Array.from({ length: 20 });
     <nav class="tabs" aria-label="Project windows">
       {work.map((p) => (
         <a class="btn tab" href={target(p.slug, p.href)} data-tab={p.slug} data-open={projectDesk ? p.slug : undefined}
-          aria-current={project === p.slug ? 'page' : undefined}><i aria-hidden="true"></i><span class="tl"><span class="full">{p.name}</span><span class="short" aria-hidden="true">{p.short ?? p.name}</span></span></a>
+          title={p.name} aria-current={project === p.slug ? 'page' : undefined}>
+          <PixelIcon name={projectIcon[p.slug] ?? 'monitor'} /><span class="task-label">{p.name}</span>
+        </a>
       ))}
     </nav>
+    <div class="launchers">
+      <a class="btn launcher" href="/resume/Abtin-Aryanpour-Resume.pdf" title="Resume PDF"><PixelIcon name="resume" /><span class="task-label">Resume<span class="visually-hidden"> PDF</span></span></a>
+    </div>
     <div class="tray sunken">
-      <span class="avail"><i aria-hidden="true"></i><span class="av-t">Open to co&#8209;op · May–Aug 2027</span></span>
+      <button type="button" class="btn tray-face" data-tray-face aria-label="Surprise the pixel face" aria-pressed="false" title="Surprise the pixel face" hidden>
+        <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+          <path fill="var(--accent)" d="M4 1h8v2h2v2h1v6h-1v2h-2v2H4v-2H2v-2H1V5h1V3h2z" />
+          <g fill="var(--on-accent)">
+            <path d="M4 5h2v2H4zm6 0h2v2h-2z" />
+            <path class="smile" d="M4 9h2v2h4V9h2v2h-2v2H6v-2H4z" />
+            <path class="gasp" d="M6 9h4v4H6z" />
+          </g>
+        </svg>
+      </button>
       <time data-time aria-label="Time in Waterloo"></time>
     </div>
   </footer>
@@ -192,41 +196,33 @@ const segs = Array.from({ length: 20 });
   .rocker[aria-pressed="false"] .r-a, .rocker[aria-pressed="true"] .r-b { background: var(--fg); color: var(--panel); box-shadow: inset 2px 2px 0 var(--shadow); }
 
   /* ---------- desktop ---------- */
-  .desk { max-width: 1480px; margin: 0 auto; padding: 14px 14px 28px; display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 12px; }
-  .desk > main { min-width: 0; }
-  .icons { display: grid; gap: 12px; align-content: start; padding-top: 6px; position: sticky; top: 64px; align-self: start; }
-  .icon-link { display: grid; justify-items: center; gap: 6px; text-decoration: none; font: 400 12px/1.2 var(--mono); text-align: center; padding: 6px 2px; }
-  .icon-link .px-icon { width: 36px; height: 36px; }
-  .icon-link span { padding: 1px 4px; }
-  .icon-link:hover span, .icon-link:focus-visible span { background: var(--accent); color: var(--on-accent); }
-  .icon-link:focus-visible { outline: 1px dotted var(--fg); outline-offset: 0; }
-  .icon-link:active .px-icon { transform: translate(1px, 1px); }
+  .desk { max-width: 1480px; margin: 0 auto; padding: 14px 14px 28px; }
 
   /* ---------- taskbar ---------- */
-  .taskbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; height: 44px; display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-top: 1px solid var(--fg); }
-  .startbtn { gap: 8px; padding: 7px 12px; flex: none; }
-  .startbtn .px-icon { width: 16px; height: 16px; }
-  .startbtn[hidden] { display: none; }
+  .taskbar { position: fixed; inset: auto 0 0; z-index: 30; height: var(--taskbar-height); display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-top: 1px solid var(--fg); }
+  .taskbar .btn { height: 36px; padding: 0 9px; white-space: nowrap; }
+  .taskbar .btn:active > :is(svg, .task-label) { transform: translate(1px, 1px); }
+  .taskbar .px-icon { width: 24px; height: 24px; flex: none; }
+  .taskbar [hidden], html:not(.js) .tray { display: none; }
+  .startbtn { flex: none; }
   .js .nojs-home { display: none; }
   .startbtn[aria-expanded="true"] { box-shadow: var(--bevel-press), 0 0 0 1px var(--fg); background: var(--fg); color: var(--panel); }
   .startbtn[aria-expanded="true"] .px-icon path[fill="var(--well)"] { fill: var(--panel); }
-  .tabs { display: flex; gap: 6px; flex: 1; min-width: 0; padding-left: 6px; border-left: 1px solid var(--rule); }
-  .tab { flex: 0 1 180px; min-width: 0; justify-content: flex-start; font-size: 13px; padding: 7px 10px; white-space: nowrap; overflow: hidden; }
-  .tab .tl { overflow: hidden; text-overflow: ellipsis; }
-  .tab i { width: 8px; height: 8px; box-shadow: 0 0 0 1px currentColor; flex: none; }
-  .tab.in-view i { background: var(--accent); box-shadow: 0 0 0 1px var(--fg); }
-  .tab[aria-current]:not([aria-current="false"]) { box-shadow: var(--bevel-press), 0 0 0 1px var(--fg); background: var(--well); }
-  .tab[aria-current="page"] i { background: var(--accent); }
+  .tabs, .launchers { display: flex; gap: 6px; padding-left: 8px; border-left: 1px solid var(--rule); }
+  .tab, .launcher { position: relative; font-size: 13px; }
+  .tab.in-view, .taskbar a[aria-current]:not([aria-current="false"]) { box-shadow: var(--bevel-press), 0 0 0 1px var(--fg); background: var(--well); }
+  .tab.in-view::after, .taskbar a[aria-current="page"]::after { content: ''; position: absolute; inset: auto 4px 2px; height: 2px; background: var(--accent); }
   .tab.is-min { color: var(--mute); }
-  .tab.is-min .tl::after { content: " (min)"; }
-  .tab .short { display: none; }
-  .tray { display: flex; align-items: center; gap: 12px; padding: 7px 12px; font: 400 13px var(--mono); white-space: nowrap; flex: none; }
-  .tray .avail { display: inline-flex; align-items: center; gap: 8px; }
-  .tray .avail i { width: 9px; height: 9px; background: var(--G); box-shadow: 0 0 0 1px var(--fg); }
+  .tab.is-min .px-icon { opacity: 0.65; }
+  .tray { display: flex; align-items: center; gap: 8px; margin-left: auto; padding: 4px 8px; font: 400 13px var(--mono); white-space: nowrap; flex: none; }
+  .taskbar .tray-face { width: 28px; height: 28px; justify-content: center; padding: 0; }
+  .tray-face svg { width: 20px; height: 20px; }
+  .tray-face .gasp, .tray-face[aria-pressed="true"] .smile { display: none; }
+  .tray-face[aria-pressed="true"] .gasp { display: block; }
   .tray time { font-variant-numeric: tabular-nums; }
   .tray time:empty { display: none; }
 
-  #start-menu { position: fixed; left: 6px; bottom: 48px; z-index: 40; width: 270px; padding: 3px; box-shadow: var(--bevel), 0 0 0 1px var(--fg), 6px 6px 0 var(--shadow); display: grid; grid-template-columns: 30px 1fr; }
+  #start-menu { position: fixed; left: 6px; bottom: calc(var(--taskbar-height) + 4px); z-index: 40; width: 270px; padding: 3px; box-shadow: var(--bevel), 0 0 0 1px var(--fg), 6px 6px 0 var(--shadow); display: grid; grid-template-columns: 30px 1fr; }
   #start-menu[hidden] { display: none; }
   #start-menu .side { background: var(--accent); color: var(--on-accent); writing-mode: vertical-rl; transform: rotate(180deg); font: 400 15px var(--mono); padding: 10px 6px; }
   #start-menu ul { list-style: none; margin: 0; padding: 4px; }
@@ -275,27 +271,17 @@ const segs = Array.from({ length: 20 });
   /* ---------- phone ---------- */
   @media (max-width: 900px) {
     html { scroll-padding-top: 12px; }
-    .desk { grid-template-columns: minmax(0, 1fr); padding: 8px 8px 20px; }
-    .icons { position: static; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2px; padding: 4px 0 2px; }
-    .icon-link { font-size: 11px; padding: 4px 0; }
-    .icon-link .px-icon { width: 30px; height: 30px; }
-    .icon-link span { padding-inline: 1px; }
+    .desk { padding: 8px 8px 20px; }
     .topbar { flex-wrap: wrap; position: static; }
     .topbar nav { order: 3; width: 100%; }
     .topbar nav ul { flex-wrap: wrap; gap: 3px; }
     .topbar .nav-btn { padding: 8px 5px; font-size: 13px; }
     .topbar .nav-btn:active { padding: 9px 4px 7px 6px; }
-    .startbtn .sl, .tab i { display: none; }
-    .tray .av-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-    .tabs { gap: 3px; padding-left: 3px; }
-    .tab { flex: 1 1 0; justify-content: center; padding: 7px 3px; font-size: 11px; }
-    .tab .full { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-    .tab .short { display: inline; }
-    .tab.is-min .tl::after { content: ""; }
-    .tray { padding: 7px 8px; gap: 8px; }
-  }
-  @media (max-width: 380px) { .tray time { display: none; } }
-  @media (max-width: 359px) {
-    .icons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .taskbar { --taskbar-gap: clamp(3px, 1vw, 6px); gap: var(--taskbar-gap); padding-inline: 4px; }
+    .taskbar .task-label, .startbtn .sl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+    .taskbar .btn { width: clamp(27px, 8vw, 36px); padding: 0; justify-content: center; }
+    .taskbar .px-icon { width: 20px; height: 20px; }
+    .tabs, .launchers { gap: var(--taskbar-gap); padding-left: var(--taskbar-gap); }
+    .tray { font-size: 11px; padding: 3px 4px; gap: 4px; }
   }
 </style>
