@@ -323,7 +323,13 @@ test('sharing images load and the sitemap lists every content page', async ({ pa
 });
 
 test('the photo viewer moves with the buttons, the keyboard and the film strip', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/photography/');
+  const centreOffset = await page.locator('.photo-window').evaluate((viewer) => {
+    const { left, width } = viewer.getBoundingClientRect();
+    return left + (width - document.documentElement.clientWidth) / 2;
+  });
+  expect(centreOffset).toBeCloseTo(0, 0);
   const count = page.locator('.count b');
   await expect(count).toHaveText('1');
   await expect(page.getByRole('button', { name: 'Previous photo' })).toBeDisabled();
